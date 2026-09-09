@@ -11,29 +11,29 @@
   "renderer": "mobile",
   "request_to_commit": {
     "count": 6,
-    "max_ms": 25.899,
-    "mean_ms": 21.3905,
+    "max_ms": 20.432,
+    "mean_ms": 19.034499999999998,
     "over_33_334_ms_percent": 0.0,
-    "p50_ms": 20.685,
-    "p95_ms": 22.817,
-    "p99_ms": 22.817
+    "p50_ms": 19.651,
+    "p95_ms": 20.063,
+    "p99_ms": 20.063
   },
   "schema": 1,
   "smoke_only": true,
   "solver_compute": {
     "count": 6,
-    "max_ms": 4.421208,
-    "mean_ms": 3.1705621666666666,
+    "max_ms": 4.584416,
+    "mean_ms": 3.1818403333333336,
     "over_33_334_ms_percent": 0.0,
-    "p50_ms": 2.731666,
-    "p95_ms": 4.416583,
-    "p99_ms": 4.416583
+    "p50_ms": 2.667834,
+    "p95_ms": 4.438792,
+    "p99_ms": 4.438792
   },
   "viewport_size": [
     0,
     0
   ],
-  "wall_seconds": 0.143766,
-  "source_sha256": "9b67dfa2014553c3d380645a439a7a92fa08e787ebc9887158570e94b243835f",
+  "wall_seconds": 0.12979,
+  "source_sha256": "566d35a030e704e9c2b5a128d2f71ba594fd9ade55522da8b9841d94c40a798f",
   "mode": "exported release headless scientific smoke; not FPS"
 }

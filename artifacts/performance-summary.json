@@ -1,0 +1,9 @@
+{
+  "all_scene_fps_pass": true,
+  "cycles": 193,
+  "rss_first_six_mib": 511.42733333333337,
+  "rss_last_six_mib": 512.5858333333333,
+  "rss_change_mib": 1.1584999999999468,
+  "static_change_mib": null,
+  "source_sha256": "566d35a030e704e9c2b5a128d2f71ba594fd9ade55522da8b9841d94c40a798f"
+}

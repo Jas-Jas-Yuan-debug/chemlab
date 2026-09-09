@@ -1,6 +1,6 @@
 # ChemLab handoff
 
-Updated 2026-09-09. Follow `docs/GOAL_OBJECTIVE.md` plus the user's approved changes. Goal is active while final packaged stability validation is running.
+Updated 2026-09-09. Follow `docs/GOAL_OBJECTIVE.md` plus the user's approved changes. Phase 0–9 delivery is verified within the documented scientific scope. Unsupported raw entries remain explicit; they are not counted as completed materials.
 
 ## Authorization
 
@@ -18,13 +18,18 @@ Updated 2026-09-09. Follow `docs/GOAL_OBJECTIVE.md` plus the user's approved cha
 - JSON white-listed replay, geometry/indicator/camera/history restoration, paused load, CSV, invalid-file/error state preservation. Heater control history included in physics-0.2; old physics-0.1 files reject as incompatible.
 - Latest full `scripts/verify.py` passed **7 CTest cases + Godot import + 2 headless flows + 8 rendered flows**, including heater controls, all six apparatus appearances, native thermostat/cooling/energy/turn checks and byte-identical CSV restoration. No errors/leak warnings.
 - `dist/ChemLab.app` rebuilt at **2026-09-09 13:20:06 UTC**, source fingerprint `566d35a030e704e9c2b5a128d2f71ba594fd9ade55522da8b9841d94c40a798f`. Official arm64 release executable, PCK, native dylib, database, notices; ad-hoc signed and strict codesign verification passed. Not notarized. Headless launch from `/tmp` passed chemistry/Barite/heat/heater/control history/save-load checks. Do not count headless timings as FPS.
-- Latest editor benchmark completed **16 scenes**, all passed P99 ≤33.334 ms and minimum complete second ≥30 frames. Editor UI stayed alive and minimized throughout, with RSS ≥562 MiB. Game callback rate about 120/s; this is engine render timing, not an external display refresh measurement. Old pre-heater receipt was replaced; its editor UI had exited early.
+- Final editor benchmark completed 16 scene segments plus repeated-cycle timing, all passing the 30 FPS criterion. Final receipts replace preliminary or interrupted runs.
 
-## Work currently in progress
+## Final delivery evidence
 
-First packaged long run was stopped after detecting an incorrect test assumption: equal 25 mL acid/base aliquots solve to 50.0005538988 mL, not exactly 50 mL. Save/load itself preserved the correct result. Benchmark now compares solved before/after volume and every element, and stops on first failure. Corrected editor benchmark with repeated cycles passed. A subsequent static review found the fixed heating beaker could retain a hidden collider when returning to chemistry; its pick layer is now disabled and heater_flow has a ray-selection regression. The shared Vessel class now disables picking for all zero-ID fixed apparatus, including the batch reactor; the main picker also rejects unknown inventory IDs. Full 12-group verification passed. Current-source editor measurement with repeated cycles is running, then packaged --stress-seconds 600 remains. Do not start competing tests or edit runtime source during measurement. It runs the same scene matrix, then approximately ten minutes of reset/neutralization/save/load/model cycles. Inspect final `artifacts/performance-packaged.json`, require full PASS and no errors. Run `python3 scripts/report_performance.py` afterward to produce PERFORMANCE.md and summary. Inspect memory trend and all FPS flags; failures require fixes, not a fabricated pass.
+- `artifacts/verification.json`: all 12 groups passed (7 CTest cases, import, 2 native headless flows, 8 rendered flows). Includes controlled heating, stirring, six heat-source appearances, CSV identity and hidden fixed-vessel pick regression.
+- `artifacts/performance-editor-run.json` and `performance-packaged.json`: identical source/build fingerprint, actual 1920×1080 image, every scene passes the documented 30 FPS P99/minimum-complete-second criterion. Editor stayed alive minimized; packaged runtime is the official release template.
+- Packaged run: 742.9 seconds total, including approximately 600 seconds / **193 repeated reset-neutralize-save-load-model cycles**; no failed checks, script errors or leak warnings. RSS peak 512.9 MiB. First/last six-cycle means 511.4/512.6 MiB; intervening samples rise and fall, without obvious sustained growth. Release internal static/orphan counters returned zero, so they are treated as unavailable evidence, not as proof of zero allocations/leaks.
+- Both sources show engine render callback timing near 120/s; this is not an external display refresh measurement. See `docs/PERFORMANCE.md` for P99, maximum frames, RSS and response distributions and finite-duration limits.
+- Current exported app also passed headless chemistry, Barite, thermal/heater/control history and paused session restoration from `/tmp`. Headless timings are not FPS.
+- App: `dist/ChemLab.app`, arm64, ad-hoc signed and verified, not notarized. Public source repo is `https://github.com/Jas-Jas-Yuan-debug/chemlab`. Final Git commits contain source, documentation and measured receipts; build/download caches and the local app remain ignored.
 
-Finish documentation, commit/push final receipts, verify remote HEAD and deliver the app/source links. Do not mark the goal complete before final performance/stability gates. The 13 unsupported raw entries are permitted by the objective's missing-data rule and must remain visibly unsupported, not counted as completed.
+Future extensions require new approved scientific scope/data, especially the 13 unsupported raw entries, real combustion/fluid models or physical optical calibration. These limitations are explicitly allowed/disclosed in the original objective and are not silently counted as implemented.
 
 ## Build and run
 
@@ -49,6 +54,7 @@ Actual app executable comes from Info.plist: `ChemLab · 观物实验室`. Expor
 - ReflectionProbe caused seven leaked Texture RID warnings on this engine/Metal configuration and was removed; orphan initial physics mesh fixed too.
 - UI screenshots may use force_draw/force_sync to handle occlusion. FPS benchmark never forces draws in measured segments, checks actual image size (not the texture getter, which reports stretched dimensions), records real frame_post_draw intervals and external RSS. Wrapper ensures source identity is unchanged and packaged source receipt matches.
 - Heater controls are timestamped on 1/120 s ticks. Restore canonicalizes timestamps to those ticks to eliminate sub-ULP ghost turn/CSV residual differences. At most 512 control records; each sample retains its control-prefix length so same-tick controls replay correctly. CSV uses at most ten significant digits; that is an export convention, not an accuracy claim.
+- Stress replay compares the solved pre-save volume and each element, not nominal added volume: two 25 mL dilute acid/base aliquots solve to 50.0005538988 mL. Zero-ID fixed vessels (batch/heater) cannot intercept chemistry picks; unknown inventory IDs are rejected.
 - Session tests must wait for simulation time for sampled curves, not a fixed number of process frames (occluded apps can process many frames before 0.05 s elapses).
 - Official macOS template downloaded by HTTP Range for only ~117 MiB member, CRC and locked SHA checked. lipo creates arm64 local template; export binary_format/architecture, Xcode codesign=3 and identity '-'. No global template install; binaries/downloads/logs are ignored.
 

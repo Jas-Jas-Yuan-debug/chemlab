@@ -31,11 +31,12 @@ def rss_at(t):
     return min((s for s in r['rss_samples'] if s.get('runtime_rss_mib',0)>0),key=lambda s:abs(s['wall_s']-t))['runtime_rss_mib']
 a=mean(rss_at(s['wall_s']) for s in first);b=mean(rss_at(s['wall_s']) for s in last)
 static_a=mean(s['static_bytes'] for s in first)/1024**2;static_b=mean(s['static_bytes'] for s in last)/1024**2
+internal_note=(f'Godot 静态内存 {static_a:.1f} → {static_b:.1f} MiB。' if static_a or static_b else '发布运行程序的静态内存与孤立节点监测均返回 0，不能解释为零占用或零孤立节点；内部计数不作为结论依据。')
 lines += ['',f"打包程序完成 {len(cycles)} 轮重复生命周期操作（约 {cycles[-1]['wall_s']-cycles[0]['wall_s']:.0f} 秒）：重置 → 稀酸碱等量加入 → pH 与体积核对 → 保存/加载 → 轮换六个物理实验台模型。每次还原检查守恒状态，运行日志无脚本错误或泄漏警告。",'',
-f"比较开头与末尾各六轮（覆盖同一组模型），平均 RSS {a:.1f} → {b:.1f} MiB，变化 {b-a:+.1f} MiB；Godot 静态内存 {static_a:.1f} → {static_b:.1f} MiB。各轮孤立节点监测范围 {min(s['orphan_nodes'] for s in cycles):.0f}–{max(s['orphan_nodes'] for s in cycles):.0f}。RSS 由系统每秒采样，包含分配器缓存；该有限时段不能证明任意长时间或任意操作序列均无泄漏。",'',
+f"比较开头与末尾各六轮（覆盖同一组模型），平均 RSS {a:.1f} → {b:.1f} MiB，变化 {b-a:+.1f} MiB；{internal_note} RSS 由系统每秒采样，包含分配器缓存和本次测量保留的逐帧计时数据；该有限时段不能证明任意长时间或任意操作序列均无泄漏。",'',
 'CSV 保存/恢复、错误保留、原料元素与氢氧守恒、加热能量账另见完整回归 `artifacts/verification.json`。无窗口发布应用检查见 `artifacts/packaged-smoke.json`，不计入帧率。','',
 f"源文件指纹：`{build['source_sha256']}`。构建文件哈希见 `artifacts/build-receipt.json`；原始实测为 `artifacts/performance-editor-run.json` 和 `artifacts/performance-packaged.json`。"]
 (ROOT/'docs/PERFORMANCE.md').write_text('\n'.join(lines)+'\n')
-summary={'all_scene_fps_pass':all(s['meets_30fps_p99'] for r in reports.values() for s in r['frames'].values()),'cycles':len(cycles),'rss_first_six_mib':a,'rss_last_six_mib':b,'rss_change_mib':b-a,'static_change_mib':static_b-static_a,'source_sha256':build['source_sha256']}
+summary={'all_scene_fps_pass':all(s['meets_30fps_p99'] for r in reports.values() for s in r['frames'].values()),'cycles':len(cycles),'rss_first_six_mib':a,'rss_last_six_mib':b,'rss_change_mib':b-a,'static_change_mib':static_b-static_a if static_a or static_b else None,'source_sha256':build['source_sha256']}
 (ROOT/'artifacts/performance-summary.json').write_text(json.dumps(summary,indent=2)+'\n')
 print(json.dumps(summary,indent=2))

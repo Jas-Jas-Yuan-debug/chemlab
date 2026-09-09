@@ -4,6 +4,8 @@
 
 目前支持 **17/30 项原料**的限定实验，以及自由落体、弹簧、单摆、热交换、直流电路、薄透镜和加热搅拌。支持器材操作、实际物质转移、测量/曲线、JSON 保存恢复和 CSV 导出。另 13 项显示“尚未支持”，不计入可操作数量，也不承诺任意混合。
 
+已在 M4 / 16 GiB、实际 1920×1080 图像下通过编辑器及独立程序的 30 FPS 性能判据，并完成约十分钟、193 轮重复操作验证。详见 [实测报告](docs/PERFORMANCE.md)。
+
 用户已批准保留 AGPL、从 Unreal 改用 Godot，并公开此仓库。见 [决策记录](docs/PHASE0_DECISIONS.md) 和 [原始目标](docs/GOAL_OBJECTIVE.md)。
 
 ## 构建与启动
@@ -51,7 +53,7 @@ open dist/ChemLab.app
 
 化学采用固定 25°C、充分混合后的平衡，不模拟反应速率、燃烧、有机合成、任意氧化还原、反应放热或空间浓度场。均一分样保持强度量，真正混合再求平衡。液体、玻璃与部分教学器材是明确的视觉近似，未声称经过实物光学标定。
 
-[支持矩阵](docs/SUPPORT_MATRIX.md) · [科学边界](docs/VALIDATION_SCOPE.md) · [气液固](docs/BATCH_EQUILIBRIUM.md) · [扩展溶液](docs/AQUEOUS_EXTENSION.md) · [沉淀](docs/PRECIPITATION.md) · [物理模型](docs/PHYSICS_MODELS.md) · [加热与搅拌](docs/HEATING_AND_STIRRING.md) · [指示剂](docs/INDICATORS.md) · [保存/CSV](docs/SESSION_FORMAT.md) · [视觉验证](docs/VISUAL_MODEL.md) · [加热器材](docs/HEATING_AND_STIRRING.md) · [打包](docs/PACKAGING.md) · [性能](docs/PERFORMANCE.md) · [交付状态](docs/DELIVERY_STATUS.md) · [交接](HANDOFF.md)
+[支持矩阵](docs/SUPPORT_MATRIX.md) · [科学边界](docs/VALIDATION_SCOPE.md) · [气液固](docs/BATCH_EQUILIBRIUM.md) · [扩展溶液](docs/AQUEOUS_EXTENSION.md) · [沉淀](docs/PRECIPITATION.md) · [物理模型](docs/PHYSICS_MODELS.md) · [加热与搅拌](docs/HEATING_AND_STIRRING.md) · [指示剂](docs/INDICATORS.md) · [保存/CSV](docs/SESSION_FORMAT.md) · [视觉验证](docs/VISUAL_MODEL.md) · [打包](docs/PACKAGING.md) · [性能](docs/PERFORMANCE.md) · [交付状态](docs/DELIVERY_STATUS.md) · [交接](HANDOFF.md)
 
 ![可调温加热与搅拌](artifacts/heater-2.png)
 
