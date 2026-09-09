@@ -20,3 +20,45 @@
 ## 后续模型
 
 弹簧、单摆、热交换、直流电路、几何光学尚待实现和验证，不计为已支持的实验。
+
+## Phase 7：更多物理实验 · physics-0.1
+
+五类实验均采用 C++ 状态和 1/120 s 固定模拟时钟，渲染读取同一份状态。参数改变后明确应用/重置；暂停不累计模拟时间；重复使用上一份已应用的参数。时间倍率 1–20 只加速模拟时钟，不改变公式。
+
+### 弹簧
+
+水平、无阻尼、质量集中、弹簧无质量。m=0.05–2 kg、k=0.5–50 N/m、A=0.01–0.2 m。x=A cos(√(k/m)t)，v 为其导数，E=½mv²+½kx²。检查四分之一周期、速度、能量和不同输入帧间隔下的结果。
+
+### 单摆
+
+摆长 0.1–1.5 m，重力 0.1–20 m/s²，初始角 1–10°。小角度模型 θ=θ₀cos(√(g/L)t)，采用同一线性近似的机械能；三维小球位置由摆长和当前角度求出。忽略阻力、支点摩擦和绳质量。摆长量到质心；并非任意角度精确非线性单摆。
+
+来源：[OpenStax 简谐运动](https://openstax.org/books/university-physics-volume-1/pages/15-1-simple-harmonic-motion)、[单摆](https://openstax.org/books/college-physics-2e/pages/16-4-the-simple-pendulum)。
+
+### 热交换
+
+两个内部均温、对外绝热的液态水体；质量各 0.05–1 kg，初温 5–90°C，固定热导 K=0.1–20 W/K。比热近似 4186 J/(kg·K)，不计算容器热容、蒸发、沸腾或其他相变。
+
+令 Cᵢ=mᵢc，平衡温度 Tₑ=(C₁T₁₀+C₂T₂₀)/(C₁+C₂)，时间常数 τ=C₁C₂/[K(C₁+C₂)]。温差按 exp(−t/τ) 衰减，总显热守恒；传给水 2 的热量 Q₂=C₂(T₂−T₂₀)，瞬时热流 K(T₁−T₂)。热导为用户指定的集总参数，不声称已由三维容器几何推导。颜色是温度图示，容器为示意。
+
+检查等质量/不等质量最终温度、一个时间常数、趋近平衡和能量守恒。此模块与 PHREEQC 的设定温度相互独立，不把恒温化学当作放热计算。
+
+来源：[OpenStax 比热与量热法](https://openstax.org/books/university-physics-volume-2/pages/1-4-heat-transfer-specific-heat-and-calorimetry)、[传热机制](https://openstax.org/books/university-physics-volume-2/pages/1-6-mechanisms-of-heat-transfer)。
+
+### 直流电路
+
+理想 0–12 V 直流源、两个 1–1000 Ω 欧姆电阻。串联 R=R₁+R₂，并联 R⁻¹=R₁⁻¹+R₂⁻¹；测量总/支路电流、电阻分压、总功率和累计耗能。断开电流归零，已耗能不清空；暂停/断开期间不计时间。更改参数需要重置，不用新功率回算旧记录。
+
+忽略导线/电源内阻和温度效应，拒绝零电阻短路。检查欧姆定律、KCL、KVL 和 W=Pt。
+
+来源：[OpenStax 串并联电阻](https://openstax.org/books/college-physics-2e/pages/21-1-resistors-in-series-and-parallel)。
+
+### 几何光学
+
+空气中近轴薄透镜，|f|=0.05–0.5 m，物距 u=0.1–1 m，物高 0.01–0.1 m。v=fu/(u−f)，m=−v/u；正焦距会聚、负焦距发散。通过平行入射与光心光线构图，虚像显示反向延长线。物体在焦平面时报告无穷远，不返回伪造的有限像距。超出三维显示范围时保留科学读数并提示。
+
+曲线按每次应用参数记录物距、像距和放大率；不是随时间变化的光传播。忽略像差、衍射、厚度及玻璃色散；发散透镜网格标为示意。检查实像、虚像、倒立/正立及焦平面极限。
+
+来源：[OpenStax 薄透镜](https://openstax.org/books/university-physics-volume-3/pages/2-4-thin-lenses)。
+
+原生验证：`tests/physics_models_test.cpp`。完整渲染界面流程：`godot/tests/physics_flow.gd`，涵盖五类参数、开始、暂停、重复、测量/曲线/物体位置、并联电路、虚像/无穷远和无效参数保留。

@@ -1,6 +1,7 @@
 #pragma once
 #include "science/chemistry.hpp"
 #include "science/mechanics.hpp"
+#include "science/physics_models.hpp"
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
 #include <future>
@@ -27,6 +28,7 @@ class LabCore : public RefCounted {
     uint64_t revision_=0;
     bool reset_queued_=false;
     chemlab::FreeFall fall_;
+    chemlab::PhysicsExperiment bench_;
     std::optional<chemlab::BatchResult> batch_;
     bool start(const std::function<void(chemlab::Chemistry&,Result&)>& job);
 protected:
@@ -44,6 +46,12 @@ public:
     bool run_batch(const Dictionary& parameters);
     bool extract_batch(int vessel_id);
     Dictionary batch_snapshot() const;
+    String configure_bench(const String& kind,const Dictionary& parameters);
+    void start_bench();
+    void pause_bench();
+    void reset_bench();
+    Dictionary advance_bench(double elapsed_s);
+    Dictionary bench_snapshot() const;
     String configure_fall(double height_m,double gravity_m_s2);
     void start_fall();
     void pause_fall();

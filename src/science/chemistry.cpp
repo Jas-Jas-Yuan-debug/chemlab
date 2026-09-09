@@ -195,6 +195,7 @@ BatchResult Chemistry::equilibrate(const Solution& base,const BatchConditions& c
     check(std::abs(r.carbon_residual_mol)<1e-9&&std::abs(r.calcium_residual_mol)<1e-9&&std::abs(r.sulfur_residual_mol)<1e-9,"气液固物质收支未通过");
     balance(r.solution.hydrogen_mol,base.hydrogen_mol+(c.solid_reagent==19?4*reacted:0),1e-8,"H");
     balance(r.solution.oxygen_mol+2*(r.gas_co2_mol+r.co2_to_environment_mol),base.oxygen_mol+2*c.co2_added_mol+(c.solid_reagent==19?6*reacted:3*reacted),1e-8,"O");
+    r.mineral=c.solid_reagent?phase:"";
     r.solution.isolated_batch_sample=true;
     r.solution.ingredients_mol=base.ingredients_mol;
     // Provenance describes dissolved additions only; solids and headspace stay
@@ -202,6 +203,34 @@ BatchResult Chemistry::equilibrate(const Solution& base,const BatchConditions& c
     if(c.solid_reagent&&reacted>0)r.solution.ingredients_mol[c.solid_reagent]+=reacted;
     if(c.gas!=GasBoundary::None)r.solution.ingredients_mol[10]+=std::max(0.0,c.co2_added_mol-r.gas_co2_mol-r.co2_to_environment_mol);
 
+    return r;
+}
+
+BatchResult Chemistry::precipitate_barite(const Solution&a,const Solution&b){
+    check(!a.empty()&&!b.empty(),"需要两份溶液");
+    check(a.ingredients_mol.size()==1&&a.ingredients_mol.count(25)&&b.ingredients_mol.size()==1&&b.ingredients_mol.count(14),"此实验仅验证 BaCl₂ 与 Na₂SO₄ 预配液");
+    check(a.volume_l+b.volume_l<=0.250+1e-8,"混合前总体积限 250 mL");
+    const std::string extra="SELECTED_OUTPUT 2\n-reset false\n-high_precision true\nUSER_PUNCH 2\n-headings barite si\n-start\n10 PUNCH EQUI(\"Barite\"), SI(\"Barite\")\n-end\n";
+    BatchResult r;r.mineral="Barite";
+    r.solution=solve(extra+renamed(a,1)+"\nEND\n"+renamed(b,2)+"\nEND\nMIX 3\n1 1\n2 1\nEQUILIBRIUM_PHASES 3\nBarite 0 0\nSAVE solution 3\nEND\n");
+    SetCurrentSelectedOutputUserNumber(id_,2);
+    const int row=GetSelectedOutputRowCount(id_)-1;
+    r.solid_remaining_mol=value(id_,row,0);r.solid_saturation_index=value(id_,row,1);
+    const double solid=r.solid_remaining_mol;
+    check(solid>=-1e-14,"出现负沉淀量");
+    for(const auto&name:element_names){
+        const double expected=a.elements.at(name)+b.elements.at(name)-(name=="Ba"||name=="S"?solid:0);
+        balance(r.solution.elements[name],expected,1e-11,name);
+    }
+    balance(r.solution.hydrogen_mol,a.hydrogen_mol+b.hydrogen_mol,1e-8,"H");
+    balance(r.solution.oxygen_mol+4*solid,a.oxygen_mol+b.oxygen_mol,1e-8,"O");
+    for(const auto&name:valence_names)
+        balance(r.solution.valence_mol[name],a.valence_mol.at(name)+b.valence_mol.at(name)-(name=="S(6)"?solid:0),1e-12,name+"价态");
+    r.barium_residual_mol=r.solution.elements["Ba"]+solid-a.elements.at("Ba")-b.elements.at("Ba");
+    r.sulfur_residual_mol=r.solution.elements["S"]+solid-a.elements.at("S")-b.elements.at("S");
+    r.solution.ingredients_mol=a.ingredients_mol;
+    for(auto[id,n]:b.ingredients_mol)r.solution.ingredients_mol[id]+=n;
+    r.solution.isolated_batch_sample=true;
     return r;
 }
 

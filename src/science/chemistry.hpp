@@ -16,6 +16,8 @@ struct Solution {
     std::map<std::string, double> valence_mol;
     std::string raw;
     std::string composition_key;
+    // Input provenance for permitted combinations; current phase inventory is
+    // elements/valence_mol, not undissociated original reagent molecules.
     std::map<int, double> ingredients_mol;
     bool empty() const { return volume_l <= 1e-12; }
 };
@@ -31,6 +33,7 @@ struct BatchConditions {
 };
 struct BatchResult {
     Solution solution;
+    std::string mineral;
     double solid_remaining_mol = 0;
     double gas_co2_mol = 0;
     double gas_pressure_atm = 0;
@@ -38,6 +41,7 @@ struct BatchResult {
     double solid_saturation_index = 0;
     double carbon_residual_mol = 0;
     double calcium_residual_mol = 0;
+    double barium_residual_mol = 0;
     double sulfur_residual_mol = 0;
 };
 
@@ -49,6 +53,7 @@ public:
     Chemistry(const Chemistry&) = delete;
     Chemistry& operator=(const Chemistry&) = delete;
     Solution prepare(int reagent, double concentration_mol_l, double volume_l);
+    BatchResult precipitate_barite(const Solution& barium_chloride, const Solution& sodium_sulfate);
     BatchResult equilibrate(const Solution& solution, const BatchConditions& conditions);
     Solution mix(const Solution& a, double af, const Solution& b, double bf);
     static bool supported(int reagent);

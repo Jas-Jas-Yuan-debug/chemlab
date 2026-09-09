@@ -19,7 +19,7 @@ set_property(SOURCE "${IPHREEQC_ROOT}/src/phreeqcpp/transport.cpp"
 add_executable(iphreeqc_probe tests/iphreeqc_probe.cpp)
 target_link_libraries(iphreeqc_probe PRIVATE IPhreeqc)
 target_compile_options(iphreeqc_probe PRIVATE -Wall -Wextra -Wpedantic)
-add_library(chemlab_science STATIC src/science/chemistry.cpp src/science/mechanics.cpp)
+add_library(chemlab_science STATIC src/science/chemistry.cpp src/science/mechanics.cpp src/science/physics_models.cpp)
 target_include_directories(chemlab_science PUBLIC src)
 target_link_libraries(chemlab_science PUBLIC IPhreeqc)
 target_compile_options(chemlab_science PRIVATE -Wall -Wextra -Wpedantic)
@@ -42,6 +42,14 @@ add_test(NAME batch_equilibrium COMMAND batch_test "${IPHREEQC_ROOT}/database/ph
 add_executable(aqueous_expansion_test tests/aqueous_expansion_test.cpp)
 target_link_libraries(aqueous_expansion_test PRIVATE chemlab_science)
 add_test(NAME aqueous_expansion COMMAND aqueous_expansion_test "${IPHREEQC_ROOT}/database/phreeqc.dat")
+
+add_executable(barite_test tests/barite_test.cpp)
+target_link_libraries(barite_test PRIVATE chemlab_science)
+add_test(NAME barite COMMAND barite_test "${IPHREEQC_ROOT}/database/phreeqc.dat")
+
+add_executable(physics_models_test tests/physics_models_test.cpp)
+target_link_libraries(physics_models_test PRIVATE chemlab_science)
+add_test(NAME physics_models COMMAND physics_models_test)
 
 option(CHEMLAB_BUILD_GODOT "Build the native Godot extension" OFF)
 if(CHEMLAB_BUILD_GODOT)

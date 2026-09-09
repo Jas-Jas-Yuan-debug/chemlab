@@ -55,6 +55,8 @@ var fall_experiment: Node3D
 var ui_theme: Theme
 var batch_experiment: Node3D
 var batch_mode := false
+var bench_experiment: Node3D
+var bench_mode := false
 
 func _ready() -> void:
     add_child(Room.new())
@@ -87,6 +89,11 @@ func _ready() -> void:
     batch_experiment.lab = self
     batch_experiment.ui_theme = ui_theme
     add_child(batch_experiment)
+    bench_experiment = preload("res://scripts/physics_experiment.gd").new()
+    bench_experiment.core = core
+    bench_experiment.lab = self
+    bench_experiment.ui_theme = ui_theme
+    add_child(bench_experiment)
     set_status("正在准备实验台…")
 
 func style(bg: Color, border: Color = Color.TRANSPARENT) -> StyleBoxFlat:
@@ -171,7 +178,9 @@ func build_ui() -> void:
     name_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     button(row,"化学实验","ChemistryTab",func(): switch_experiment(false))
     button(row,"自由落体","FreeFallTab",func(): switch_experiment(true))
-    button(row,"溶解与气液","BatchTab",switch_batch)
+    button(row,"溶解与气液","BatchTab",func(): switch_batch(false))
+    button(row,"沉淀实验","PrecipitationTab",func(): switch_batch(true))
+    button(row,"更多物理","PhysicsBenchTab",switch_bench)
     status_badge = label(row,"水溶液平衡  ·  25 °C  ·  已验证 17 / 30 项原料",14,Color("9ecdb8"))
     var left := panel(ui,Vector2(24,108),Vector2(274,822))
     chemistry_panels.append(left.get_parent())
@@ -296,6 +305,9 @@ func set_status(text: String) -> void:
         status.text = text
 
 func switch_experiment(physics: bool) -> void:
+    bench_mode = false
+    if bench_experiment:
+        bench_experiment.set_active(false)
     batch_mode = false
     if batch_experiment:
         batch_experiment.set_active(false)
@@ -314,19 +326,31 @@ func switch_experiment(physics: bool) -> void:
     status_badge.text = "力学实验  ·  忽略空气阻力" if physics else "水溶液平衡  ·  25 °C  ·  已验证 17 / 30 项原料"
     set_status("设置高度与重力，应用参数后释放小球。" if physics else "选择原料与器材，继续水溶液实验。")
 
-func switch_batch() -> void:
+func switch_batch(barite: bool = false) -> void:
     switch_experiment(false)
     batch_mode = true
     for p in chemistry_panels:
         p.visible = false
     for v in views.values():
         v.visible = false
+    batch_experiment.set_barite(barite)
     batch_experiment.set_active(true)
     focus = Vector3(0.06,0.96,0)
     distance = 0.70
     update_camera()
     status_badge.text = "气液固平衡 · 25°C"
     set_status("每次配料定义独立试验；固体、清液和 CO₂ 分别记账。")
+
+func switch_bench() -> void:
+    switch_experiment(false)
+    bench_mode = true
+    for p in chemistry_panels:
+        p.visible = false
+    for v in views.values():
+        v.visible = false
+    bench_experiment.set_active(true)
+    status_badge.text = "物理实验 · 独立模型"
+    set_status("选择实验、应用参数，然后开始测量。")
 
 func update_camera() -> void:
     camera.position = focus+Vector3(sin(orbit.x)*cos(orbit.y),sin(orbit.y),cos(orbit.x)*cos(orbit.y))*distance
@@ -457,7 +481,7 @@ func apply_result(result: Dictionary) -> void:
         ensure_view(s)
         states[int(s.id)] = s
         views[int(s.id)].update_state(s)
-        views[int(s.id)].visible = not batch_mode and not physics_mode
+        views[int(s.id)].visible = not batch_mode and not physics_mode and not bench_mode
     if result.operation=="pour":
         if result.transferred_ml>0:
             last_transfer_ms = Time.get_ticks_msec()
@@ -550,7 +574,7 @@ func _unhandled_input(event: InputEvent) -> void:
             distance = min(2.8,distance*1.1)
             update_camera()
         elif event.button_index==MOUSE_BUTTON_LEFT:
-            if physics_mode or batch_mode:
+            if physics_mode or batch_mode or bench_mode:
                 return
             dragging = false
             if event.pressed:

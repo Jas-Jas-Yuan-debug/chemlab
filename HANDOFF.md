@@ -102,3 +102,24 @@ Pure aliquots now scale extensive upstream cxxSolution state instead of re-equil
 composition_key allows recombining identical aliquots. H/O/water RAW scalars roundtrip 17 digits.
 Valence amounts checked separately on actual mixtures. See docs/AQUEOUS_EXTENSION.md.
 Fixed catalog buttons: enabled state derives from registry, no longer hard-coded id<=9.
+
+Phase 6 partial: dedicated BaCl2/Na2SO4 → Barite equilibrium UI and C++ model.
+27 native condition sets plus rendered barite_flow pass (including no precipitate below saturation,
+limiting-ion excess, extraction/aliquot). Source of current solid volume is solver amount × database Vm.
+Total remains 17/30 (no new raw entry counted). See docs/PRECIPITATION.md.
+Next proceed Phase 7 physics models/UI; sources consulted OpenStax SHM, pendulum, calorimetry,
+resistor series/parallel, thin lenses. Phase 8/9 still unimplemented.
+
+Phase 7 implemented: src/science/physics_models.* (spring, small-angle pendulum, two-water
+thermal exchange, series/parallel DC, thin lens real/virtual/infinite), LabCore bench methods,
+godot/scripts/physics_experiment.gd with parameter/simulation/measurement/curve/3D flow.
+physics_models_test passes independent relationships, conserved energy, frame-step independence.
+physics_flow passed native-to-visual transforms and complete controls; float input comparison uses
+tolerance (SpinBox value is not exactly decimal 0.2). Fixed native errors to String::utf8 so Chinese
+invalid-parameter errors render correctly. Added dark optics board for contrast. Readings remain unchanged
+on invalid configuration. Five screenshot artifacts physics-*.png. All 7 CTest cases and native/import/six rendered flows pass without error/leak warnings.
+Fixed an orphan initial MeshInstance3D in physics view (allocated before parenting and overwritten).
+This milestone is ready for push.
+Next: Phase 8 durable save/load/replay & CSV, then full Phase 9 packaging/performance/stress.
+Remaining early-phase concerns: continuous-pour real UI regression; indicator boundary tests;
+pour pose/stream realism and vessel liquid clipping under tilt are still approximations.

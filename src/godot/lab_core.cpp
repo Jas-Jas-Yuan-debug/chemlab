@@ -6,6 +6,12 @@
 
 namespace godot {
 void LabCore::_bind_methods(){
+    ClassDB::bind_method(D_METHOD("configure_bench","kind","parameters"),&LabCore::configure_bench);
+    ClassDB::bind_method(D_METHOD("start_bench"),&LabCore::start_bench);
+    ClassDB::bind_method(D_METHOD("pause_bench"),&LabCore::pause_bench);
+    ClassDB::bind_method(D_METHOD("reset_bench"),&LabCore::reset_bench);
+    ClassDB::bind_method(D_METHOD("advance_bench","elapsed_s"),&LabCore::advance_bench);
+    ClassDB::bind_method(D_METHOD("bench_snapshot"),&LabCore::bench_snapshot);
     ClassDB::bind_method(D_METHOD("run_batch","parameters"),&LabCore::run_batch);
     ClassDB::bind_method(D_METHOD("extract_batch","vessel_id"),&LabCore::extract_batch);
     ClassDB::bind_method(D_METHOD("batch_snapshot"),&LabCore::batch_snapshot);
@@ -25,7 +31,7 @@ void LabCore::_bind_methods(){
     ClassDB::bind_method(D_METHOD("fall_snapshot"),&LabCore::fall_snapshot);
 }
 LabCore::~LabCore(){if(pending_.valid())pending_.wait();}
-String LabCore::configure_fall(double h,double g){try{fall_.configure(h,g);return "";}catch(const std::exception&e){return String(e.what());}}
+String LabCore::configure_fall(double h,double g){try{fall_.configure(h,g);return "";}catch(const std::exception&e){return String::utf8(e.what());}}
 void LabCore::start_fall(){fall_.start();}
 void LabCore::pause_fall(){fall_.pause();}
 void LabCore::reset_fall(){fall_.reset();}
@@ -36,9 +42,28 @@ Dictionary LabCore::fall_snapshot()const{
     d["landed"]=r.landed;d["running"]=r.running;return d;
 }
 Dictionary LabCore::advance_fall(double elapsed){
-    try{fall_.advance(elapsed);}catch(const std::exception&e){Dictionary d=fall_snapshot();d["error"]=String(e.what());return d;}
+    try{fall_.advance(elapsed);}catch(const std::exception&e){Dictionary d=fall_snapshot();d["error"]=String::utf8(e.what());return d;}
     return fall_snapshot();
 }
+String LabCore::configure_bench(const String&kind,const Dictionary&p){
+    chemlab::Scalars values;Array keys=p.keys();
+    for(int i=0;i<keys.size();++i){String key=keys[i];values[key.utf8().get_data()]=double(p[key]);}
+    try{bench_.configure(kind.utf8().get_data(),values);return "";}catch(const std::exception&e){return String::utf8(e.what());}
+}
+void LabCore::start_bench(){bench_.start();}
+void LabCore::pause_bench(){bench_.pause();}
+void LabCore::reset_bench(){bench_.reset();}
+Dictionary LabCore::bench_snapshot()const{
+    Dictionary d;for(auto[key,value]:bench_.reading())d[String(key.c_str())]=value;
+    d["kind"]=String(bench_.kind().c_str());
+    Dictionary parameters;for(auto[key,value]:bench_.parameters())parameters[String(key.c_str())]=value;
+    d["parameters"]=parameters;return d;
+}
+Dictionary LabCore::advance_bench(double elapsed){
+    try{bench_.advance(elapsed);}catch(const std::exception&e){Dictionary d=bench_snapshot();d["error"]=String::utf8(e.what());return d;}
+    return bench_snapshot();
+}
+
 bool LabCore::is_busy()const{return pending_.valid();}
 void LabCore::initialize(const String& database){database_=database.utf8().get_data();reset_lab();}
 bool LabCore::start(const std::function<void(chemlab::Chemistry&,Result&)>& job){
@@ -96,6 +121,8 @@ bool LabCore::add_empty(int id,double capacity_ml){
     });
 }
 bool LabCore::run_batch(const Dictionary&p){
+    const bool barite=p.get("barite",false);
+    const double sulfate_concentration=p.get("sulfate_concentration",0.001),sulfate_ml=p.get("sulfate_ml",50.0);
     const int reagent=p.get("base_reagent",1), solid=p.get("solid_reagent",18), boundary=p.get("gas_boundary",0);
     const double concentration=p.get("concentration",0.001),volume=p.get("volume_ml",100.0);
     chemlab::BatchConditions c;c.solid_reagent=solid;c.solid_mol=double(p.get("solid_mmol",2.0))/1000;
@@ -104,8 +131,9 @@ bool LabCore::run_batch(const Dictionary&p){
     return start([=](chemlab::Chemistry&solver,Result&r){
         r.operation="batch";
         if(boundary<0||boundary>2)throw std::runtime_error("气相边界无效");
-        auto base=solver.prepare(reagent,reagent==1?0:concentration,volume/1000);
-        r.batch=solver.equilibrate(base,c);r.operation="batch";
+        auto base=solver.prepare(barite?25:reagent,!barite&&reagent==1?0:concentration,volume/1000);
+        if(barite)r.batch=solver.precipitate_barite(base,solver.prepare(14,sulfate_concentration,sulfate_ml/1000));
+        else r.batch=solver.equilibrate(base,c);r.operation="batch";
     });
 }
 bool LabCore::extract_batch(int to){
@@ -124,6 +152,7 @@ bool LabCore::extract_batch(int to){
 Dictionary LabCore::batch_snapshot()const{
     Dictionary d;if(!batch_)return d;
     const auto&r=*batch_;const auto&s=r.solution;
+    d["mineral"]=String(r.mineral.c_str());
     d["volume_ml"]=s.volume_l*1000;d["ph"]=s.empty()?Variant():Variant(s.ph);
     d["solid_remaining_mmol"]=r.solid_remaining_mol*1000;
     d["gas_co2_mmol"]=r.gas_co2_mol*1000;d["gas_pressure_atm"]=r.gas_pressure_atm;
@@ -155,7 +184,7 @@ Dictionary LabCore::poll(){
     if(!pending_.valid()||pending_.wait_for(std::chrono::seconds(0))!=std::future_status::ready)return result;
     auto completed=pending_.get();
     if(completed.generation==generation_){
-        result["ready"]=true;result["error"]=String(completed.error.c_str());
+        result["ready"]=true;result["error"]=String::utf8(completed.error.c_str());
         if(completed.error.empty()){vessels_=std::move(completed.vessels);batch_=std::move(completed.batch);++revision_;}
         result["state"]=snapshot();result["operation"]=String(completed.operation.c_str());
         result["from"]=completed.from;result["to"]=completed.to;
