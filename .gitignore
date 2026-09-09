@@ -1,0 +1,18 @@
+.DS_Store
+build/
+third_party/downloads/
+third_party/src/
+third_party/install/
+*.log
+__pycache__/
+tools/
+.godot/
+godot/bin/*.dylib
+artifacts/environment.json
+artifacts/*local*
+
+# Unreal generated content, if the user selects that route.
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/

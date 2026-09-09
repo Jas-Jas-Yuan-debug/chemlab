@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "iphreeqc": {
+    "version": "3.8.6-17100",
+    "url": "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz",
+    "sha256": "f5babcc9fb0c252e0c432786bbe9c265f02ca32791b096106f360cf1df1d9d94",
+    "archive": "iphreeqc-3.8.6-17100.tar.gz",
+    "source_directory": "iphreeqc-3.8.6-17100",
+    "license_notice": "third_party/licenses/USGS-PHREEQC-NOTICE.txt"
+  },
+  "database": {
+    "name": "phreeqc.dat",
+    "path": "database/phreeqc.dat",
+    "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+    "modified": false
+  },
+  "godot": {
+    "version": "4.7.2-stable",
+    "url": "https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_macos.universal.zip",
+    "sha256": "c58a24e31d720be9d62f60cb5627c4e695fb72f21b0cfe1bc9ccaa9a3b3ba63e",
+    "archive": "Godot_v4.7.2-stable_macos.universal.zip",
+    "license": "MIT"
+  },
+  "original_code_license": "AGPL-3.0-only",
+  "godot_cpp": {
+    "commit": "e83fd0904c13356ed1d4c3d09f8bb9132bdc6b77",
+    "tag": "godot-4.5-stable",
+    "api_target": "4.5",
+    "url": "https://codeload.github.com/godotengine/godot-cpp/tar.gz/e83fd0904c13356ed1d4c3d09f8bb9132bdc6b77",
+    "sha256": "d4c03daf46c8bef4544614182b0762c3e32789151c7f8f44e8eb2053d5cddeba",
+    "archive": "godot-cpp-e83fd090.tar.gz",
+    "source_directory": "godot-cpp-e83fd0904c13356ed1d4c3d09f8bb9132bdc6b77",
+    "license": "MIT"
+  }
+}
