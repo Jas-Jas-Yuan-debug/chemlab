@@ -14,8 +14,28 @@ void LabCore::_bind_methods(){
     ClassDB::bind_method(D_METHOD("is_busy"),&LabCore::is_busy);
     ClassDB::bind_method(D_METHOD("poll"),&LabCore::poll);
     ClassDB::bind_method(D_METHOD("snapshot"),&LabCore::snapshot);
+    ClassDB::bind_method(D_METHOD("configure_fall","height_m","gravity_m_s2"),&LabCore::configure_fall);
+    ClassDB::bind_method(D_METHOD("start_fall"),&LabCore::start_fall);
+    ClassDB::bind_method(D_METHOD("pause_fall"),&LabCore::pause_fall);
+    ClassDB::bind_method(D_METHOD("reset_fall"),&LabCore::reset_fall);
+    ClassDB::bind_method(D_METHOD("advance_fall","elapsed_s"),&LabCore::advance_fall);
+    ClassDB::bind_method(D_METHOD("fall_snapshot"),&LabCore::fall_snapshot);
 }
 LabCore::~LabCore(){if(pending_.valid())pending_.wait();}
+String LabCore::configure_fall(double h,double g){try{fall_.configure(h,g);return "";}catch(const std::exception&e){return String(e.what());}}
+void LabCore::start_fall(){fall_.start();}
+void LabCore::pause_fall(){fall_.pause();}
+void LabCore::reset_fall(){fall_.reset();}
+Dictionary LabCore::fall_snapshot()const{
+    const auto r=fall_.reading();Dictionary d;
+    d["time_s"]=r.time_s;d["height_m"]=r.height_m;d["velocity_m_s"]=r.velocity_m_s;
+    d["impact_time_s"]=r.impact_time_s;d["impact_speed_m_s"]=r.impact_speed_m_s;
+    d["landed"]=r.landed;d["running"]=r.running;return d;
+}
+Dictionary LabCore::advance_fall(double elapsed){
+    try{fall_.advance(elapsed);}catch(const std::exception&e){Dictionary d=fall_snapshot();d["error"]=String(e.what());return d;}
+    return fall_snapshot();
+}
 bool LabCore::is_busy()const{return pending_.valid();}
 void LabCore::initialize(const String& database){database_=database.utf8().get_data();reset_lab();}
 bool LabCore::start(const std::function<void(chemlab::Chemistry&,Result&)>& job){

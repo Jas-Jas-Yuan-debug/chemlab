@@ -19,7 +19,7 @@ set_property(SOURCE "${IPHREEQC_ROOT}/src/phreeqcpp/transport.cpp"
 add_executable(iphreeqc_probe tests/iphreeqc_probe.cpp)
 target_link_libraries(iphreeqc_probe PRIVATE IPhreeqc)
 target_compile_options(iphreeqc_probe PRIVATE -Wall -Wextra -Wpedantic)
-add_library(chemlab_science STATIC src/science/chemistry.cpp)
+add_library(chemlab_science STATIC src/science/chemistry.cpp src/science/mechanics.cpp)
 target_include_directories(chemlab_science PUBLIC src)
 target_link_libraries(chemlab_science PUBLIC IPhreeqc)
 target_compile_options(chemlab_science PRIVATE -Wall -Wextra -Wpedantic)
@@ -31,6 +31,9 @@ add_test(NAME iphreeqc_science
     COMMAND iphreeqc_probe "${IPHREEQC_ROOT}/database/phreeqc.dat"
     "${CMAKE_BINARY_DIR}/artifacts/iphreeqc_results.csv")
 add_test(NAME science_core COMMAND science_core_test "${IPHREEQC_ROOT}/database/phreeqc.dat")
+add_executable(mechanics_test tests/mechanics_test.cpp)
+target_link_libraries(mechanics_test PRIVATE chemlab_science)
+add_test(NAME mechanics COMMAND mechanics_test)
 
 option(CHEMLAB_BUILD_GODOT "Build the native Godot extension" OFF)
 if(CHEMLAB_BUILD_GODOT)

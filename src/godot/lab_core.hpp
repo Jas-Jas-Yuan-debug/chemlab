@@ -1,5 +1,6 @@
 #pragma once
 #include "science/chemistry.hpp"
+#include "science/mechanics.hpp"
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
 #include <future>
@@ -23,6 +24,7 @@ class LabCore : public RefCounted {
     uint64_t generation_=0;
     uint64_t revision_=0;
     bool reset_queued_=false;
+    chemlab::FreeFall fall_;
     bool start(const std::function<void(chemlab::Chemistry&,Result&)>& job);
 protected:
     static void _bind_methods();
@@ -36,5 +38,11 @@ public:
     bool is_busy() const;
     Dictionary poll();
     Dictionary snapshot() const;
+    String configure_fall(double height_m,double gravity_m_s2);
+    void start_fall();
+    void pause_fall();
+    void reset_fall();
+    Dictionary advance_fall(double elapsed_s);
+    Dictionary fall_snapshot() const;
 };
 }

@@ -38,10 +38,13 @@ tools/Godot.app/Contents/MacOS/Godot --path godot
 - 固定 25°C、1–250 mL、0.00001–0.01 mol/L。以求解的溶液体积反求水质量；不把 kg 水当 L 溶液。
 - HCl/NaOH/NaCl/KOH/KCl 支持限定稀溶液混合；CaCl₂/NaHCO₃/Na₂CO₃ 当前仅支持自身混合与水稀释。
 - 固体加入、CO₂/其他气体、其余 21 项原料、更多物理实验及保存/导出尚待后续阶段。
+- 自由落体已可调整高度/重力、释放、暂停、继续、重复并查看高度/速率曲线；解析碰撞时刻与固定步进已核对。
 - 三种指示剂采用有来源的颜色近似，忽略微量加入影响；不模拟反应速率、热效应或空间浓度场。
 
 [支持矩阵](docs/SUPPORT_MATRIX.md) · [科学边界](docs/VALIDATION_SCOPE.md) ·
 [指示剂来源](docs/INDICATORS.md) · [进度与交接](HANDOFF.md)
+
+[物理模型与验证](docs/PHYSICS_MODELS.md)
 
 ![运行中的三维实验室](artifacts/laboratory-initial.png)
 

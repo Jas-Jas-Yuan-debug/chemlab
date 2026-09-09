@@ -26,6 +26,10 @@ Use Git; push meaningful verified stages. No unapproved paid resources or large 
   IDs 2–6 may mix; 7–9 only self/water, otherwise reject pending validated gas/solid models.
   Three sourced indicator approximations added; trace addition ignored; phenolphthalein range guarded.
   PHREEQC worker requests serialize; reset generation discards stale results; errors keep valid state.
+- Phase 3: C++ FreeFall fixed-step clock and analytic impact event, Godot sphere/ruler/control panels,
+  parameter editing, release/pause/resume/repeat, height/speed curves and chemistry/physics mode tabs.
+  `mechanics_test` and rendered `fall_flow.gd` pass; screenshot artifacts/free-fall.png.
+  Post-impact velocity is zero with impact speed reported separately. See docs/PHYSICS_MODELS.md.
 
 ## Tests and commands
 
@@ -38,6 +42,7 @@ ctest --test-dir build --output-on-failure
 tools/Godot.app/Contents/MacOS/Godot --headless --editor --path godot --import
 tools/Godot.app/Contents/MacOS/Godot --headless --path godot --script tests/native_smoke.gd
 tools/Godot.app/Contents/MacOS/Godot --path godot --script tests/visual_flow.gd
+tools/Godot.app/Contents/MacOS/Godot --path godot --script tests/fall_flow.gd --quit-after 1800
 ```
 
 `Start ChemLab.command` builds cached sources and launches the scene. No global installation.
@@ -62,7 +67,7 @@ iterations (75 distinct initial conditions), independent dilute pH limits, failu
 ## Remaining work (goal NOT complete)
 
 1. Finish Phase 1/2 usability and indicators tests, continuous-pour UI regression and visual motion.
-2. Phase 3 free fall: C++ fixed step clock, configurable height/gravity, measurements/curve, pause/reset.
+2. Phase 3 free fall is implemented and tested; maintain regression while adding other experiments.
 3. Phase 4 improve realism (current materials are an early approximation, not photoreal validation).
 4. Phases 5/6 gas/finite-solid models; CO2 is still missing from base ten. Selected DB lacks silver,
    acetate, Portlandite, Brucite, Chalcanthite etc. Keep unsupported or validate a coherent alternative;

@@ -4,6 +4,7 @@ const Room = preload("res://scripts/lab_room.gd")
 const VesselView = preload("res://scripts/vessel.gd")
 const Plot = preload("res://scripts/ph_plot.gd")
 const Indicators = preload("res://scripts/indicators.gd")
+const FallExperiment = preload("res://scripts/fall_experiment.gd")
 var core: LabCore
 var camera := Camera3D.new()
 var views: Dictionary = {}
@@ -48,6 +49,10 @@ var plot: Control
 var pause_button: Button
 var pour_button: Button
 var file_dialog: FileDialog
+var chemistry_panels: Array[Control] = []
+var physics_mode := false
+var fall_experiment: Node3D
+var ui_theme: Theme
 
 func _ready() -> void:
     add_child(Room.new())
@@ -70,6 +75,11 @@ func _ready() -> void:
     add_child(stream)
     core = LabCore.new()
     core.initialize(ProjectSettings.globalize_path("res://data/phreeqc.dat"))
+    fall_experiment = FallExperiment.new()
+    fall_experiment.core = core
+    fall_experiment.lab = self
+    fall_experiment.ui_theme = ui_theme
+    add_child(fall_experiment)
     set_status("正在准备实验台…")
 
 func style(bg: Color, border: Color = Color.TRANSPARENT) -> StyleBoxFlat:
@@ -146,13 +156,17 @@ func build_ui() -> void:
     theme.set_color("font_color","Button",Color("e8eee6"))
     theme.set_color("font_disabled_color","Button",Color("697c75"))
     ui.theme = theme
+    ui_theme = theme
     var header := panel(ui,Vector2(24,20),Vector2(1552,70))
     var row := HBoxContainer.new()
     header.add_child(row)
     var name_text := label(row,"观物实验室  /  CHEMLAB",24,Color("f5e6c9"))
     name_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    button(row,"化学实验","ChemistryTab",func(): switch_experiment(false))
+    button(row,"自由落体","FreeFallTab",func(): switch_experiment(true))
     status_badge = label(row,"水溶液平衡  ·  25 °C  ·  已验证 9 / 30 项原料",14,Color("9ecdb8"))
     var left := panel(ui,Vector2(24,108),Vector2(274,822))
+    chemistry_panels.append(left.get_parent())
     label(left,"实验材料",20,Color("f5e6c9"))
     label(left,"按名称、化学式或组别查找",13,Color("96aaa1"))
     search = LineEdit.new()
@@ -194,6 +208,7 @@ func build_ui() -> void:
     var reset := button(left,"重新开始实验","ResetExperiment",reset_lab)
     reset.add_theme_color_override("font_color",Color("f1cea0"))
     var right := panel(ui,Vector2(1244,108),Vector2(332,822))
+    chemistry_panels.append(right.get_parent())
     selected_title = label(right,"烧杯 1",21,Color("f5e6c9"))
     readout = RichTextLabel.new()
     readout.bbcode_enabled = true
@@ -265,6 +280,22 @@ func set_status(text: String) -> void:
     if status:
         status.text = text
 
+func switch_experiment(physics: bool) -> void:
+    pouring = false
+    dragging = false
+    physics_mode = physics
+    for p in chemistry_panels:
+        p.visible = not physics
+    for v in views.values():
+        v.visible = not physics
+    fall_experiment.set_active(physics)
+    focus = Vector3(0,1.85,0) if physics else Vector3(0,0.94,0)
+    orbit = Vector2(0.1,0.18) if physics else Vector2(0.1,0.50)
+    distance = 3.8 if physics else 0.92
+    update_camera()
+    status_badge.text = "力学实验  ·  忽略空气阻力" if physics else "水溶液平衡  ·  25 °C  ·  已验证 9 / 30 项原料"
+    set_status("设置高度与重力，应用参数后释放小球。" if physics else "选择原料与器材，继续水溶液实验。")
+
 func update_camera() -> void:
     camera.position = focus+Vector3(sin(orbit.x)*cos(orbit.y),sin(orbit.y),cos(orbit.x)*cos(orbit.y))*distance
     camera.look_at(focus,Vector3.UP)
@@ -296,6 +327,7 @@ func ensure_view(state: Dictionary) -> void:
     var row: int = (id-1)/4
     v.position = Vector3((column-1.5)*0.12,0.89,0.10-row*0.13)
     views[id] = v
+    v.visible = not physics_mode
 
 func select_vessel(id: int) -> void:
     selected_id = id
@@ -477,6 +509,8 @@ func _unhandled_input(event: InputEvent) -> void:
             distance = min(2.8,distance*1.1)
             update_camera()
         elif event.button_index==MOUSE_BUTTON_LEFT:
+            if physics_mode:
+                return
             dragging = false
             if event.pressed:
                 var origin := camera.project_ray_origin(event.position)
@@ -493,6 +527,6 @@ func _unhandled_input(event: InputEvent) -> void:
             orbit.y = clamp(orbit.y,0.16,1.30)
             update_camera()
     elif event is InputEventKey and event.pressed and event.keycode==KEY_F and views.has(selected_id):
-        focus = views[selected_id].position+Vector3(0,0.045,0)
-        distance = 0.38
+        focus = fall_experiment.ball.global_position if physics_mode else views[selected_id].position+Vector3(0,0.045,0)
+        distance = 0.60 if physics_mode else 0.38
         update_camera()
