@@ -13,6 +13,7 @@ No endorsement by USGS is implied.
 - Rights notice: [USGS-PHREEQC-NOTICE.txt](third_party/licenses/USGS-PHREEQC-NOTICE.txt)
 - Embedded SUNDIALS notice: [SUNDIALS-NOTICE.txt](third_party/licenses/SUNDIALS-NOTICE.txt)
 - The downloaded source and database are unmodified. Version and hashes are in `dependencies.lock.json`.
+- Build adaptation by ChemLab, 2026-09-09: only `transport.cpp` is compiled with `token=chemlab_phreeqc_transport_token` to prevent collision with godot-cpp's C symbol `token`. No chemistry parameters or numerical code are changed; the original source distribution remains available above.
 - Database `phreeqc.dat` retains its original header, reaction parameters, literature references, and notice. Other bundled databases are not merged into it.
 - Parkhurst and Appelo (2013), USGS Techniques and Methods 6-A43: https://doi.org/10.3133/tm6A43
 - Charlton and Parkhurst (2011), Computers & Geosciences 37:1653–1663: https://doi.org/10.1016/j.cageo.2011.02.005
@@ -21,6 +22,11 @@ No endorsement by USGS is implied.
 
 Godot is MIT licensed. Its MIT notice and all relevant bundled third-party notices
 must accompany any redistributed runtime. https://godotengine.org/license/
-Pinned version, source, and copied notices are added during bootstrap.
+Pinned version and source are recorded in `dependencies.lock.json`.
+The downloaded engine is 4.7.2-stable; bindings target the older compatible 4.5 API.
+Godot runtime license and component notices are copied from its own Engine API:
+[engine license](third_party/licenses/GODOT-ENGINE-LICENSE.txt),
+[component notices](third_party/licenses/GODOT-THIRD-PARTY.json),
+[C++ bindings license](third_party/licenses/GODOT-CPP-LICENSE.txt).
 
 No external models, textures, or fonts have been added at this stage.

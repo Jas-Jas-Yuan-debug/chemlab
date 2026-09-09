@@ -10,6 +10,7 @@ tools/
 godot/bin/*.dylib
 artifacts/environment.json
 artifacts/*local*
+error.inp
 
 # Unreal generated content, if the user selects that route.
 Binaries/

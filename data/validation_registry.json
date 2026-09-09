@@ -1,0 +1,14 @@
+{
+  "model_version": "aqueous-0.1",
+  "database_sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+  "verified_on": "2026-09-09",
+  "verified_reagent_ids": [1,2,3,4,5,6,7,8,9],
+  "temperature_K": 298.15,
+  "volume_ml": [1,250],
+  "concentration_mol_L": [0.00001,0.01],
+  "forms": "Water and prepared aqueous solutions only; solid additions are not implemented",
+  "combinations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only.",
+  "evidence": ["tests/iphreeqc_probe.cpp", "tests/science_core_test.cpp", "godot/tests/native_smoke.gd", "godot/tests/visual_flow.gd"],
+  "runs": "81 stock/aliquot/dilution iterations (75 distinct stock conditions), dilute pH references, native integration, nine UI preparation/transfer/readout flows",
+  "not_validated": ["solid dissolution", "CO2 gas", "arbitrary mixtures", "reaction kinetics", "thermal effects", "performance target"]
+}

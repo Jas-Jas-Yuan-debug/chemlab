@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+"""Build a 30-entry catalog with auditable, non-assertive database coverage."""
+import hashlib
+import json
+from pathlib import Path
+import re
+
+ROOT = Path(__file__).resolve().parents[1]
+LOCK = json.loads((ROOT / 'dependencies.lock.json').read_text())
+REGISTRY = json.loads((ROOT / 'data/validation_registry.json').read_text())
+assert REGISTRY['database_sha256'] == LOCK['database']['sha256']
+DB = ROOT / 'third_party/src' / LOCK['iphreeqc']['source_directory'] / LOCK['database']['path']
+assert hashlib.sha256(DB.read_bytes()).hexdigest() == LOCK['database']['sha256']
+LINES = DB.read_text(encoding='latin-1').splitlines()
+masters, reactions, phases, weights = {}, {}, {}, {}
+section = ''
+KEYWORDS = {'SOLUTION_MASTER_SPECIES', 'SOLUTION_SPECIES', 'PHASES', 'EXCHANGE_MASTER_SPECIES',
+            'EXCHANGE_SPECIES', 'SURFACE_MASTER_SPECIES', 'SURFACE_SPECIES', 'RATES', 'END',
+            'PITZER', 'SIT', 'NAMED_EXPRESSIONS', 'LLNL_AQUEOUS_MODEL_PARAMETERS'}
+for index, raw in enumerate(LINES):
+    line = raw.split('#')[0].strip()
+    if line in KEYWORDS:
+        section = line
+        continue
+    if not line:
+        continue
+    if section == 'SOLUTION_MASTER_SPECIES':
+        parts = line.split()
+        masters[parts[0]] = index + 1
+        if len(parts) > 4:
+            try:
+                weights[parts[0]] = float(parts[4])
+            except ValueError:
+                pass
+    if section == 'SOLUTION_SPECIES' and '=' in line:
+        for token in line.replace('=', ' ').split():
+            if re.match(r'[A-Za-z]', token):
+                reactions.setdefault(token, []).append(index + 1)
+    if section == 'PHASES' and '=' not in line and not line.startswith('-') and index+1 < len(LINES):
+        if '=' in LINES[index+1]:
+            block = []
+            j = index + 1
+            while j < len(LINES) and (j == index+1 or LINES[j].startswith((' ', '\t', '#')) or not LINES[j].strip()):
+                block.append(LINES[j])
+                j += 1
+            phases[line] = {'line': index+1, 'reaction': LINES[index+1].strip(),
+                            'has_log_k': any(re.search(r'\b(log_k|logk|analytic|analytical_expression)\b', b, re.I) for b in block)}
+weights['Ag'] = 107.8682  # CIAAW silver page; no silver master in selected database.
+
+# name, formula, ASCII formula, phase, waters of hydration, atoms (including hydration),
+# expected aqueous species, candidate phase names, validation target / missing model.
+SPECS = [
+('水','H₂O','H2O','liquid',0,{'H':2,'O':1},['H2O','H+','OH-'],[], '无 CO2 纯水；稀释与体积/溶剂质量换算'),
+('盐酸','HCl','HCl','aqueous',0,{'H':1,'Cl':1},['H+','Cl-'],[], '稀水溶液；强酸与 NaOH/KOH 中和，禁止浓盐酸挥发模型'),
+('氢氧化钠','NaOH','NaOH','solid',0,{'Na':1,'O':1,'H':1},['Na+','OH-'],['NaOH'], '预配稀溶液；固体溶解度与溶解热另行验证'),
+('氯化钠','NaCl','NaCl','solid',0,{'Na':1,'Cl':1},['Na+','Cl-'],['Halite'], '稀溶液配制与稀释；接近饱和时需检查活度模型'),
+('氢氧化钾','KOH','KOH','solid',0,{'K':1,'O':1,'H':1},['K+','OH-'],['KOH'], '预配稀溶液；固体溶解和热效应未验证'),
+('氯化钾','KCl','KCl','solid',0,{'K':1,'Cl':1},['K+','Cl-'],['Sylvite'], '稀溶液配制与稀释；饱和实验独立验证'),
+('氯化钙','CaCl₂','CaCl2','solid',0,{'Ca':1,'Cl':2},['Ca+2','Cl-'],['CaCl2'], '无水固体与溶液分开；碳酸盐组合需指定沉淀相'),
+('碳酸氢钠','NaHCO₃','NaHCO3','solid',0,{'Na':1,'H':1,'C':1,'O':3},['Na+','HCO3-','CO3-2','CO2'],['Nahcolite'], '缓冲与稀释；酸加入和 CO2 逸出需开放/封闭收支'),
+('碳酸钠','Na₂CO₃','Na2CO3','solid',0,{'Na':2,'C':1,'O':3},['Na+','CO3-2','HCO3-'],['Natron'], '无水式与十水碳酸钠固相不可混同；预配稀溶液可候选'),
+('二氧化碳','CO₂','CO2','gas',0,{'C':1,'O':2},['CO2','HCO3-','CO3-2'],['CO2(g)'], '固定 pCO2 开放体系/有限气体封闭体系分别验证'),
+('硫酸','H₂SO₄','H2SO4','aqueous',0,{'H':2,'S':1,'O':4},['H+','HSO4-','SO4-2'],[], '只限稀水溶液酸碱；固定 S(6)，禁止脱水和浓酸模型'),
+('硝酸','HNO₃','HNO3','aqueous',0,{'H':1,'N':1,'O':3},['H+','NO3-'],[], '固定 N(5) 稀溶液酸碱；不支持完整氧化性'),
+('硝酸钠','NaNO₃','NaNO3','solid',0,{'Na':1,'N':1,'O':3},['Na+','NO3-'],['Nitratine'], '固定 N(5)，预配溶液和稀释'),
+('硫酸钠','Na₂SO₄','Na2SO4','solid',0,{'Na':2,'S':1,'O':4},['Na+','SO4-2','HSO4-'],['Thenardite'], '无水与十水相分开；硫酸盐络合及溶解验证'),
+('氯化镁','MgCl₂','MgCl2','solid',0,{'Mg':1,'Cl':2},['Mg+2','Cl-'],['MgCl2'], '无水固体；溶液配制，水解及稀释'),
+('硫酸镁','MgSO₄','MgSO4','solid',0,{'Mg':1,'S':1,'O':4},['Mg+2','SO4-2','MgSO4'],['Epsomite'], '无水式与七水盐不可混同；验证 MgSO4 络合'),
+('氢氧化钙','Ca(OH)₂','Ca(OH)2','solid',0,{'Ca':1,'O':2,'H':2},['Ca+2','OH-'],['Portlandite'], '需要 Portlandite 可信溶度积；不得默认固体全溶'),
+('碳酸钙','CaCO₃','CaCO3','solid',0,{'Ca':1,'C':1,'O':3},['Ca+2','CO3-2','HCO3-'],['Calcite','Aragonite'], '实验须明确选用方解石或文石；验证有限固体溶解'),
+('石膏','CaSO₄·2H₂O','CaSO4:2H2O','solid',2,{'Ca':1,'S':1,'O':6,'H':4},['Ca+2','SO4-2'],['Gypsum'], '二水石膏；水合水与元素守恒、饱和度'),
+('氨水','NH₃(aq)','NH3','aqueous',0,{'N':1,'H':3},['NH3','NH4+'],['NH3(g)'], 'NH3/NH4+ 平衡；固定 N(-3)，不使用纯 NH4OH 分子'),
+('氯化铵','NH₄Cl','NH4Cl','solid',0,{'N':1,'H':4,'Cl':1},['NH4+','NH3','Cl-'],['Salammoniac'], '固定 N(-3)；氨/铵缓冲、过量加入和稀释'),
+('乙酸','CH₃COOH','CH3COOH','liquid',0,{'C':2,'H':4,'O':2},['CH3COOH','CH3COO-'],[], '缺独立乙酸根主组分和酸解离参数时保持未支持'),
+('乙酸钠','CH₃COONa','CH3COONa','solid',0,{'C':2,'H':3,'O':2,'Na':1},['Na+','CH3COO-','CH3COOH'],[], '无水固体；乙酸体系缺失时未支持，禁止总无机碳替代'),
+('硝酸银','AgNO₃','AgNO3','solid',0,{'Ag':1,'N':1,'O':3},['Ag+','NO3-'],['Chlorargyrite'], '需 Ag 主组分、氯络合与 AgCl 固相；选定库无 Ag 则未支持'),
+('氯化钡','BaCl₂','BaCl2','solid',0,{'Ba':1,'Cl':2},['Ba+2','Cl-','BaSO4'],['Barite','Witherite'], '无水式；BaSO4 沉淀须检查硫酸根活度、限定候选 Barite'),
+('五水硫酸铜','CuSO₄·5H₂O','CuSO4:5H2O','solid',5,{'Cu':1,'S':1,'O':9,'H':10},['Cu+2','SO4-2','CuSO4'],['Chalcanthite'], 'Cu(2) 络合和水合相；溶液颜色需有来源，禁止直接套固体色'),
+('氯化铁','FeCl₃','FeCl3','solid',0,{'Fe':1,'Cl':3},['Fe+3','FeOH+2','Cl-'],['Fe(OH)3(a)','Goethite'], '固定 Fe(3)；强水解、络合及非晶/晶体候选相分别验证'),
+('七水硫酸亚铁','FeSO₄·7H₂O','FeSO4:7H2O','solid',7,{'Fe':1,'S':1,'O':11,'H':14},['Fe+2','SO4-2','FeSO4'],['Melanterite'], '固定 Fe(2)、水合水；氧化需要独立限定模型'),
+('氢氧化镁','Mg(OH)₂','Mg(OH)2','solid',0,{'Mg':1,'O':2,'H':2},['Mg+2','OH-'],['Brucite'], '需 Brucite 可信溶度积，不把输入反应量当已溶解量'),
+('氧气','O₂','O2','gas',0,{'O':2},['O2','Oxg'],['O2(g)','Oxg(g)'], '优先红氧解耦的气液溶解；不表示燃烧和任意氧化还原'),
+]
+
+catalog = []
+for i,(name,formula,ascii_formula,phase,hydrate,atoms,aqueous,candidates,plan) in enumerate(SPECS,1):
+    found = {s:reactions[s] for s in aqueous if s in reactions}
+    missing = [s for s in aqueous if s not in reactions]
+    candidate_coverage = {s:phases.get(s) for s in candidates}
+    forms = [{'phase':phase,'hydrate_water_per_formula':hydrate,'inventory_mol':0.0}]
+    if phase not in ('gas','aqueous','liquid'):
+        forms.append({'phase':'aqueous','hydrate_water_per_formula':0,'inventory_mol':0.0,'concentration_mol_L':None})
+    entry = {'id':i,'name_zh':name,'formula':formula,'formula_ascii':ascii_formula,
+             'category':['基础组','扩展组','进阶组'][(i-1)//10], 'phase':phase,
+             'hydrate_water_per_formula':hydrate,'formula_atoms':atoms,
+             'molar_mass_g_mol':round(sum(weights[e]*n for e,n in atoms.items()),5),
+             'molar_mass_source':'phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682',
+             'available_amount_mol':0.0,'solution_concentration_mol_L':None,'temperature_K':298.15,
+             'forms':forms,'visual':{'solution_color_mapping':None,'status':'未验证；不得以固体颜色指定溶液颜色'},
+             'database_mapping':{'database':'phreeqc.dat','sha256':LOCK['database']['sha256'],
+                                 'aqueous_species_lines':found,'missing_species':missing,
+                                 'candidate_phases':candidate_coverage},
+             'applicability':plan,'sources':['USGS IPhreeqc '+LOCK['iphreeqc']['version']+' / database/phreeqc.dat',
+                 'https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz'],
+             'validation':{'status':'尚未支持','operational':False,'science_tests':[],
+                           'plan':plan+'；另测 1/50/250 mL、稀释、过量和重复转移、元素收支'}}
+    if i==24:entry['sources'].append('https://www.ciaaw.org/silver.htm')
+    if i in REGISTRY['verified_reagent_ids']:
+        entry['validation'].update({'status':'已验证（限定水溶液）','operational':True,
+            'science_tests':REGISTRY['evidence'],'verified_on':REGISTRY['verified_on'],
+            'range':{'temperature_K':298.15,'volume_ml':[1,250],'concentration_mol_L':[0.00001,0.01]},
+            'limitations':REGISTRY['combinations']})
+        for form in entry['forms']:
+            form['operational'] = form['phase'] in ('aqueous','liquid')
+    catalog.append(entry)
+assert len(catalog)==30 and len({e['id'] for e in catalog})==30
+count = sum(e['validation']['operational'] for e in catalog)
+(ROOT/'data/reagents.json').write_text(json.dumps({'schema_version':1,'verified_operational_count':count,'reagents':catalog},ensure_ascii=False,indent=2)+'\n')
+report=['# 原料支持矩阵 · Phase 0','',
+        f'**产品已验证可操作：{count}/30。** 1–9 项仅限预配水溶液/蒸馏水；固体加入、气体及其余条目未支持。', '',
+        '已运行 tests/science_core_test.cpp 和 Godot 的 native_smoke / visual_flow；范围见 data/validation_registry.json。下表的数据库覆盖不等于其余条目已可操作。', '',
+        '固定数据库：`phreeqc.dat`，SHA-256 `'+LOCK['database']['sha256']+'`。仅扫描这一份官方数据库，未合并其他库。', '',
+        '摩尔质量按所选数据库原子量计算（水合水已计入），显示值后续按有效数字取舍；银原子量来自 CIAAW。', '',
+        '| # | 原料 | 水溶液物种覆盖 | 候选固/气相与参数 | 适用条件 / 验证计划 |',
+        '|---|---|---|---|---|']
+for e in catalog:
+    db=e['database_mapping']
+    aq='；'.join(s+' L'+str(ns[0]) for s,ns in db['aqueous_species_lines'].items())
+    if db['missing_species']:aq+='；缺：'+', '.join(db['missing_species'])
+    ph='；'.join(s+(' L'+str(v['line'])+(' (log K 有)' if v['has_log_k'] else ' (参数需核查)') if v else ' 缺失') for s,v in db['candidate_phases'].items()) or '该条目无需原料纯固相；实验候选相另选'
+    report.append(f"| {e['id']} | {e['name_zh']} {e['formula']} | {aq} | {ph} | {e['applicability']} |")
+report += ['', 'L 为解压后原始数据库文件行号。固相存在仍需检查具体晶型、水合状态、实验温度、离子强度及数据出处，不能把 Natron/Epsomite 直接当作无水原料。', '',
+           '指示剂另建模型，不计入 30 项。尚未实现颜色映射时，不显示假定的颜色。']
+(ROOT/'docs/SUPPORT_MATRIX.md').write_text('\n'.join(report)+'\n')
+print(f'Catalog and support matrix generated: 30 entries; product operational: {count}.')

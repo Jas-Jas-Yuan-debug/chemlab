@@ -1,0 +1,159 @@
+#include "chemistry.hpp"
+#include <IPhreeqc.h>
+#include <algorithm>
+#include <cmath>
+#include <iomanip>
+#include <regex>
+#include <sstream>
+#include <stdexcept>
+
+namespace chemlab {
+namespace {
+const std::vector<std::string> element_names = {"Na","Cl","K","Ca","Mg","C","S","N","Ba","Fe","Cu"};
+void check(bool ok, const std::string& text) { if (!ok) throw std::runtime_error(text); }
+std::string num(double value) { std::ostringstream s; s << std::setprecision(17) << value; return s.str(); }
+std::string renamed(const Solution& s, int number) {
+    check(s.raw.rfind("SOLUTION_RAW", 0) == 0, "缺少有效的溶液状态");
+    return std::regex_replace(s.raw, std::regex("^SOLUTION_RAW\\s+[0-9]+"), "SOLUTION_RAW " + std::to_string(number));
+}
+std::string selected() {
+    std::string s = "SELECTED_OUTPUT 1\n-reset false\n-high_precision true\nUSER_PUNCH 1\n-headings ph volume water charge h o";
+    for (const auto& name : element_names) s += " " + name;
+    s += "\n-start\n10 PUNCH -LA(\"H+\"), SOLN_VOL, TOT(\"water\"), CHARGE_BALANCE, TOTMOLE(\"H\"), TOTMOLE(\"O\")\n20 PUNCH ";
+    for (size_t i=0; i<element_names.size(); ++i) s += (i ? ", " : "") + std::string("TOTMOLE(\"") + element_names[i] + "\")";
+    return s + "\n-end\n";
+}
+double value(int id, int row, int col) {
+    VAR v; VarInit(&v);
+    const auto result = GetSelectedOutputValue(id, row, col, &v);
+    const bool valid = v.type == TT_DOUBLE || v.type == TT_LONG;
+    const double x = v.type == TT_DOUBLE ? v.dVal : (v.type == TT_LONG ? v.lVal : 0);
+    VarClear(&v);
+    check(result == 0 && valid && std::isfinite(x), "求解结果缺失或非有限数值");
+    return x;
+}
+void balance(double actual, double expected, double absolute, const std::string& name) {
+    check(std::abs(actual-expected) <= absolute + std::abs(expected)*1e-9, name+"物质收支未通过，操作已取消");
+}
+}
+
+Chemistry::Chemistry(const std::string& database) : id_(CreateIPhreeqc()) {
+    check(id_ >= 0, "无法创建化学求解器");
+    if (LoadDatabase(id_,database.c_str()) != 0) {
+        const std::string error = GetErrorString(id_); DestroyIPhreeqc(id_); id_ = -1;
+        throw std::runtime_error("无法加载数据库："+error);
+    }
+    SetDumpStringOn(id_, 1);
+    SetDumpFileOn(id_, 0);
+    SetSelectedOutputFileOn(id_, 0);
+    SetOutputFileOn(id_, 0);
+}
+Chemistry::~Chemistry() { if (id_ >= 0) DestroyIPhreeqc(id_); }
+bool Chemistry::supported(int reagent) { return reagent >= 1 && reagent <= 9; }
+
+Solution Chemistry::solve(const std::string& input) {
+    const std::string script = "DELETE\n-all\nEND\n" + selected() + input + "DUMP\n-solution 3\nEND\n";
+    const int errors = RunString(id_,script.c_str());
+    check(errors == 0, "化学求解失败："+std::string(GetErrorString(id_)));
+    check(GetWarningStringLineCount(id_) == 0, "化学求解警告："+std::string(GetWarningString(id_)));
+    const int row = GetSelectedOutputRowCount(id_)-1;
+    check(row > 0 && GetSelectedOutputColumnCount(id_) == 6+int(element_names.size()), "化学读数不完整");
+    Solution s;
+    s.ph=value(id_,row,0); s.volume_l=value(id_,row,1); s.water_kg=value(id_,row,2);
+    s.charge_eq=value(id_,row,3); s.hydrogen_mol=value(id_,row,4); s.oxygen_mol=value(id_,row,5);
+    for (size_t i=0; i<element_names.size(); ++i) {
+        s.elements[element_names[i]]=value(id_,row,int(i)+6);
+        check(s.elements[element_names[i]] >= -1e-15, "出现负物质的量");
+    }
+    s.raw=GetDumpString(id_);
+    const auto start=s.raw.find("SOLUTION_RAW");
+    check(start != std::string::npos, "求解器未保存溶液状态");
+    s.raw=s.raw.substr(start);
+    check(s.water_kg>0 && s.volume_l>0 && s.ph>=0 && s.ph<=14.5, "结果超出已验证的稀溶液范围");
+    check(std::abs(s.charge_eq)<1e-9, "电荷收支未通过");
+    return s;
+}
+
+Solution Chemistry::prepare(int reagent, double concentration, double volume) {
+    check(supported(reagent), "此原料尚未支持操作");
+    check(std::isfinite(volume) && volume>=0.001 && volume<=0.250, "初始体积限 1–250 mL");
+    check(std::isfinite(concentration) && (reagent==1 ? concentration==0 : concentration>=1e-5 && concentration<=0.01), "浓度限 0.00001–0.01 mol/L；蒸馏水为 0");
+    const double moles=concentration*volume;
+    double water=volume*0.9970474;
+    Solution result;
+    for (int iteration=0; iteration<8; ++iteration) {
+        const double molality=moles/water;
+        std::string body="SOLUTION 3\n-temp 25\n-pressure 1\n-units mol/kgw\n-water "+num(water)+"\npH 7 charge\n";
+        const auto add=[&body,molality](const std::string& element,double ratio) { body+=element+" "+num(molality*ratio)+"\n"; };
+        switch(reagent) {
+            case 1:break;
+            case 2:add("Cl",1);break;
+            case 3:add("Na",1);break;
+            case 4:add("Na",1);add("Cl",1);break;
+            case 5:add("K",1);break;
+            case 6:add("K",1);add("Cl",1);break;
+            case 7:add("Ca",1);add("Cl",2);break;
+            case 8:add("Na",1);add("C(4)",1);break;
+            case 9:add("Na",2);add("C(4)",1);break;
+        }
+        result=solve(body+"END\n");
+        if (std::abs(result.volume_l-volume)<1e-10) break;
+        water+=(volume-result.volume_l)*0.9970474;
+        check(water>0, "体积与溶剂质量换算失败");
+    }
+    check(std::abs(result.volume_l-volume)<1e-8, "配液体积未收敛");
+    if (reagent != 1) result.ingredients_mol[reagent]=moles;
+    return result;
+}
+
+void Chemistry::validate_combination(const Solution& a,const Solution& b) {
+    // Monovalent strong electrolytes can share the tested acid/base model.
+    // Calcium and carbonate initially permit only self-mixing and water dilution.
+    int special=0;
+    for (const auto* s : {&a,&b}) for (auto [id,moles] : s->ingredients_mol) {
+        if (moles<=0) continue;
+        if (id>=7) { check(special==0 || special==id,"此原料组合尚未验证：沉淀或气液行为未启用"); special=id; }
+    }
+    if (special) for (const auto* s : {&a,&b}) for (auto [id,moles] : s->ingredients_mol)
+        check(moles<=0 || id==special,"此原料目前仅支持自身混合和蒸馏水稀释");
+}
+
+Solution Chemistry::mix(const Solution& a,double af,const Solution& b,double bf) {
+    check(std::isfinite(af)&&std::isfinite(bf)&&af>=0&&af<=1&&bf>=0&&bf<=1,"转移比例无效");
+    if ((a.empty()||af==0)&&(b.empty()||bf==0)) return {};
+    validate_combination(a,b);
+    std::string input;
+    if (!a.empty()&&af>0) input+=renamed(a,1)+"\nEND\n";
+    if (!b.empty()&&bf>0) input+=renamed(b,2)+"\nEND\n";
+    input+="MIX 3\n";
+    if (!a.empty()&&af>0) input+="1 "+num(af)+"\n";
+    if (!b.empty()&&bf>0) input+="2 "+num(bf)+"\n";
+    Solution r=solve(input+"SAVE solution 3\nEND\n");
+    for(auto [id,n]:a.ingredients_mol) if(n*af>0) r.ingredients_mol[id]+=n*af;
+    for(auto [id,n]:b.ingredients_mol) if(n*bf>0) r.ingredients_mol[id]+=n*bf;
+    for (const auto& name:element_names) {
+        auto get=[&name](const Solution& s){auto i=s.elements.find(name);return i==s.elements.end()?0:i->second;};
+        balance(r.elements[name],get(a)*af+get(b)*bf,1e-11,name);
+    }
+    balance(r.hydrogen_mol,a.hydrogen_mol*af+b.hydrogen_mol*bf,1e-8,"H");
+    balance(r.oxygen_mol,a.oxygen_mol*af+b.oxygen_mol*bf,1e-8,"O");
+    return r;
+}
+
+TransferResult transfer(Chemistry& solver,const Vessel& source,const Vessel& target,double requested) {
+    check(source.id!=target.id,"不能向同一个容器倾倒");
+    check(std::isfinite(requested)&&requested>=0,"倾倒量必须为非负有限数");
+    TransferResult result{source,target,0};
+    double amount=std::min({requested,source.solution.volume_l,std::max(0.0,target.capacity_l-target.solution.volume_l)});
+    if(amount<1e-10) return result;
+    // Include a sub-picolitre floating point remainder in the actual transfer.
+    // Do not solve a fictitious 1e-20 L residual or silently discard its matter.
+    if(source.solution.volume_l-amount<1e-12)amount=source.solution.volume_l;
+    const double fraction=std::clamp(amount/source.solution.volume_l,0.0,1.0);
+    result.target.solution=solver.mix(target.solution,1,source.solution,fraction);
+    result.source.solution=solver.mix(source.solution,1-fraction,{},0);
+    check(result.target.solution.volume_l<=target.capacity_l+1e-8,"混合体积超过容器容量");
+    result.transferred_l=amount;
+    return result;
+}
+}

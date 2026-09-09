@@ -1,0 +1,27 @@
+config_version=5
+
+[application]
+config/name="ChemLab · 观物实验室"
+run/main_scene="res://scenes/laboratory.tscn"
+config/features=PackedStringArray("4.5", "Mobile")
+
+[display]
+window/size/viewport_width=1600
+window/size/viewport_height=1000
+window/size/window_width_override=1440
+window/size/window_height_override=900
+window/stretch/mode="canvas_items"
+
+[rendering]
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"
+rendering_device/driver.macos="metal"
+textures/default_filters/use_nearest_mipmap_filter=false
+anti_aliasing/quality/msaa_3d=2
+environment/defaults/default_clear_color=Color(0.07,0.09,0.10,1)
+
+[physics]
+common/physics_ticks_per_second=120
+
+[internationalization]
+locale/fallback="zh_CN"

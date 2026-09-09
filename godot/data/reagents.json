@@ -1,0 +1,3150 @@
+{
+  "schema_version": 1,
+  "verified_operational_count": 9,
+  "reagents": [
+    {
+      "id": 1,
+      "name_zh": "水",
+      "formula": "H₂O",
+      "formula_ascii": "H2O",
+      "category": "基础组",
+      "phase": "liquid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "H": 2,
+        "O": 1
+      },
+      "molar_mass_g_mol": 18.016,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "liquid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "operational": true
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "H2O": [
+            82,
+            82,
+            212,
+            218,
+            240,
+            254,
+            270,
+            295,
+            301,
+            306,
+            334,
+            337,
+            340,
+            368,
+            404,
+            489,
+            493,
+            524,
+            528,
+            532,
+            535,
+            539,
+            542,
+            545,
+            584,
+            588,
+            622,
+            628,
+            633,
+            637,
+            685,
+            690,
+            704,
+            762,
+            765,
+            767,
+            769,
+            771,
+            781,
+            784,
+            786,
+            788,
+            809,
+            835,
+            838,
+            840,
+            842,
+            844,
+            847,
+            896,
+            898,
+            900,
+            902,
+            904,
+            936
+          ],
+          "H+": [
+            67,
+            67,
+            212,
+            218,
+            223,
+            228,
+            233,
+            240,
+            254,
+            259,
+            265,
+            270,
+            276,
+            285,
+            295,
+            301,
+            306,
+            314,
+            328,
+            334,
+            337,
+            340,
+            343,
+            349,
+            355,
+            359,
+            364,
+            368,
+            375,
+            404,
+            414,
+            489,
+            493,
+            524,
+            528,
+            532,
+            535,
+            539,
+            542,
+            545,
+            584,
+            588,
+            622,
+            628,
+            633,
+            637,
+            674,
+            680,
+            685,
+            690,
+            704,
+            707,
+            762,
+            765,
+            767,
+            769,
+            771,
+            781,
+            784,
+            786,
+            788,
+            809,
+            835,
+            838,
+            840,
+            842,
+            844,
+            847,
+            896,
+            898,
+            900,
+            902,
+            904,
+            936
+          ],
+          "OH-": [
+            212
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {}
+      },
+      "applicability": "无 CO2 纯水；稀释与体积/溶剂质量换算",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "已验证（限定水溶液）",
+        "operational": true,
+        "science_tests": [
+          "tests/iphreeqc_probe.cpp",
+          "tests/science_core_test.cpp",
+          "godot/tests/native_smoke.gd",
+          "godot/tests/visual_flow.gd"
+        ],
+        "plan": "无 CO2 纯水；稀释与体积/溶剂质量换算；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
+        "verified_on": "2026-09-09",
+        "range": {
+          "temperature_K": 298.15,
+          "volume_ml": [
+            1,
+            250
+          ],
+          "concentration_mol_L": [
+            1e-05,
+            0.01
+          ]
+        },
+        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+      }
+    },
+    {
+      "id": 2,
+      "name_zh": "盐酸",
+      "formula": "HCl",
+      "formula_ascii": "HCl",
+      "category": "基础组",
+      "phase": "aqueous",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "H": 1,
+        "Cl": 1
+      },
+      "molar_mass_g_mol": 36.461,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "operational": true
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "H+": [
+            67,
+            67,
+            212,
+            218,
+            223,
+            228,
+            233,
+            240,
+            254,
+            259,
+            265,
+            270,
+            276,
+            285,
+            295,
+            301,
+            306,
+            314,
+            328,
+            334,
+            337,
+            340,
+            343,
+            349,
+            355,
+            359,
+            364,
+            368,
+            375,
+            404,
+            414,
+            489,
+            493,
+            524,
+            528,
+            532,
+            535,
+            539,
+            542,
+            545,
+            584,
+            588,
+            622,
+            628,
+            633,
+            637,
+            674,
+            680,
+            685,
+            690,
+            704,
+            707,
+            762,
+            765,
+            767,
+            769,
+            771,
+            781,
+            784,
+            786,
+            788,
+            809,
+            835,
+            838,
+            840,
+            842,
+            844,
+            847,
+            896,
+            898,
+            900,
+            902,
+            904,
+            936
+          ],
+          "Cl-": [
+            138,
+            138,
+            228,
+            497,
+            548,
+            552,
+            555,
+            591,
+            595,
+            598,
+            728,
+            732,
+            742,
+            747,
+            751,
+            755,
+            790,
+            795,
+            799,
+            804,
+            809,
+            847,
+            854,
+            858,
+            862,
+            906,
+            910,
+            914,
+            918
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {}
+      },
+      "applicability": "稀水溶液；强酸与 NaOH/KOH 中和，禁止浓盐酸挥发模型",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "已验证（限定水溶液）",
+        "operational": true,
+        "science_tests": [
+          "tests/iphreeqc_probe.cpp",
+          "tests/science_core_test.cpp",
+          "godot/tests/native_smoke.gd",
+          "godot/tests/visual_flow.gd"
+        ],
+        "plan": "稀水溶液；强酸与 NaOH/KOH 中和，禁止浓盐酸挥发模型；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
+        "verified_on": "2026-09-09",
+        "range": {
+          "temperature_K": 298.15,
+          "volume_ml": [
+            1,
+            250
+          ],
+          "concentration_mol_L": [
+            1e-05,
+            0.01
+          ]
+        },
+        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+      }
+    },
+    {
+      "id": 3,
+      "name_zh": "氢氧化钠",
+      "formula": "NaOH",
+      "formula_ascii": "NaOH",
+      "category": "基础组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "Na": 1,
+        "O": 1,
+        "H": 1
+      },
+      "molar_mass_g_mol": 39.9978,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "operational": false
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null,
+          "operational": true
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Na+": [
+            90,
+            90,
+            453,
+            459,
+            466,
+            470
+          ],
+          "OH-": [
+            212
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "NaOH": null
+        }
+      },
+      "applicability": "预配稀溶液；固体溶解度与溶解热另行验证",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "已验证（限定水溶液）",
+        "operational": true,
+        "science_tests": [
+          "tests/iphreeqc_probe.cpp",
+          "tests/science_core_test.cpp",
+          "godot/tests/native_smoke.gd",
+          "godot/tests/visual_flow.gd"
+        ],
+        "plan": "预配稀溶液；固体溶解度与溶解热另行验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
+        "verified_on": "2026-09-09",
+        "range": {
+          "temperature_K": 298.15,
+          "volume_ml": [
+            1,
+            250
+          ],
+          "concentration_mol_L": [
+            1e-05,
+            0.01
+          ]
+        },
+        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+      }
+    },
+    {
+      "id": 4,
+      "name_zh": "氯化钠",
+      "formula": "NaCl",
+      "formula_ascii": "NaCl",
+      "category": "基础组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "Na": 1,
+        "Cl": 1
+      },
+      "molar_mass_g_mol": 58.4428,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "operational": false
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null,
+          "operational": true
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Na+": [
+            90,
+            90,
+            453,
+            459,
+            466,
+            470
+          ],
+          "Cl-": [
+            138,
+            138,
+            228,
+            497,
+            548,
+            552,
+            555,
+            591,
+            595,
+            598,
+            728,
+            732,
+            742,
+            747,
+            751,
+            755,
+            790,
+            795,
+            799,
+            804,
+            809,
+            847,
+            854,
+            858,
+            862,
+            906,
+            910,
+            914,
+            918
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "Halite": {
+            "line": 1191,
+            "reaction": "NaCl = Cl- + Na+",
+            "has_log_k": true
+          }
+        }
+      },
+      "applicability": "稀溶液配制与稀释；接近饱和时需检查活度模型",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "已验证（限定水溶液）",
+        "operational": true,
+        "science_tests": [
+          "tests/iphreeqc_probe.cpp",
+          "tests/science_core_test.cpp",
+          "godot/tests/native_smoke.gd",
+          "godot/tests/visual_flow.gd"
+        ],
+        "plan": "稀溶液配制与稀释；接近饱和时需检查活度模型；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
+        "verified_on": "2026-09-09",
+        "range": {
+          "temperature_K": 298.15,
+          "volume_ml": [
+            1,
+            250
+          ],
+          "concentration_mol_L": [
+            1e-05,
+            0.01
+          ]
+        },
+        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+      }
+    },
+    {
+      "id": 5,
+      "name_zh": "氢氧化钾",
+      "formula": "KOH",
+      "formula_ascii": "KOH",
+      "category": "基础组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "K": 1,
+        "O": 1,
+        "H": 1
+      },
+      "molar_mass_g_mol": 56.11,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "operational": false
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null,
+          "operational": true
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "K+": [
+            97,
+            97,
+            473,
+            478,
+            485
+          ],
+          "OH-": [
+            212
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "KOH": null
+        }
+      },
+      "applicability": "预配稀溶液；固体溶解和热效应未验证",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "已验证（限定水溶液）",
+        "operational": true,
+        "science_tests": [
+          "tests/iphreeqc_probe.cpp",
+          "tests/science_core_test.cpp",
+          "godot/tests/native_smoke.gd",
+          "godot/tests/visual_flow.gd"
+        ],
+        "plan": "预配稀溶液；固体溶解和热效应未验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
+        "verified_on": "2026-09-09",
+        "range": {
+          "temperature_K": 298.15,
+          "volume_ml": [
+            1,
+            250
+          ],
+          "concentration_mol_L": [
+            1e-05,
+            0.01
+          ]
+        },
+        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+      }
+    },
+    {
+      "id": 6,
+      "name_zh": "氯化钾",
+      "formula": "KCl",
+      "formula_ascii": "KCl",
+      "category": "基础组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "K": 1,
+        "Cl": 1
+      },
+      "molar_mass_g_mol": 74.555,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "operational": false
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null,
+          "operational": true
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "K+": [
+            97,
+            97,
+            473,
+            478,
+            485
+          ],
+          "Cl-": [
+            138,
+            138,
+            228,
+            497,
+            548,
+            552,
+            555,
+            591,
+            595,
+            598,
+            728,
+            732,
+            742,
+            747,
+            751,
+            755,
+            790,
+            795,
+            799,
+            804,
+            809,
+            847,
+            854,
+            858,
+            862,
+            906,
+            910,
+            914,
+            918
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "Sylvite": {
+            "line": 1197,
+            "reaction": "KCl = K+ + Cl-",
+            "has_log_k": true
+          }
+        }
+      },
+      "applicability": "稀溶液配制与稀释；饱和实验独立验证",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "已验证（限定水溶液）",
+        "operational": true,
+        "science_tests": [
+          "tests/iphreeqc_probe.cpp",
+          "tests/science_core_test.cpp",
+          "godot/tests/native_smoke.gd",
+          "godot/tests/visual_flow.gd"
+        ],
+        "plan": "稀溶液配制与稀释；饱和实验独立验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
+        "verified_on": "2026-09-09",
+        "range": {
+          "temperature_K": 298.15,
+          "volume_ml": [
+            1,
+            250
+          ],
+          "concentration_mol_L": [
+            1e-05,
+            0.01
+          ]
+        },
+        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+      }
+    },
+    {
+      "id": 7,
+      "name_zh": "氯化钙",
+      "formula": "CaCl₂",
+      "formula_ascii": "CaCl2",
+      "category": "基础组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "Ca": 1,
+        "Cl": 2
+      },
+      "molar_mass_g_mol": 110.986,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "operational": false
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null,
+          "operational": true
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Ca+2": [
+            107,
+            107,
+            368,
+            370,
+            375,
+            381,
+            386,
+            388,
+            392,
+            395
+          ],
+          "Cl-": [
+            138,
+            138,
+            228,
+            497,
+            548,
+            552,
+            555,
+            591,
+            595,
+            598,
+            728,
+            732,
+            742,
+            747,
+            751,
+            755,
+            790,
+            795,
+            799,
+            804,
+            809,
+            847,
+            854,
+            858,
+            862,
+            906,
+            910,
+            914,
+            918
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "CaCl2": null
+        }
+      },
+      "applicability": "无水固体与溶液分开；碳酸盐组合需指定沉淀相",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "已验证（限定水溶液）",
+        "operational": true,
+        "science_tests": [
+          "tests/iphreeqc_probe.cpp",
+          "tests/science_core_test.cpp",
+          "godot/tests/native_smoke.gd",
+          "godot/tests/visual_flow.gd"
+        ],
+        "plan": "无水固体与溶液分开；碳酸盐组合需指定沉淀相；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
+        "verified_on": "2026-09-09",
+        "range": {
+          "temperature_K": 298.15,
+          "volume_ml": [
+            1,
+            250
+          ],
+          "concentration_mol_L": [
+            1e-05,
+            0.01
+          ]
+        },
+        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+      }
+    },
+    {
+      "id": 8,
+      "name_zh": "碳酸氢钠",
+      "formula": "NaHCO₃",
+      "formula_ascii": "NaHCO3",
+      "category": "基础组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "Na": 1,
+        "H": 1,
+        "C": 1,
+        "O": 3
+      },
+      "molar_mass_g_mol": 84.0089,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "operational": false
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null,
+          "operational": true
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Na+": [
+            90,
+            90,
+            453,
+            459,
+            466,
+            470
+          ],
+          "HCO3-": [
+            233,
+            453,
+            473,
+            501,
+            604,
+            698,
+            740,
+            819,
+            870,
+            926
+          ],
+          "CO3-2": [
+            144,
+            144,
+            233,
+            240,
+            254,
+            370,
+            375,
+            408,
+            414,
+            499,
+            602,
+            693,
+            707,
+            712,
+            736,
+            738,
+            815,
+            817,
+            866,
+            868,
+            922,
+            924
+          ],
+          "CO2": [
+            240,
+            248
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "Nahcolite": null
+        }
+      },
+      "applicability": "缓冲与稀释；酸加入和 CO2 逸出需开放/封闭收支",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "已验证（限定水溶液）",
+        "operational": true,
+        "science_tests": [
+          "tests/iphreeqc_probe.cpp",
+          "tests/science_core_test.cpp",
+          "godot/tests/native_smoke.gd",
+          "godot/tests/visual_flow.gd"
+        ],
+        "plan": "缓冲与稀释；酸加入和 CO2 逸出需开放/封闭收支；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
+        "verified_on": "2026-09-09",
+        "range": {
+          "temperature_K": 298.15,
+          "volume_ml": [
+            1,
+            250
+          ],
+          "concentration_mol_L": [
+            1e-05,
+            0.01
+          ]
+        },
+        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+      }
+    },
+    {
+      "id": 9,
+      "name_zh": "碳酸钠",
+      "formula": "Na₂CO₃",
+      "formula_ascii": "Na2CO3",
+      "category": "基础组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "Na": 2,
+        "C": 1,
+        "O": 3
+      },
+      "molar_mass_g_mol": 105.9907,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "operational": false
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null,
+          "operational": true
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Na+": [
+            90,
+            90,
+            453,
+            459,
+            466,
+            470
+          ],
+          "CO3-2": [
+            144,
+            144,
+            233,
+            240,
+            254,
+            370,
+            375,
+            408,
+            414,
+            499,
+            602,
+            693,
+            707,
+            712,
+            736,
+            738,
+            815,
+            817,
+            866,
+            868,
+            922,
+            924
+          ],
+          "HCO3-": [
+            233,
+            453,
+            473,
+            501,
+            604,
+            698,
+            740,
+            819,
+            870,
+            926
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "Natron": null
+        }
+      },
+      "applicability": "无水式与十水碳酸钠固相不可混同；预配稀溶液可候选",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "已验证（限定水溶液）",
+        "operational": true,
+        "science_tests": [
+          "tests/iphreeqc_probe.cpp",
+          "tests/science_core_test.cpp",
+          "godot/tests/native_smoke.gd",
+          "godot/tests/visual_flow.gd"
+        ],
+        "plan": "无水式与十水碳酸钠固相不可混同；预配稀溶液可候选；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
+        "verified_on": "2026-09-09",
+        "range": {
+          "temperature_K": 298.15,
+          "volume_ml": [
+            1,
+            250
+          ],
+          "concentration_mol_L": [
+            1e-05,
+            0.01
+          ]
+        },
+        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+      }
+    },
+    {
+      "id": 10,
+      "name_zh": "二氧化碳",
+      "formula": "CO₂",
+      "formula_ascii": "CO2",
+      "category": "基础组",
+      "phase": "gas",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "C": 1,
+        "O": 2
+      },
+      "molar_mass_g_mol": 44.0111,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "gas",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "CO2": [
+            240,
+            248
+          ],
+          "HCO3-": [
+            233,
+            453,
+            473,
+            501,
+            604,
+            698,
+            740,
+            819,
+            870,
+            926
+          ],
+          "CO3-2": [
+            144,
+            144,
+            233,
+            240,
+            254,
+            370,
+            375,
+            408,
+            414,
+            499,
+            602,
+            693,
+            707,
+            712,
+            736,
+            738,
+            815,
+            817,
+            866,
+            868,
+            922,
+            924
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "CO2(g)": {
+            "line": 1204,
+            "reaction": "CO2 = CO2",
+            "has_log_k": true
+          }
+        }
+      },
+      "applicability": "固定 pCO2 开放体系/有限气体封闭体系分别验证",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "固定 pCO2 开放体系/有限气体封闭体系分别验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 11,
+      "name_zh": "硫酸",
+      "formula": "H₂SO₄",
+      "formula_ascii": "H2SO4",
+      "category": "扩展组",
+      "phase": "aqueous",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "H": 2,
+        "S": 1,
+        "O": 4
+      },
+      "molar_mass_g_mol": 98.08,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "H+": [
+            67,
+            67,
+            212,
+            218,
+            223,
+            228,
+            233,
+            240,
+            254,
+            259,
+            265,
+            270,
+            276,
+            285,
+            295,
+            301,
+            306,
+            314,
+            328,
+            334,
+            337,
+            340,
+            343,
+            349,
+            355,
+            359,
+            364,
+            368,
+            375,
+            404,
+            414,
+            489,
+            493,
+            524,
+            528,
+            532,
+            535,
+            539,
+            542,
+            545,
+            584,
+            588,
+            622,
+            628,
+            633,
+            637,
+            674,
+            680,
+            685,
+            690,
+            704,
+            707,
+            762,
+            765,
+            767,
+            769,
+            771,
+            781,
+            784,
+            786,
+            788,
+            809,
+            835,
+            838,
+            840,
+            842,
+            844,
+            847,
+            896,
+            898,
+            900,
+            902,
+            904,
+            936
+          ],
+          "HSO4-": [
+            259,
+            386,
+            507,
+            561,
+            651
+          ],
+          "SO4-2": [
+            149,
+            149,
+            259,
+            270,
+            322,
+            381,
+            421,
+            428,
+            459,
+            478,
+            503,
+            557,
+            563,
+            607,
+            643,
+            647,
+            702,
+            717,
+            721,
+            775,
+            821,
+            825,
+            872,
+            876,
+            928,
+            930
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {}
+      },
+      "applicability": "只限稀水溶液酸碱；固定 S(6)，禁止脱水和浓酸模型",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "只限稀水溶液酸碱；固定 S(6)，禁止脱水和浓酸模型；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 12,
+      "name_zh": "硝酸",
+      "formula": "HNO₃",
+      "formula_ascii": "HNO3",
+      "category": "扩展组",
+      "phase": "aqueous",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "H": 1,
+        "N": 1,
+        "O": 3
+      },
+      "molar_mass_g_mol": 63.0147,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "H+": [
+            67,
+            67,
+            212,
+            218,
+            223,
+            228,
+            233,
+            240,
+            254,
+            259,
+            265,
+            270,
+            276,
+            285,
+            295,
+            301,
+            306,
+            314,
+            328,
+            334,
+            337,
+            340,
+            343,
+            349,
+            355,
+            359,
+            364,
+            368,
+            375,
+            404,
+            414,
+            489,
+            493,
+            524,
+            528,
+            532,
+            535,
+            539,
+            542,
+            545,
+            584,
+            588,
+            622,
+            628,
+            633,
+            637,
+            674,
+            680,
+            685,
+            690,
+            704,
+            707,
+            762,
+            765,
+            767,
+            769,
+            771,
+            781,
+            784,
+            786,
+            788,
+            809,
+            835,
+            838,
+            840,
+            842,
+            844,
+            847,
+            896,
+            898,
+            900,
+            902,
+            904,
+            936
+          ],
+          "NO3-": [
+            154,
+            154,
+            295,
+            301,
+            306,
+            611,
+            850,
+            939
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {}
+      },
+      "applicability": "固定 N(5) 稀溶液酸碱；不支持完整氧化性",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "固定 N(5) 稀溶液酸碱；不支持完整氧化性；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 13,
+      "name_zh": "硝酸钠",
+      "formula": "NaNO₃",
+      "formula_ascii": "NaNO3",
+      "category": "扩展组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "Na": 1,
+        "N": 1,
+        "O": 3
+      },
+      "molar_mass_g_mol": 84.9965,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Na+": [
+            90,
+            90,
+            453,
+            459,
+            466,
+            470
+          ],
+          "NO3-": [
+            154,
+            154,
+            295,
+            301,
+            306,
+            611,
+            850,
+            939
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "Nitratine": null
+        }
+      },
+      "applicability": "固定 N(5)，预配溶液和稀释",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "固定 N(5)，预配溶液和稀释；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 14,
+      "name_zh": "硫酸钠",
+      "formula": "Na₂SO₄",
+      "formula_ascii": "Na2SO4",
+      "category": "扩展组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "Na": 2,
+        "S": 1,
+        "O": 4
+      },
+      "molar_mass_g_mol": 142.0436,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Na+": [
+            90,
+            90,
+            453,
+            459,
+            466,
+            470
+          ],
+          "SO4-2": [
+            149,
+            149,
+            259,
+            270,
+            322,
+            381,
+            421,
+            428,
+            459,
+            478,
+            503,
+            557,
+            563,
+            607,
+            643,
+            647,
+            702,
+            717,
+            721,
+            775,
+            821,
+            825,
+            872,
+            876,
+            928,
+            930
+          ],
+          "HSO4-": [
+            259,
+            386,
+            507,
+            561,
+            651
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "Thenardite": {
+            "line": 1032,
+            "reaction": "Na2SO4 = 2 Na+ + SO4-2",
+            "has_log_k": true
+          }
+        }
+      },
+      "applicability": "无水与十水相分开；硫酸盐络合及溶解验证",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "无水与十水相分开；硫酸盐络合及溶解验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 15,
+      "name_zh": "氯化镁",
+      "formula": "MgCl₂",
+      "formula_ascii": "MgCl2",
+      "category": "扩展组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "Mg": 1,
+        "Cl": 2
+      },
+      "molar_mass_g_mol": 95.218,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Mg+2": [
+            102,
+            102,
+            404,
+            408,
+            414,
+            421,
+            435,
+            439,
+            442,
+            446
+          ],
+          "Cl-": [
+            138,
+            138,
+            228,
+            497,
+            548,
+            552,
+            555,
+            591,
+            595,
+            598,
+            728,
+            732,
+            742,
+            747,
+            751,
+            755,
+            790,
+            795,
+            799,
+            804,
+            809,
+            847,
+            854,
+            858,
+            862,
+            906,
+            910,
+            914,
+            918
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "MgCl2": null
+        }
+      },
+      "applicability": "无水固体；溶液配制，水解及稀释",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "无水固体；溶液配制，水解及稀释；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 16,
+      "name_zh": "硫酸镁",
+      "formula": "MgSO₄",
+      "formula_ascii": "MgSO4",
+      "category": "扩展组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "Mg": 1,
+        "S": 1,
+        "O": 4
+      },
+      "molar_mass_g_mol": 120.376,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Mg+2": [
+            102,
+            102,
+            404,
+            408,
+            414,
+            421,
+            435,
+            439,
+            442,
+            446
+          ],
+          "SO4-2": [
+            149,
+            149,
+            259,
+            270,
+            322,
+            381,
+            421,
+            428,
+            459,
+            478,
+            503,
+            557,
+            563,
+            607,
+            643,
+            647,
+            702,
+            717,
+            721,
+            775,
+            821,
+            825,
+            872,
+            876,
+            928,
+            930
+          ],
+          "MgSO4": [
+            421,
+            428
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "Epsomite": {
+            "line": 1036,
+            "reaction": "MgSO4:7H2O = Mg+2 + SO4-2 + 7 H2O",
+            "has_log_k": true
+          }
+        }
+      },
+      "applicability": "无水式与七水盐不可混同；验证 MgSO4 络合",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "无水式与七水盐不可混同；验证 MgSO4 络合；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 17,
+      "name_zh": "氢氧化钙",
+      "formula": "Ca(OH)₂",
+      "formula_ascii": "Ca(OH)2",
+      "category": "扩展组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "Ca": 1,
+        "O": 2,
+        "H": 2
+      },
+      "molar_mass_g_mol": 74.096,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Ca+2": [
+            107,
+            107,
+            368,
+            370,
+            375,
+            381,
+            386,
+            388,
+            392,
+            395
+          ],
+          "OH-": [
+            212
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "Portlandite": null
+        }
+      },
+      "applicability": "需要 Portlandite 可信溶度积；不得默认固体全溶",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "需要 Portlandite 可信溶度积；不得默认固体全溶；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 18,
+      "name_zh": "碳酸钙",
+      "formula": "CaCO₃",
+      "formula_ascii": "CaCO3",
+      "category": "扩展组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "Ca": 1,
+        "C": 1,
+        "O": 3
+      },
+      "molar_mass_g_mol": 100.0911,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Ca+2": [
+            107,
+            107,
+            368,
+            370,
+            375,
+            381,
+            386,
+            388,
+            392,
+            395
+          ],
+          "CO3-2": [
+            144,
+            144,
+            233,
+            240,
+            254,
+            370,
+            375,
+            408,
+            414,
+            499,
+            602,
+            693,
+            707,
+            712,
+            736,
+            738,
+            815,
+            817,
+            866,
+            868,
+            922,
+            924
+          ],
+          "HCO3-": [
+            233,
+            453,
+            473,
+            501,
+            604,
+            698,
+            740,
+            819,
+            870,
+            926
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "Calcite": {
+            "line": 956,
+            "reaction": "CaCO3 = CO3-2 + Ca+2",
+            "has_log_k": true
+          },
+          "Aragonite": {
+            "line": 962,
+            "reaction": "CaCO3 = CO3-2 + Ca+2",
+            "has_log_k": true
+          }
+        }
+      },
+      "applicability": "实验须明确选用方解石或文石；验证有限固体溶解",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "实验须明确选用方解石或文石；验证有限固体溶解；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 19,
+      "name_zh": "石膏",
+      "formula": "CaSO₄·2H₂O",
+      "formula_ascii": "CaSO4:2H2O",
+      "category": "扩展组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 2,
+      "formula_atoms": {
+        "Ca": 1,
+        "S": 1,
+        "O": 6,
+        "H": 4
+      },
+      "molar_mass_g_mol": 172.176,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 2,
+          "inventory_mol": 0.0
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Ca+2": [
+            107,
+            107,
+            368,
+            370,
+            375,
+            381,
+            386,
+            388,
+            392,
+            395
+          ],
+          "SO4-2": [
+            149,
+            149,
+            259,
+            270,
+            322,
+            381,
+            421,
+            428,
+            459,
+            478,
+            503,
+            557,
+            563,
+            607,
+            643,
+            647,
+            702,
+            717,
+            721,
+            775,
+            821,
+            825,
+            872,
+            876,
+            928,
+            930
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "Gypsum": {
+            "line": 996,
+            "reaction": "CaSO4:2H2O = Ca+2 + SO4-2 + 2 H2O",
+            "has_log_k": true
+          }
+        }
+      },
+      "applicability": "二水石膏；水合水与元素守恒、饱和度",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "二水石膏；水合水与元素守恒、饱和度；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 20,
+      "name_zh": "氨水",
+      "formula": "NH₃(aq)",
+      "formula_ascii": "NH3",
+      "category": "扩展组",
+      "phase": "aqueous",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "N": 1,
+        "H": 3
+      },
+      "molar_mass_g_mol": 17.0307,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "NH3": [
+            314
+          ],
+          "NH4+": [
+            306,
+            314,
+            322
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "NH3(g)": {
+            "line": 1246,
+            "reaction": "NH3 = NH3",
+            "has_log_k": true
+          }
+        }
+      },
+      "applicability": "NH3/NH4+ 平衡；固定 N(-3)，不使用纯 NH4OH 分子",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "NH3/NH4+ 平衡；固定 N(-3)，不使用纯 NH4OH 分子；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 21,
+      "name_zh": "氯化铵",
+      "formula": "NH₄Cl",
+      "formula_ascii": "NH4Cl",
+      "category": "进阶组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "N": 1,
+        "H": 4,
+        "Cl": 1
+      },
+      "molar_mass_g_mol": 53.4917,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "NH4+": [
+            306,
+            314,
+            322
+          ],
+          "NH3": [
+            314
+          ],
+          "Cl-": [
+            138,
+            138,
+            228,
+            497,
+            548,
+            552,
+            555,
+            591,
+            595,
+            598,
+            728,
+            732,
+            742,
+            747,
+            751,
+            755,
+            790,
+            795,
+            799,
+            804,
+            809,
+            847,
+            854,
+            858,
+            862,
+            906,
+            910,
+            914,
+            918
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "Salammoniac": null
+        }
+      },
+      "applicability": "固定 N(-3)；氨/铵缓冲、过量加入和稀释",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "固定 N(-3)；氨/铵缓冲、过量加入和稀释；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 22,
+      "name_zh": "乙酸",
+      "formula": "CH₃COOH",
+      "formula_ascii": "CH3COOH",
+      "category": "进阶组",
+      "phase": "liquid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "C": 2,
+        "H": 4,
+        "O": 2
+      },
+      "molar_mass_g_mol": 60.0542,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "liquid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {},
+        "missing_species": [
+          "CH3COOH",
+          "CH3COO-"
+        ],
+        "candidate_phases": {}
+      },
+      "applicability": "缺独立乙酸根主组分和酸解离参数时保持未支持",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "缺独立乙酸根主组分和酸解离参数时保持未支持；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 23,
+      "name_zh": "乙酸钠",
+      "formula": "CH₃COONa",
+      "formula_ascii": "CH3COONa",
+      "category": "进阶组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "C": 2,
+        "H": 3,
+        "O": 2,
+        "Na": 1
+      },
+      "molar_mass_g_mol": 82.036,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Na+": [
+            90,
+            90,
+            453,
+            459,
+            466,
+            470
+          ]
+        },
+        "missing_species": [
+          "CH3COO-",
+          "CH3COOH"
+        ],
+        "candidate_phases": {}
+      },
+      "applicability": "无水固体；乙酸体系缺失时未支持，禁止总无机碳替代",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "无水固体；乙酸体系缺失时未支持，禁止总无机碳替代；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 24,
+      "name_zh": "硝酸银",
+      "formula": "AgNO₃",
+      "formula_ascii": "AgNO3",
+      "category": "进阶组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "Ag": 1,
+        "N": 1,
+        "O": 3
+      },
+      "molar_mass_g_mol": 169.8749,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "NO3-": [
+            154,
+            154,
+            295,
+            301,
+            306,
+            611,
+            850,
+            939
+          ]
+        },
+        "missing_species": [
+          "Ag+"
+        ],
+        "candidate_phases": {
+          "Chlorargyrite": null
+        }
+      },
+      "applicability": "需 Ag 主组分、氯络合与 AgCl 固相；选定库无 Ag 则未支持",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz",
+        "https://www.ciaaw.org/silver.htm"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "需 Ag 主组分、氯络合与 AgCl 固相；选定库无 Ag 则未支持；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 25,
+      "name_zh": "氯化钡",
+      "formula": "BaCl₂",
+      "formula_ascii": "BaCl2",
+      "category": "进阶组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "Ba": 1,
+        "Cl": 2
+      },
+      "molar_mass_g_mol": 208.246,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Ba+2": [
+            117,
+            117,
+            690,
+            693,
+            698,
+            702
+          ],
+          "Cl-": [
+            138,
+            138,
+            228,
+            497,
+            548,
+            552,
+            555,
+            591,
+            595,
+            598,
+            728,
+            732,
+            742,
+            747,
+            751,
+            755,
+            790,
+            795,
+            799,
+            804,
+            809,
+            847,
+            854,
+            858,
+            862,
+            906,
+            910,
+            914,
+            918
+          ],
+          "BaSO4": [
+            702
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "Barite": {
+            "line": 1016,
+            "reaction": "BaSO4 = Ba+2 + SO4-2",
+            "has_log_k": true
+          },
+          "Witherite": {
+            "line": 990,
+            "reaction": "BaCO3 = Ba+2 + CO3-2",
+            "has_log_k": true
+          }
+        }
+      },
+      "applicability": "无水式；BaSO4 沉淀须检查硫酸根活度、限定候选 Barite",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "无水式；BaSO4 沉淀须检查硫酸根活度、限定候选 Barite；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 26,
+      "name_zh": "五水硫酸铜",
+      "formula": "CuSO₄·5H₂O",
+      "formula_ascii": "CuSO4:5H2O",
+      "category": "进阶组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 5,
+      "formula_atoms": {
+        "Cu": 1,
+        "S": 1,
+        "O": 9,
+        "H": 10
+      },
+      "molar_mass_g_mol": 249.69,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 5,
+          "inventory_mol": 0.0
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Cu+2": [
+            191,
+            191,
+            724,
+            736,
+            738,
+            740,
+            742,
+            747,
+            751,
+            755,
+            759,
+            762,
+            765,
+            767,
+            769,
+            771,
+            775,
+            779
+          ],
+          "SO4-2": [
+            149,
+            149,
+            259,
+            270,
+            322,
+            381,
+            421,
+            428,
+            459,
+            478,
+            503,
+            557,
+            563,
+            607,
+            643,
+            647,
+            702,
+            717,
+            721,
+            775,
+            821,
+            825,
+            872,
+            876,
+            928,
+            930
+          ],
+          "CuSO4": [
+            775
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "Chalcanthite": null
+        }
+      },
+      "applicability": "Cu(2) 络合和水合相；溶液颜色需有来源，禁止直接套固体色",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "Cu(2) 络合和水合相；溶液颜色需有来源，禁止直接套固体色；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 27,
+      "name_zh": "氯化铁",
+      "formula": "FeCl₃",
+      "formula_ascii": "FeCl3",
+      "category": "进阶组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "Fe": 1,
+        "Cl": 3
+      },
+      "molar_mass_g_mol": 162.206,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Fe+3": [
+            520,
+            524,
+            528,
+            532,
+            535,
+            542,
+            545,
+            548,
+            552,
+            555,
+            557,
+            561,
+            563,
+            566,
+            570,
+            573,
+            577,
+            581
+          ],
+          "FeOH+2": [
+            524
+          ],
+          "Cl-": [
+            138,
+            138,
+            228,
+            497,
+            548,
+            552,
+            555,
+            591,
+            595,
+            598,
+            728,
+            732,
+            742,
+            747,
+            751,
+            755,
+            790,
+            795,
+            799,
+            804,
+            809,
+            847,
+            854,
+            858,
+            862,
+            906,
+            910,
+            914,
+            918
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "Fe(OH)3(a)": {
+            "line": 1155,
+            "reaction": "Fe(OH)3 + 3 H+ = Fe+3 + 3 H2O",
+            "has_log_k": true
+          },
+          "Goethite": {
+            "line": 1150,
+            "reaction": "FeOOH + 3 H+ = Fe+3 + 2 H2O",
+            "has_log_k": true
+          }
+        }
+      },
+      "applicability": "固定 Fe(3)；强水解、络合及非晶/晶体候选相分别验证",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "固定 Fe(3)；强水解、络合及非晶/晶体候选相分别验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 28,
+      "name_zh": "七水硫酸亚铁",
+      "formula": "FeSO₄·7H₂O",
+      "formula_ascii": "FeSO4:7H2O",
+      "category": "进阶组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 7,
+      "formula_atoms": {
+        "Fe": 1,
+        "S": 1,
+        "O": 11,
+        "H": 14
+      },
+      "molar_mass_g_mol": 278.023,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 7,
+          "inventory_mol": 0.0
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Fe+2": [
+            123,
+            123,
+            489,
+            493,
+            497,
+            499,
+            501,
+            503,
+            507,
+            509,
+            511,
+            513,
+            515,
+            518,
+            520,
+            539
+          ],
+          "SO4-2": [
+            149,
+            149,
+            259,
+            270,
+            322,
+            381,
+            421,
+            428,
+            459,
+            478,
+            503,
+            557,
+            563,
+            607,
+            643,
+            647,
+            702,
+            717,
+            721,
+            775,
+            821,
+            825,
+            872,
+            876,
+            928,
+            930
+          ],
+          "FeSO4": [
+            503
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "Melanterite": {
+            "line": 1275,
+            "reaction": "FeSO4:7H2O = 7 H2O + Fe+2 + SO4-2",
+            "has_log_k": true
+          }
+        }
+      },
+      "applicability": "固定 Fe(2)、水合水；氧化需要独立限定模型",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "固定 Fe(2)、水合水；氧化需要独立限定模型；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 29,
+      "name_zh": "氢氧化镁",
+      "formula": "Mg(OH)₂",
+      "formula_ascii": "Mg(OH)2",
+      "category": "进阶组",
+      "phase": "solid",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "Mg": 1,
+        "O": 2,
+        "H": 2
+      },
+      "molar_mass_g_mol": 58.328,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "solid",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        },
+        {
+          "phase": "aqueous",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0,
+          "concentration_mol_L": null
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "Mg+2": [
+            102,
+            102,
+            404,
+            408,
+            414,
+            421,
+            435,
+            439,
+            442,
+            446
+          ],
+          "OH-": [
+            212
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "Brucite": null
+        }
+      },
+      "applicability": "需 Brucite 可信溶度积，不把输入反应量当已溶解量",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "需 Brucite 可信溶度积，不把输入反应量当已溶解量；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    },
+    {
+      "id": 30,
+      "name_zh": "氧气",
+      "formula": "O₂",
+      "formula_ascii": "O2",
+      "category": "进阶组",
+      "phase": "gas",
+      "hydrate_water_per_formula": 0,
+      "formula_atoms": {
+        "O": 2
+      },
+      "molar_mass_g_mol": 32.0,
+      "molar_mass_source": "phreeqc.dat SOLUTION_MASTER_SPECIES gram formula weights; Ag: CIAAW 107.8682",
+      "available_amount_mol": 0.0,
+      "solution_concentration_mol_L": null,
+      "temperature_K": 298.15,
+      "forms": [
+        {
+          "phase": "gas",
+          "hydrate_water_per_formula": 0,
+          "inventory_mol": 0.0
+        }
+      ],
+      "visual": {
+        "solution_color_mapping": null,
+        "status": "未验证；不得以固体颜色指定溶液颜色"
+      },
+      "database_mapping": {
+        "database": "phreeqc.dat",
+        "sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+        "aqueous_species_lines": {
+          "O2": [
+            218
+          ],
+          "Oxg": [
+            199,
+            199
+          ]
+        },
+        "missing_species": [],
+        "candidate_phases": {
+          "O2(g)": {
+            "line": 1217,
+            "reaction": "O2 = O2",
+            "has_log_k": true
+          },
+          "Oxg(g)": {
+            "line": 1252,
+            "reaction": "Oxg = Oxg",
+            "has_log_k": true
+          }
+        }
+      },
+      "applicability": "优先红氧解耦的气液溶解；不表示燃烧和任意氧化还原",
+      "sources": [
+        "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+      ],
+      "validation": {
+        "status": "尚未支持",
+        "operational": false,
+        "science_tests": [],
+        "plan": "优先红氧解耦的气液溶解；不表示燃烧和任意氧化还原；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+      }
+    }
+  ]
+}
