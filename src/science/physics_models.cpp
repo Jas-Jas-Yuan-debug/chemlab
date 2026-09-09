@@ -12,8 +12,38 @@ const std::map<std::string,std::vector<Field>> schema={
  {"pendulum",{{"length_m",0.1,1.5,0.8},{"gravity_m_s2",0.1,20,9.80665},{"angle_deg",1,10,8},{"mass_kg",0.05,1,0.2}}},
  {"heat",{{"mass1_kg",0.05,1,0.1},{"mass2_kg",0.05,1,0.1},{"temperature1_c",5,90,70},{"temperature2_c",5,90,20},{"conductance_w_k",0.1,20,10}}},
  {"circuit",{{"voltage_v",0,12,6},{"resistance1_ohm",1,1000,100},{"resistance2_ohm",1,1000,200},{"parallel",0,1,0}}},
- {"lens",{{"focal_m",-0.5,0.5,0.2},{"object_m",0.1,1,0.5},{"object_height_m",0.01,0.1,0.05}}}
+ {"lens",{{"focal_m",-0.5,0.5,0.2},{"object_m",0.1,1,0.5},{"object_height_m",0.01,0.1,0.05}}},
+ {"heater",{{"mass_kg",0.05,0.25,0.1},{"initial_temperature_c",5,90,20},{"target_c",25,95,60},{"power_w",50,1000,250},{"stir_rpm",0,600,300},{"source",0,5,0}}}
 };
+void validate_control(const Scalars& c){
+ const std::vector<Field> fields={{"time_s",0,86400,0},{"target_c",25,95,60},{"power_w",50,1000,250},{"stir_rpm",0,600,300},{"heat_enabled",0,1,0},{"stir_enabled",0,1,0},{"source",0,5,0}};
+ if(c.size()!=fields.size())throw std::invalid_argument("加热控制记录字段不完整");
+ for(const auto& f:fields){auto it=c.find(f.key);if(it==c.end()||!std::isfinite(it->second)||it->second<f.lower||it->second>f.upper)throw std::invalid_argument("加热控制参数超出范围");}
+ for(const auto* key:{"heat_enabled","stir_enabled","source"})if(c.at(key)!=std::floor(c.at(key)))throw std::invalid_argument("加热器材或开关值无效");
+}
+// Lumped liquid-water model with ideal temperature feedback. The specified
+// power is heat delivered to the water, not an inferred fuel combustion rate.
+struct HeatedWater { double temperature, input=0, loss=0, turns=0, power=0; };
+void heat_segment(HeatedWater& s,const Scalars& c,double seconds,double capacity){
+ constexpr double ambient=20,conductance=0.6;
+ const double initial=s.temperature, target=c.at("target_c");
+ const bool on=c.at("heat_enabled")==1;
+ double duration=seconds, input=0;
+ if(on&&std::abs(initial-target)<1e-10){s.temperature=target;s.power=conductance*(target-ambient);input=s.power*duration;}
+ else {
+  const double power=on&&initial<target?c.at("power_w"):0;
+  const double equilibrium=ambient+power/conductance;
+  double hit=seconds+1;
+  if(on)hit=-capacity/conductance*std::log((target-equilibrium)/(initial-equilibrium));
+  const bool reaches=on&&std::isfinite(hit)&&hit>=0&&hit<=seconds;
+  duration=reaches?hit:seconds;
+  s.temperature=equilibrium+(initial-equilibrium)*std::exp(-conductance*duration/capacity);
+  input=power*duration;s.power=power;
+  if(reaches){s.temperature=target;s.power=conductance*(target-ambient);input+=s.power*(seconds-duration);}
+ }
+ s.input+=input;s.loss+=input-capacity*(s.temperature-initial);
+ if(c.at("stir_enabled")==1)s.turns+=seconds*c.at("stir_rpm")/60;
+}
 }
 void PhysicsExperiment::configure(const std::string&kind,const Scalars&input){
  auto found=schema.find(kind);if(found==schema.end())throw std::invalid_argument("未知物理实验");
@@ -25,11 +55,35 @@ void PhysicsExperiment::configure(const std::string&kind,const Scalars&input){
  for(auto[key,v]:input)if(!p.count(key))throw std::invalid_argument("不支持此实验参数");
  if(kind=="lens"&&std::abs(p.at("focal_m"))<0.05)throw std::invalid_argument("焦距绝对值限 0.05–0.5 m");
  if(kind=="circuit"&&p.at("parallel")!=0&&p.at("parallel")!=1)throw std::invalid_argument("电路仅支持串联或并联");
+ if(kind=="heater"&&p.at("source")!=std::floor(p.at("source")))throw std::invalid_argument("加热器材编号无效");
  kind_=kind;parameters_=p;reset();
 }
 void PhysicsExperiment::start(){running_=true;}
 void PhysicsExperiment::pause(){running_=false;}
-void PhysicsExperiment::reset(){ticks_=0;remainder_=0;running_=false;}
+void PhysicsExperiment::reset(){
+ ticks_=0;remainder_=0;running_=false;heater_controls_.clear();
+ if(kind_=="heater")heater_controls_.push_back({{"time_s",0},{"target_c",parameters_.at("target_c")},{"power_w",parameters_.at("power_w")},{"stir_rpm",parameters_.at("stir_rpm")},{"source",parameters_.at("source")},{"heat_enabled",0},{"stir_enabled",0}});
+}
+void PhysicsExperiment::control_heater(const Scalars& change){
+ if(kind_!="heater")throw std::invalid_argument("请先选择加热搅拌实验");
+ if(heater_controls_.size()>=512)throw std::invalid_argument("控制记录已达 512 项，请保存后重新开始");
+ Scalars control=heater_controls_.back();control["time_s"]=ticks_*step_s;
+ for(const auto&[key,value]:change){if(key=="time_s"||!control.count(key))throw std::invalid_argument("不支持的加热控制参数");control[key]=value;}
+ validate_control(control);heater_controls_.push_back(std::move(control));
+}
+void PhysicsExperiment::restore_heater_controls(const std::vector<Scalars>& controls){
+ if(kind_!="heater"||controls.empty()||controls.size()>512)throw std::invalid_argument("加热控制记录无效");
+ double previous=0;
+ for(const auto& c:controls){validate_control(c);if(c.at("time_s")<previous)throw std::invalid_argument("加热控制时间顺序无效");previous=c.at("time_s");}
+ if(controls.front().at("time_s")!=0)throw std::invalid_argument("缺少加热初始控制状态");
+ auto canonical=controls;
+ for(auto& c:canonical){
+  const double tick=std::round(c.at("time_s")/step_s)*step_s;
+  if(std::abs(tick-c.at("time_s"))>1e-8)throw std::invalid_argument("加热控制时间不在模拟时钟刻度上");
+  c["time_s"]=tick;
+ }
+ heater_controls_=std::move(canonical);
+}
 void PhysicsExperiment::advance(double elapsed){
  if(!std::isfinite(elapsed)||elapsed<0||elapsed>60)throw std::invalid_argument("物理模拟时间步无效");
  if(!running_)return;
@@ -80,6 +134,22 @@ Scalars PhysicsExperiment::reading()const{
   const bool infinite=std::abs(u-f)<1e-10;
   r["at_infinity"]=infinite?1:0;
   if(!infinite){const double v=f*u/(u-f);r["image_m"]=v;r["magnification"]=-v/u;r["image_height_m"]=-v/u*p("object_height_m");r["virtual"]=v<0?1:0;}
+ }else if(kind_=="heater"){
+  const double capacity=4186*p("mass_kg");HeatedWater s{p("initial_temperature_c")};
+  size_t active=0;
+  for(size_t i=0;i<heater_controls_.size();++i){
+   const auto& c=heater_controls_[i];if(c.at("time_s")>t+1e-10)break;
+   const double end=i+1<heater_controls_.size()?std::min(t,heater_controls_[i+1].at("time_s")):t;
+   heat_segment(s,c,std::max(0.0,end-c.at("time_s")),capacity);active=i;
+  }
+  const auto& c=heater_controls_[active];
+  r["temperature_c"]=s.temperature;r["target_c"]=c.at("target_c");r["power_limit_w"]=c.at("power_w");
+  r["power_w"]=running_?s.power:0;r["energy_j"]=capacity*(s.temperature-p("initial_temperature_c"));
+  r["input_energy_j"]=s.input;r["ambient_loss_j"]=s.loss;r["energy_residual_j"]=s.input-s.loss-r["energy_j"];
+  r["stir_rpm"]=running_&&c.at("stir_enabled")==1?c.at("stir_rpm"):0;
+  r["stir_setpoint_rpm"]=c.at("stir_rpm");r["stir_turns"]=s.turns;
+  r["heat_enabled"]=c.at("heat_enabled");r["stir_enabled"]=c.at("stir_enabled");r["source"]=c.at("source");
+  r["at_target"]=std::abs(s.temperature-c.at("target_c"))<1e-8?1:0;r["heater_control_count"]=active+1;
  }
  return r;
 }

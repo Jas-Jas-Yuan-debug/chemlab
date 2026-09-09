@@ -1,10 +1,10 @@
 {
-  "started_utc": "2026-09-09T12:33:14Z",
+  "started_utc": "2026-09-09T13:01:10Z",
   "checks": [
     {
       "name": "native",
       "passed": true,
-      "duration_s": 0.795,
+      "duration_s": 3.513,
       "evidence": [
         "100% tests passed, 0 tests failed out of 7"
       ]
@@ -12,7 +12,7 @@
     {
       "name": "import",
       "passed": true,
-      "duration_s": 1.945,
+      "duration_s": 1.652,
       "evidence": []
     },
     {
@@ -26,7 +26,7 @@
     {
       "name": "session_native",
       "passed": true,
-      "duration_s": 0.239,
+      "duration_s": 0.336,
       "evidence": [
         "PASS: JSON session replay restores solution/solid inventories, operation events and paused physics; incompatible and failed replay preserve valid state"
       ]
@@ -34,7 +34,7 @@
     {
       "name": "visual_flow",
       "passed": true,
-      "duration_s": 4.068,
+      "duration_s": 1.125,
       "evidence": [
         "PASS: rendered UI prepare/reset defaults, aliquot buttons, acid/base neutralization, readout, search, screenshot",
         "PASS: all 14 aqueous reagent forms prepared, transferred and measured through UI handlers"
@@ -43,7 +43,7 @@
     {
       "name": "fall_flow",
       "passed": true,
-      "duration_s": 2.145,
+      "duration_s": 1.925,
       "evidence": [
         "PASS: rendered free-fall flow, configure/release/pause/resume/impact/repeat, curves, chemistry preservation"
       ]
@@ -51,7 +51,7 @@
     {
       "name": "batch_flow",
       "passed": true,
-      "duration_s": 2.048,
+      "duration_s": 1.821,
       "evidence": [
         "PASS: rendered calcite closed/open, gypsum finite solid, CO2 headspace, liquid separation and aliquot transfer, readout/curve/reset flows"
       ]
@@ -59,7 +59,7 @@
     {
       "name": "barite_flow",
       "passed": true,
-      "duration_s": 1.347,
+      "duration_s": 0.678,
       "evidence": [
         "PASS: rendered Barite precipitation/undersaturation/excess, phase amount, liquid extraction and aliquot transfer"
       ]
@@ -67,7 +67,7 @@
     {
       "name": "physics_flow",
       "passed": true,
-      "duration_s": 3.628,
+      "duration_s": 3.131,
       "evidence": [
         "PASS: all five rendered physics controls, native readings, body transforms, curves, pause/repeat, parallel circuit, real/virtual/infinite lens and invalid-parameter preservation"
       ]
@@ -75,7 +75,7 @@
     {
       "name": "session_flow",
       "passed": true,
-      "duration_s": 1.712,
+      "duration_s": 0.985,
       "evidence": [
         "PASS: session file picker wiring, atomic JSON save/load, equipment/indicator/camera/curve restoration, CSV identity, corrupt file rejection, paused physics resume"
       ]
@@ -83,9 +83,17 @@
     {
       "name": "pouring_flow",
       "passed": true,
-      "duration_s": 5.843,
+      "duration_s": 3.763,
       "evidence": [
         "PASS: actual held-button transfer, horizontal bounded liquid mesh, verified rendered-volume approximation, empty stop, release stop, chloride conservation and indicator boundaries"
+      ]
+    },
+    {
+      "name": "heater_flow",
+      "passed": true,
+      "duration_s": 1.94,
+      "evidence": [
+        "PASS: six rendered heat sources, live target/power/RPM controls, independent switches, thermostat/energy/cooling, rotor motion, paused save/load and identical CSV, invalid control preservation"
       ]
     }
   ],

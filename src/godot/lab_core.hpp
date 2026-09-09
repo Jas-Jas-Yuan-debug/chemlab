@@ -4,6 +4,7 @@
 #include "science/physics_models.hpp"
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
+#include <godot_cpp/variant/array.hpp>
 #include <future>
 #include <functional>
 #include <optional>
@@ -46,13 +47,14 @@ public:
     Dictionary poll();
     Dictionary snapshot() const;
     Dictionary save_session() const;
-    Dictionary preview_bench(const String& kind,const Dictionary& parameters,double elapsed_s,bool running=false) const;
+    Dictionary preview_bench(const String& kind,const Dictionary& parameters,double elapsed_s,bool running=false,const Array& heater_controls=Array()) const;
     Dictionary preview_fall(double height_m,double gravity_m_s2,double elapsed_s) const;
     String load_session(const Dictionary& document);
     bool run_batch(const Dictionary& parameters);
     bool extract_batch(int vessel_id);
     Dictionary batch_snapshot() const;
     String configure_bench(const String& kind,const Dictionary& parameters);
+    String control_heater(const Dictionary& control);
     void start_bench();
     void pause_bench();
     void reset_bench();

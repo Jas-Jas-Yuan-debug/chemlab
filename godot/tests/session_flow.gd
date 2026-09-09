@@ -43,8 +43,9 @@ func run() -> void:
     lab.switch_bench()
     lab.bench_experiment.select_model(2)
     lab.bench_experiment.start()
-    for i in range(20):
-        await process_frame
+    # Process frames can run much faster than rendered frames when occluded.
+    # Allow actual simulation time for the 0.05 s measurement sampler.
+    await create_timer(0.25).timeout
     lab.bench_experiment.pause()
     var before: Dictionary = lab.core.snapshot()
     var time_before: float = lab.core.bench_snapshot().time_s

@@ -76,10 +76,12 @@ func run() -> void:
     lab.set_status("正在执行交付验证，期间会自动切换实验与记录性能。")
     # Warm all model geometry and shaders before recording stable frame times.
     lab.switch_bench()
-    for index in range(5):
+    for index in range(lab.bench_experiment.KINDS.size()):
         print("Benchmark model ",index)
         lab.bench_experiment.select_model(index)
         lab.bench_experiment.start()
+        if lab.bench_experiment.kind_index==5:
+            lab.core.control_heater({"heat_enabled":1,"stir_enabled":1})
         await wait_seconds(0.6)
     lab.switch_batch()
     lab.batch_experiment.run_trial()
@@ -130,15 +132,26 @@ func run() -> void:
         await wait_seconds(phase_seconds/5)
     segment = ""
     lab.switch_bench()
-    for index in range(5):
+    for index in range(lab.bench_experiment.KINDS.size()):
         print("Benchmark model ",index)
         lab.bench_experiment.select_model(index)
         lab.bench_experiment.start()
+        if lab.bench_experiment.kind_index==5:
+            lab.core.control_heater({"heat_enabled":1,"stir_enabled":1})
         begin(lab.bench_experiment.KINDS[index])
         await wait_seconds(phase_seconds)
         segment = ""
         lab.bench_experiment.pause()
         observe(lab.bench_experiment.KINDS[index])
+    # Observe each flame/electric apparatus without changing its thermal history.
+    for source in range(6):
+        lab.core.control_heater({"source":source})
+        lab.bench_experiment.start()
+        await wait_seconds(0.5)
+        begin("heater_source_%d"%source)
+        await wait_seconds(maxf(3,phase_seconds/2))
+        segment = ""
+        check(abs(lab.core.bench_snapshot().energy_residual_j)<1e-7,"Heater energy during source switches")
     # Bounded repeated lifecycle exercise: chemistry -> save/load -> physical model.
     var stress_start := Time.get_ticks_msec()
     var cycle := 0
@@ -159,8 +172,10 @@ func run() -> void:
         await idle()
         check(abs(lab.states[3].volume_ml-50)<0.00001,"Repeated restore inventory")
         lab.switch_bench()
-        lab.bench_experiment.select_model(cycle%5)
+        lab.bench_experiment.select_model(cycle%lab.bench_experiment.KINDS.size())
         lab.bench_experiment.start()
+        if lab.bench_experiment.kind_index==5:
+            lab.core.control_heater({"heat_enabled":1,"stir_enabled":1})
         begin("stress_cycles")
         await wait_seconds(3)
         segment = ""
@@ -254,4 +269,18 @@ func run_smoke() -> void:
     check(abs(lab.states[3].ph-7)<0.03,"Packaged restored pH")
     check(abs(lab.core.bench_snapshot().time_s-10)<1e-10,"Packaged restored physics")
     check(lab.core.bench_snapshot().running==0,"Packaged paused restoration")
+    lab.bench_experiment.select_model(5)
+    lab.core.control_heater({"heat_enabled":1,"stir_enabled":1,"target_c":45,"power_w":1000})
+    lab.core.start_bench()
+    lab.core.advance_bench(30)
+    check(abs(lab.core.bench_snapshot().temperature_c-45)<1e-8,"Packaged heater target")
+    lab.core.control_heater({"source":5,"target_c":30})
+    lab.core.advance_bench(10)
+    check(lab.core.bench_snapshot().temperature_c<45,"Packaged live target cooling")
+    check(abs(lab.core.bench_snapshot().energy_residual_j)<1e-7,"Packaged heater energy budget")
+    lab.core.pause_bench()
+    check(lab.save_to_path("user://packaged-heater.json"),"Packaged heater save")
+    check(lab.load_from_path("user://packaged-heater.json"),"Packaged heater load")
+    await idle()
+    check(lab.core.bench_snapshot().source==5 and lab.core.bench_snapshot().running==0,"Packaged heater restored paused")
     finish()

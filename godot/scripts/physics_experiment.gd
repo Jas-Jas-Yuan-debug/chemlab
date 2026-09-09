@@ -1,22 +1,25 @@
 extends Node3D
 const Room = preload("res://scripts/lab_room.gd")
 const Plot = preload("res://scripts/measurement_plot.gd")
-const KINDS = ["spring","pendulum","heat","circuit","lens"]
-const NAMES = ["弹簧简谐运动","小角度单摆","隔离体系热交换","直流电路","薄透镜成像"]
+const Heater = preload("res://scripts/heater_apparatus.gd")
+const KINDS = ["spring","pendulum","heat","circuit","lens","heater"]
+const NAMES = ["弹簧简谐运动","小角度单摆","隔离体系热交换","直流电路","薄透镜成像","加热与搅拌"]
 # key, label, min, max, step, default
 const FIELDS = [
     [["mass_kg","质量 / kg",0.05,2,0.05,0.2],["stiffness_n_m","劲度 / N·m⁻¹",0.5,50,0.5,8],["amplitude_m","振幅 / m",0.01,0.2,0.01,0.1]],
     [["length_m","摆长 / m",0.1,1.5,0.05,0.8],["gravity_m_s2","重力 / m·s⁻²",0.1,20,0.01,9.80665],["angle_deg","初始角 / °",1,10,0.5,8],["mass_kg","质量 / kg",0.05,1,0.05,0.2]],
     [["mass1_kg","水 1 / kg",0.05,1,0.05,0.1],["mass2_kg","水 2 / kg",0.05,1,0.05,0.1],["temperature1_c","初温 1 / °C",5,90,1,70],["temperature2_c","初温 2 / °C",5,90,1,20],["conductance_w_k","热导 / W·K⁻¹",0.1,20,0.1,10]],
     [["voltage_v","电压 / V",0,12,0.1,6],["resistance1_ohm","电阻 1 / Ω",1,1000,1,100],["resistance2_ohm","电阻 2 / Ω",1,1000,1,200]],
-    [["focal_m","焦距 / m",-0.5,0.5,0.01,0.2],["object_m","物距 / m",0.1,1,0.01,0.5],["object_height_m","物高 / m",0.01,0.1,0.01,0.05]]
+    [["focal_m","焦距 / m",-0.5,0.5,0.01,0.2],["object_m","物距 / m",0.1,1,0.01,0.5],["object_height_m","物高 / m",0.01,0.1,0.01,0.05]],
+    [["mass_kg","水质量 / kg",0.05,0.25,0.01,0.1],["initial_temperature_c","水初温 / °C",5,90,1,20],["target_c","目标水温 / °C",25,95,1,60],["power_w","有效热功率 / W",50,1000,10,250],["stir_rpm","搅拌 / rpm",0,600,10,300]]
 ]
 const NOTES = [
     "水平弹簧，质量集中于滑块。\n无摩擦、无阻尼，弹簧无质量。\nx 从平衡点向右为正。\nω = √(k/m)，x = A cos(ωt)。\n弹簧线圈形状是视觉近似。",
     "摆长为支点到小球质心的距离。\n初始角限制在 1–10°。\n采用 sin θ ≈ θ 的小角度模型，\n忽略空气阻力与支点摩擦。\n图中能量采用同一线性近似。",
     "两个内部温度均匀的液态水体，\n外界绝热，热导固定。\n比热近似为 4186 J/(kg·K)，\n忽略容器热容、蒸发和相变。\n颜色表示温度；容器为示意。\n热量来自独立能量收支。",
     "理想直流电源与两个欧姆电阻，\n导线电阻、电源内阻忽略。\n可切换串联与并联。\n断开时电流为零，累计耗能保留。\n不模拟电阻升温后的阻值变化。",
-    "空气中的薄透镜、近轴光线。\n正焦距会聚，负焦距发散。\n|f| 限 0.05–0.5 m；物距为正。\n1/f = 1/u + 1/v；放大率 = −v/u。\n虚像用反向延长线表示。\n曲线记录每次应用参数的成像结果。"
+    "空气中的薄透镜、近轴光线。\n正焦距会聚，负焦距发散。\n|f| 限 0.05–0.5 m；物距为正。\n1/f = 1/u + 1/v；放大率 = −v/u。\n虚像用反向延长线表示。\n曲线记录每次应用参数的成像结果。",
+    "水温设定 25–95°C，探头理想控温。\n有效功率指传入水的热量；\n不求解燃烧或真实火焰温度。\n水体均温，比热取 4186 J/(kg·K)。\n环境 20°C，散热热导 0.6 W/K。\n忽略杯体热容、蒸发与搅拌生热。\n转速为驱动设定，不求解流场。\n独立水实验；化学保持 25°C。"
 ]
 var lab: Node3D
 var core: LabCore
@@ -27,6 +30,11 @@ var picker: OptionButton
 var fields := {}
 var field_box: VBoxContainer
 var topology: OptionButton
+var heater_controls: VBoxContainer
+var heat_source: OptionButton
+var heater_switch: Button
+var stir_switch: Button
+var heater_view: Node3D
 var speed: SpinBox
 var notes: Label
 var measurements: RichTextLabel
@@ -53,7 +61,15 @@ func _ready() -> void:
     ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
     ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     layer.add_child(ui)
-    var left: VBoxContainer = lab.panel(ui,Vector2(24,108),Vector2(318,740))
+    var left_panel: VBoxContainer = lab.panel(ui,Vector2(24,108),Vector2(336,780))
+    var scroll := ScrollContainer.new()
+    scroll.custom_minimum_size = Vector2(302,744)
+    scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+    left_panel.add_child(scroll)
+    var left := VBoxContainer.new()
+    left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    left.add_theme_constant_override("separation",7)
+    scroll.add_child(left)
     lab.label(left,"物理实验台",23,Color("f4deba"))
     picker = OptionButton.new()
     picker.name = "PhysicsModel"
@@ -67,6 +83,18 @@ func _ready() -> void:
     topology.add_item("串联")
     topology.add_item("并联")
     left.add_child(topology)
+    heater_controls = VBoxContainer.new()
+    left.add_child(heater_controls)
+    heat_source = OptionButton.new()
+    heat_source.name = "HeaterSource"
+    for title in Heater.SOURCES:
+        heat_source.add_item(title)
+    heater_controls.add_child(heat_source)
+    lab.button(heater_controls,"应用温度 / 功率 / 转速（不重置）","ApplyHeaterControl",apply_heater_control)
+    var switches := HBoxContainer.new()
+    heater_controls.add_child(switches)
+    heater_switch = lab.button(switches,"开启加热","ToggleHeater",func(): toggle_heater("heat_enabled"))
+    stir_switch = lab.button(switches,"开启搅拌","ToggleStirrer",func(): toggle_heater("stir_enabled"))
     speed = lab.number(left,"时间倍率",1,20,1,1,"PhysicsSpeed")
     lab.button(left,"应用参数并重置","ConfigureBench",configure)
     lab.button(left,"开始 / 接通","StartBench",start)
@@ -119,6 +147,8 @@ func select_model(index: int,apply_parameters: bool = true) -> void:
     for field in FIELDS[index]:
         fields[field[0]] = lab.number(field_box,field[1],field[2],field[3],field[4],field[5],field[0])
     topology.visible = index==3
+    heater_controls.visible = index==5
+    picker.selected = index
     speed.editable = index!=4
     notes.text = NOTES[index]
     samples.clear()
@@ -133,6 +163,8 @@ func configure() -> void:
         p[key] = fields[key].value
     if kind_index==3:
         p.parallel = topology.selected
+    elif kind_index==5:
+        p.source = heat_source.selected
     var error := core.configure_bench(KINDS[kind_index],p)
     if not error.is_empty():
         status.text = error
@@ -149,6 +181,24 @@ func configure() -> void:
     update_reading(core.bench_snapshot(),true)
     status.text = "参数已应用；可开始、暂停和重复。" if kind_index!=4 else "光路与像的位置已更新。"
 
+func apply_heater_control() -> void:
+    var error := core.control_heater({"target_c":fields.target_c.value,"power_w":fields.power_w.value,"stir_rpm":fields.stir_rpm.value,"source":heat_source.selected})
+    if not error.is_empty():
+        status.text = error
+        return
+    update_reading(core.bench_snapshot(),true)
+    status.text = "温度、功率和转速已更新；水温与累计能量保留。"
+
+func toggle_heater(key: String) -> void:
+    var r := core.bench_snapshot()
+    var error := core.control_heater({key:0 if r[key]>0 else 1})
+    if not error.is_empty():
+        status.text = error
+        return
+    core.start_bench()
+    update_reading(core.bench_snapshot(),true)
+    status.text = "加热和搅拌独立控制；关闭加热后按环境散热。"
+
 func start() -> void:
     core.start_bench()
     status.text = "实验进行中。时间倍率 ×%.0f。"%speed.value
@@ -160,7 +210,10 @@ func pause() -> void:
 
 func repeat_trial() -> void:
     # Repeat the applied parameters even if uncommitted input fields changed.
+    var old := core.bench_snapshot()
     core.reset_bench()
+    if kind_index==5:
+        core.control_heater({"target_c":old.target_c,"power_w":old.power_limit_w,"stir_rpm":old.stir_setpoint_rpm,"source":old.source,"heat_enabled":old.heat_enabled,"stir_enabled":old.stir_enabled})
     samples.clear()
     first_plot.points.clear()
     second_plot.points.clear()
@@ -233,6 +286,10 @@ func build_geometry() -> void:
             box(Vector3(0.11,0.04,0.04),pos,Color("c5ad7e"))
             tag("R%d"%(i+1),pos+Vector3(0,0.06,0))
         tag("＋  电源  −",Vector3(-0.28,1.07,0))
+    elif kind_index==5:
+        heater_view = Heater.new()
+        geometry.add_child(heater_view)
+        heater_view.amount_ml = applied.mass_kg*1000
     else:
         box(Vector3(1.5,0.02,0.06),Vector3(0,0.90,0),Color("4a6360"))
         box(Vector3(1.50,0.45,0.018),Vector3(0,1.12,-0.035),Color("162724"))
@@ -287,6 +344,9 @@ func draw_state(r: Dictionary) -> void:
             line(Vector3(-0.27,0.956,0.11),Vector3(-0.24,0.956,0.14),color)
         if applied.parallel==1:
             line(Vector3(-0.27,0.956,0.07),Vector3(0.27,0.956,0.07),color)
+    elif kind_index==5:
+        heater_view.update_state(r)
+        line(Vector3(-0.17,0.916,0.126),Vector3(0.17,0.916,0.126),Color("9fbaa9"))
     else:
         var u: float = applied.object_m
         var h: float = applied.object_height_m
@@ -352,6 +412,18 @@ func update_reading(r: Dictionary,record: bool) -> void:
         primary_title.text = "电流 — 时间"
         secondary_title.text = "耗能 — 时间"
         second_plot.y_max = maxf(1,b*1.1)
+    elif kind_index==5:
+        a = r.temperature_c
+        b = r.input_energy_j
+        limit = 100
+        measurements.text = "[font_size=25]水温 %.1f°C[/font_size]   设定 %.0f°C\n%.1f s · %s\n热功率 %.1f / %.0f W\n搅拌 %.0f rpm\n输入 %.1f J · 散热 %.1f J\n水内能变化 %.1f J"%[a,r.target_c,r.time_s,"保温" if r.at_target>0 and r.heat_enabled>0 else "升温" if r.power_w>0 else "停止加热 / 散热",r.power_w,r.power_limit_w,r.stir_rpm,b,r.ambient_loss_j,r.energy_j]
+        first_plot.unit = "°C"
+        second_plot.unit = "J"
+        primary_title.text = "实际水温 — 时间"
+        secondary_title.text = "累计输入热量 — 时间"
+        second_plot.y_max = maxf(1,b*1.1)
+        heater_switch.text = "关闭加热" if r.heat_enabled>0 else "开启加热"
+        stir_switch.text = "关闭搅拌" if r.stir_enabled>0 else "开启搅拌"
     else:
         x = applied.object_m
         first_plot.unit = "m"
@@ -379,7 +451,7 @@ func update_reading(r: Dictionary,record: bool) -> void:
     second_plot.x_unit = first_plot.x_unit
     first_plot.x_max = 1.0 if kind_index==4 else maxf(5,x)
     second_plot.x_max = first_plot.x_max
-    if record and (kind_index==4 or r.time_s>=last_sample+0.05):
+    if record and (kind_index==4 or r.time_s>=last_sample+0.05 or (kind_index==5 and not samples.is_empty() and r.heater_control_count!=samples[-1].heater_control_count)):
         samples.append(r.duplicate(true))
         first_plot.points.append(Vector2(x,a))
         second_plot.points.append(Vector2(x,b))
@@ -418,5 +490,10 @@ func restore_view(reading: Dictionary,history: Array) -> void:
         applied = sample.parameters.duplicate(true)
         update_reading(sample,true)
     applied = reading.parameters.duplicate(true)
+    if kind_index==5:
+        fields.target_c.value = reading.target_c
+        fields.power_w.value = reading.power_limit_w
+        fields.stir_rpm.value = reading.stir_setpoint_rpm
+        heat_source.selected = int(reading.source)
     update_reading(reading,false)
     status.text = "已恢复，实验处于暂停状态。"

@@ -1,14 +1,14 @@
 {
-  "created_utc": "2026-09-09T12:40:58Z",
-  "source_sha256": "e55536ba4849cfb504386984ddfc04fb16f72160127ab332290db6af7f277865",
+  "created_utc": "2026-09-09T13:02:24Z",
+  "source_sha256": "9b67dfa2014553c3d380645a439a7a92fa08e787ebc9887158570e94b243835f",
   "architecture": "arm64",
   "runtime": "official Godot 4.7.2 release template, thinned from universal",
   "signing": "ad-hoc, codesign --verify --deep --strict passed",
   "notarized": false,
   "files": {
     "Contents/Frameworks/libchemlab_native.dylib": {
-      "bytes": 2565520,
-      "sha256": "e8a148af55b094a95f77045f458b386693f2e99e7641f6c36ebd30ac7b8897cf"
+      "bytes": 2582816,
+      "sha256": "b77547ced464a23d88d1af455f8895df72d896aadc9800461ea6cf11adfa0872"
     },
     "Contents/Info.plist": {
       "bytes": 1873,
@@ -16,15 +16,15 @@
     },
     "Contents/MacOS/ChemLab \u00b7 \u89c2\u7269\u5b9e\u9a8c\u5ba4": {
       "bytes": 82439632,
-      "sha256": "f0bf9c34c4185b73e34f3be49ca08b69e4777123215c0468e744ba6fa43cb4c8"
+      "sha256": "3115d6a774d3e364f89fd6981d518d4519ce5a2081ab4a65a235c7bd743da854"
     },
     "Contents/PkgInfo": {
       "bytes": 9,
       "sha256": "7e50a30efad50208a173203ced60818d693bb61266b75aa10927d1a2adce80cb"
     },
     "Contents/Resources/ChemLab \u00b7 \u89c2\u7269\u5b9e\u9a8c\u5ba4.pck": {
-      "bytes": 5051512,
-      "sha256": "fd6b190fe8d57ca8a23b7a9c2b0b7045cfb2ae5abb1c2266cf394348d58dbf64"
+      "bytes": 5062440,
+      "sha256": "c6a3ac331e88cab62086cee4a3b8f471e86bcd3f62f7d2820cb72675181827e3"
     },
     "Contents/Resources/Licenses/GODOT-CPP-LICENSE.txt": {
       "bytes": 1093,
@@ -64,7 +64,7 @@
     },
     "Contents/_CodeSignature/CodeResources": {
       "bytes": 5036,
-      "sha256": "7947b1149738b1cb0be9c4aa400c14bb4e99e20143ca99176876e390ee09f4c9"
+      "sha256": "4af3efadfa2adef8b4f97ef82ffeb18c0533c0f05ec4b095e2bf0aa656dc62c7"
     }
   }
 }

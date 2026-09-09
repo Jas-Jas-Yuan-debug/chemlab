@@ -16,7 +16,10 @@ static func make_document(lab: Node3D) -> Dictionary:
         fall_times.append({"time_s":sample.time_s,"running":sample.running})
     var bench_history := []
     for sample in lab.bench_experiment.samples:
-        bench_history.append({"parameters":sample.parameters.duplicate(true),"time_s":sample.time_s,"running":sample.running})
+        var item := {"parameters":sample.parameters.duplicate(true),"time_s":sample.time_s,"running":sample.running}
+        if sample.kind=="heater":
+            item.heater_control_count = sample.heater_control_count
+        bench_history.append(item)
     var mode := "bench" if lab.bench_mode else "fall" if lab.physics_mode else "barite" if lab.batch_mode and lab.batch_experiment.barite_mode else "batch" if lab.batch_mode else "chemistry"
     return {"format":FORMAT,"view_schema":1,"science":lab.core.save_session(),"view":{
         "equipment":equipment,"selected_id":lab.selected_id,"target_id":lab.target_id,"mode":mode,
@@ -107,7 +110,13 @@ static func validate(document: Variant,lab: Node3D) -> Dictionary:
     for item in v.bench_history:
         if not item is Dictionary or not item.get("parameters") is Dictionary or not finite(item.get("time_s")) or not finite(item.get("running")) or (item.running!=0 and item.running!=1):
             return {"error":"物理曲线记录无效。"}
-        var r: Dictionary = lab.core.preview_bench(b.kind,item.parameters,item.time_s,bool(item.running))
+        var controls := []
+        if b.kind=="heater":
+            var count = item.get("heater_control_count")
+            if not b.get("heater_controls") is Array or not finite(count) or count!=floor(count) or count<1 or count>b.heater_controls.size() or count>512:
+                return {"error":"加热曲线的控制历史无效。"}
+            controls = b.heater_controls.slice(0,int(count))
+        var r: Dictionary = lab.core.preview_bench(b.kind,item.parameters,item.time_s,bool(item.running),controls)
         if r.has("error"):
             return {"error":r.error}
         bench_history.append(r)

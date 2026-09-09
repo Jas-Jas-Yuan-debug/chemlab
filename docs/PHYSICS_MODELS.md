@@ -58,3 +58,7 @@
 来源：[OpenStax 薄透镜](https://openstax.org/books/university-physics-volume-3/pages/2-4-thin-lenses)。
 
 原生验证：`tests/physics_models_test.cpp`。完整渲染界面流程：`godot/tests/physics_flow.gd`，涵盖五类参数、开始、暂停、重复、测量/曲线/物体位置、并联电路、虚像/无穷远和无效参数保留。
+
+### 加热与搅拌
+
+新增第六个实验台模型（连同自由落体共七类）。水的可调温加热、独立调速搅拌、六种热源外观、控制历史、能量账和适用限制见 [专门说明](HEATING_AND_STIRRING.md)。已有五类模型的验证仍保留；新增界面测试为 `heater_flow.gd`。

@@ -8,7 +8,7 @@
 namespace godot {
 namespace {
 const char* database_hash="59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10";
-const char* session_model="aqueous-0.2+batch-0.1+barite-0.1+physics-0.1";
+const char* session_model="aqueous-0.2+batch-0.1+barite-0.1+physics-0.2";
 chemlab::Scalars scalars(const Dictionary&d){
     if(d.size()>32)throw std::runtime_error("记录参数过多");
     chemlab::Scalars r;Array keys=d.keys();
@@ -21,14 +21,21 @@ chemlab::Scalars scalars(const Dictionary&d){
     return r;
 }
 Dictionary dictionary(const chemlab::Scalars&values){Dictionary d;for(auto[key,value]:values)d[String::utf8(key.c_str())]=value;return d;}
+std::vector<chemlab::Scalars> heater_controls(const Array& input){
+    if(input.size()>512)throw std::runtime_error("加热控制记录过多");
+    std::vector<chemlab::Scalars> result;
+    for(int i=0;i<input.size();++i){if(input[i].get_type()!=Variant::DICTIONARY)throw std::runtime_error("加热控制记录格式无效");result.push_back(scalars(input[i]));}
+    return result;
+}
 }
 
 void LabCore::_bind_methods(){
-    ClassDB::bind_method(D_METHOD("preview_bench","kind","parameters","elapsed_s","running"),&LabCore::preview_bench,DEFVAL(false));
+    ClassDB::bind_method(D_METHOD("preview_bench","kind","parameters","elapsed_s","running","heater_controls"),&LabCore::preview_bench,DEFVAL(false),DEFVAL(Array()));
     ClassDB::bind_method(D_METHOD("preview_fall","height_m","gravity_m_s2","elapsed_s"),&LabCore::preview_fall);
     ClassDB::bind_method(D_METHOD("save_session"),&LabCore::save_session);
     ClassDB::bind_method(D_METHOD("load_session","document"),&LabCore::load_session);
     ClassDB::bind_method(D_METHOD("configure_bench","kind","parameters"),&LabCore::configure_bench);
+    ClassDB::bind_method(D_METHOD("control_heater","control"),&LabCore::control_heater);
     ClassDB::bind_method(D_METHOD("start_bench"),&LabCore::start_bench);
     ClassDB::bind_method(D_METHOD("pause_bench"),&LabCore::pause_bench);
     ClassDB::bind_method(D_METHOD("reset_bench"),&LabCore::reset_bench);
@@ -74,6 +81,7 @@ String LabCore::configure_bench(const String&kind,const Dictionary&p){
     try{bench_.configure(kind.utf8().get_data(),values);return "";}catch(const std::exception&e){return String::utf8(e.what());}
 }
 void LabCore::start_bench(){bench_.start();}
+String LabCore::control_heater(const Dictionary&p){try{bench_.control_heater(scalars(p));return "";}catch(const std::exception&e){return String::utf8(e.what());}}
 void LabCore::pause_bench(){bench_.pause();}
 void LabCore::reset_bench(){bench_.reset();}
 Dictionary LabCore::bench_snapshot()const{
@@ -138,8 +146,8 @@ bool LabCore::run_batch(const Dictionary&p){
 }
 bool LabCore::extract_batch(int to){return submit({"extract_batch",{{"to",double(to)}}});}
 
-Dictionary LabCore::preview_bench(const String&kind,const Dictionary&p,double elapsed,bool running)const{
-    try{chemlab::PhysicsExperiment model;model.configure(kind.utf8().get_data(),scalars(p));model.restore(elapsed);if(running)model.start();Dictionary r=dictionary(model.reading());r["parameters"]=dictionary(model.parameters());r["kind"]=kind;return r;}
+Dictionary LabCore::preview_bench(const String&kind,const Dictionary&p,double elapsed,bool running,const Array& controls)const{
+    try{chemlab::PhysicsExperiment model;model.configure(kind.utf8().get_data(),scalars(p));if(kind=="heater")model.restore_heater_controls(heater_controls(controls));model.restore(elapsed);if(running)model.start();Dictionary r=dictionary(model.reading());r["parameters"]=dictionary(model.parameters());r["kind"]=kind;return r;}
     catch(const std::exception&e){Dictionary r;r["error"]=String::utf8(e.what());return r;}
 }
 Dictionary LabCore::preview_fall(double height,double gravity,double elapsed)const{
@@ -151,7 +159,9 @@ Dictionary LabCore::save_session()const{
     Array commands,events;
     for(const auto&c:session_.journal){Dictionary item;item["operation"]=String(c.operation.c_str());item["parameters"]=dictionary(c.parameters);commands.push_back(item);}
     for(const auto&e:session_.events){Dictionary item;item["operation"]=String(e.operation.c_str());item["from"]=e.from;item["to"]=e.to;item["transferred_ml"]=e.transferred_ml;item["readings"]=dictionary(e.readings);events.push_back(item);}
-    d["commands"]=commands;d["events"]=events;d["fall"]=fall_snapshot();d["bench"]=bench_snapshot();return d;
+    d["commands"]=commands;d["events"]=events;d["fall"]=fall_snapshot();Dictionary bench=bench_snapshot();
+    if(bench_.kind()=="heater"){Array controls;for(const auto& c:bench_.heater_controls())controls.push_back(dictionary(c));bench["heater_controls"]=controls;}
+    d["bench"]=bench;return d;
 }
 String LabCore::load_session(const Dictionary&d){
     if(is_busy())return String::utf8("请等待当前操作完成后再加载");
@@ -171,6 +181,11 @@ String LabCore::load_session(const Dictionary&d){
         chemlab::Scalars fv=scalars(f);chemlab::FreeFall fall;fall.configure(fv.at("initial_height_m"),fv.at("gravity_m_s2"));fall.restore(fv.at("time_s"),fv.at("landed")!=0);
         if(b["kind"].get_type()!=Variant::STRING||(b["time_s"].get_type()!=Variant::FLOAT&&b["time_s"].get_type()!=Variant::INT))throw std::runtime_error("物理实验类型或时间格式无效");
         chemlab::PhysicsExperiment bench;String kind=b["kind"];bench.configure(kind.utf8().get_data(),scalars(b["parameters"]));bench.restore(b["time_s"]);
+        if(kind=="heater"){
+            if(!b.has("heater_controls")||b["heater_controls"].get_type()!=Variant::ARRAY)throw std::runtime_error("缺少加热控制历史");
+            const auto controls=heater_controls(b["heater_controls"]);bench.restore_heater_controls(controls);
+            if(controls.back().at("time_s")>double(b["time_s"])+1e-8)throw std::runtime_error("加热控制记录超过实验时间");
+        }
         bool started=start([commands,fall,bench](chemlab::Chemistry&solver,Result&r){
             r.operation="load";chemlab::LabSession restored;restored.reset(solver);
             for(const auto&c:commands)restored.apply(solver,c);
