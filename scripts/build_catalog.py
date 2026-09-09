@@ -125,7 +125,7 @@ assert len(catalog)==30 and len({e['id'] for e in catalog})==30
 count = sum(e['validation']['operational'] for e in catalog)
 (ROOT/'data/reagents.json').write_text(json.dumps({'schema_version':1,'verified_operational_count':count,'reagents':catalog},ensure_ascii=False,indent=2)+'\n')
 report=['# 原料支持矩阵','',
-        f'**产品已验证可操作：{count}/30。** 1–9 项为预配水溶液/蒸馏水；10 CO₂、18 方解石、19 石膏在独立气液固实验中支持有限加入和平衡，清液可分离及分装。其余条目未支持。', '',
+        f'**产品已验证可操作：{count}/30。** 1–9、11、14–16、25 项为预配水溶液/蒸馏水；10 CO₂、18 方解石、19 石膏在独立气液固实验中支持有限加入和平衡，清液可分离及分装。其余条目未支持。', '',
         '已运行 science_core / batch_test 和 Godot 的 native_smoke / visual_flow / batch_flow；范围见 data/validation_registry.json。下表的数据库覆盖不等于其余条目已可操作。', '',
         '固定数据库：`phreeqc.dat`，SHA-256 `'+LOCK['database']['sha256']+'`。仅扫描这一份官方数据库，未合并其他库。', '',
         '摩尔质量按所选数据库原子量计算（水合水已计入），显示值后续按有效数字取舍；银原子量来自 CIAAW。', '',

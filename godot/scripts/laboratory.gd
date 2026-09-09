@@ -172,7 +172,7 @@ func build_ui() -> void:
     button(row,"化学实验","ChemistryTab",func(): switch_experiment(false))
     button(row,"自由落体","FreeFallTab",func(): switch_experiment(true))
     button(row,"溶解与气液","BatchTab",switch_batch)
-    status_badge = label(row,"水溶液平衡  ·  25 °C  ·  已验证 12 / 30 项原料",14,Color("9ecdb8"))
+    status_badge = label(row,"水溶液平衡  ·  25 °C  ·  已验证 17 / 30 项原料",14,Color("9ecdb8"))
     var left := panel(ui,Vector2(24,108),Vector2(274,822))
     chemistry_panels.append(left.get_parent())
     label(left,"实验材料",20,Color("f5e6c9"))
@@ -267,7 +267,7 @@ func refresh_reagents() -> void:
             continue
         var b := button(reagent_list,item.name_zh+"  "+item.formula,"Reagent%d"%item.id,func(): choose_reagent(int(item.id)))
         b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-        b.disabled = item.id>9
+        b.disabled = not item.validation.operational
         b.tooltip_text = item.applicability
         if b.disabled:
             b.text += "  · 未支持"
@@ -286,7 +286,7 @@ func choose_reagent(id: int) -> void:
     concentration.editable = id!=1
     if id==1:
         set_status("蒸馏水预设：不含空气中的 CO₂，固定 25°C。")
-    elif id>=7:
+    elif id>=7 and id not in [11,14]:
         set_status(item.name_zh+"目前仅支持预配稀溶液、自身混合与蒸馏水稀释。")
     else:
         set_status("已选择 "+item.name_zh+"，点击“重新配制所选容器”开始独立配液。")
@@ -311,7 +311,7 @@ func switch_experiment(physics: bool) -> void:
     orbit = Vector2(0.1,0.18) if physics else Vector2(0.1,0.50)
     distance = 3.8 if physics else 0.92
     update_camera()
-    status_badge.text = "力学实验  ·  忽略空气阻力" if physics else "水溶液平衡  ·  25 °C  ·  已验证 12 / 30 项原料"
+    status_badge.text = "力学实验  ·  忽略空气阻力" if physics else "水溶液平衡  ·  25 °C  ·  已验证 17 / 30 项原料"
     set_status("设置高度与重力，应用参数后释放小球。" if physics else "选择原料与器材，继续水溶液实验。")
 
 func switch_batch() -> void:

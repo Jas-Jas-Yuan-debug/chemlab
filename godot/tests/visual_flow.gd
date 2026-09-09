@@ -50,7 +50,11 @@ func run() -> void:
         await process_frame
     await RenderingServer.frame_post_draw
     root.get_texture().get_image().save_png(ProjectSettings.globalize_path("res://../artifacts/laboratory-initial.png"))
-    for reagent in range(1,10):
+    for item in lab.catalog:
+        var b = lab.reagent_list.find_child("Reagent%d"%item.id,true,false)
+        assert(b!=null)
+        assert(b.disabled==not item.validation.operational)
+    for reagent in [1,2,3,4,5,6,7,8,9,11,14,15,16,25]:
         lab.select_vessel(1)
         lab.chosen_reagent = reagent
         lab.volume.value = 25
@@ -63,7 +67,7 @@ func run() -> void:
         assert(abs(lab.states[3].volume_ml-5)<0.00001)
         assert(abs(lab.states[3].ph-lab.states[1].ph)<0.00001)
         await click("ResetExperiment")
-    print("PASS: all 9 aqueous reagent forms prepared, transferred and measured through UI handlers")
+    print("PASS: all 14 aqueous reagent forms prepared, transferred and measured through UI handlers")
     lab.queue_free()
     await process_frame
     await process_frame

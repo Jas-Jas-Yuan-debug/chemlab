@@ -17,7 +17,7 @@ func run() -> void:
     lab = load("res://scenes/laboratory.tscn").instantiate()
     root.add_child(lab)
     await idle()
-    await click("BatchTab")
+    await click("Reagent18")
     var experiment = lab.batch_experiment
     assert(experiment.active and not lab.fall_experiment.active)
     await click("RunBatch")

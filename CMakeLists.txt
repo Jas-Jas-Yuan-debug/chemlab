@@ -39,6 +39,10 @@ add_executable(batch_test tests/batch_test.cpp)
 target_link_libraries(batch_test PRIVATE chemlab_science)
 add_test(NAME batch_equilibrium COMMAND batch_test "${IPHREEQC_ROOT}/database/phreeqc.dat")
 
+add_executable(aqueous_expansion_test tests/aqueous_expansion_test.cpp)
+target_link_libraries(aqueous_expansion_test PRIVATE chemlab_science)
+add_test(NAME aqueous_expansion COMMAND aqueous_expansion_test "${IPHREEQC_ROOT}/database/phreeqc.dat")
+
 option(CHEMLAB_BUILD_GODOT "Build the native Godot extension" OFF)
 if(CHEMLAB_BUILD_GODOT)
     set(GODOTCPP_ROOT "${CMAKE_SOURCE_DIR}/third_party/src/godot-cpp-e83fd0904c13356ed1d4c3d09f8bb9132bdc6b77")

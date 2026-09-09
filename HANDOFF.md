@@ -35,7 +35,7 @@ Use Git; push meaningful verified stages. No unapproved paid resources or large 
   wood/stone materials and reduced lighting. Liquid numerical amount never comes from visuals.
   Avoid ReflectionProbe on this Metal Mobile build: it caused 7 leaked Texture RID warnings on shutdown;
   removed it, reran all render flows without warnings. Pour stream/pose still needs refinement.
-- Phase 5 partial: 12/30 total now verified. Added finite CO2, Calcite and Gypsum in dedicated batch UI,
+- Phase 5 partial: 17/30 total now verified. Added finite CO2, Calcite and Gypsum in dedicated batch UI,
   closed liquid/solid, ideal closed CO2 volume, fixed external CO2, real remaining solids, gas/element ledger,
   filtered liquid extraction and empty-vessel aliquots. 108 condition sets with repeat and transfer checks;
   USGS gypsum and independent Henry/Ka references; full rendered UI tested. See docs/BATCH_EQUILIBRIUM.md.
@@ -79,7 +79,7 @@ iterations (75 distinct initial conditions), independent dilute pH limits, failu
 1. Finish Phase 1/2 usability and indicators tests, continuous-pour UI regression and visual motion.
 2. Phase 3 free fall is implemented and tested; maintain regression while adding other experiments.
 3. Phase 4 improve realism (current materials are an early approximation, not photoreal validation).
-4. Phases 5/6 expand supported validated scope beyond the 12 entries; basic CO2 now works. Selected DB lacks silver,
+4. Phases 5/6 expand supported validated scope beyond the 17 entries; basic CO2 now works. Selected DB lacks silver,
    acetate, Portlandite, Brucite, Chalcanthite etc. Keep unsupported or validate a coherent alternative;
    never splice databases or promise arbitrary mixing. Gas bubbles/solids must derive from solver amounts.
 5. Phase 7 spring/pendulum/heat/DC/optics, independently validated models and full UI workflows.
@@ -93,3 +93,12 @@ Batch solver finding: upstream PR EOS clips V_m at 1e4 L/mol, giving a low-press
 Use the explicit CO2_ideal(g) copy of the exact pinned database equilibrium parameters (no EOS critical
 parameters); test PV=nRT. No upstream source/database edits. Do not silently revert to PR gas path.
 `artifacts/verification.json` is a reproducible test receipt, NOT a performance benchmark.
+
+Aqueous expansion: 11/14/15/16/25 now operational as prepared stocks. 45 parameter sets,
+repeated transfers and 14 UI reagent flows pass. Sulfuric acid and sodium sulfate may join
+2–6 acid/base/salt mixtures; Mg/Ba stocks only self/water. Candidate N/Fe/Cu automatic-MIX
+valence audit failed; raw audit file retained, these forms remain disabled pending dedicated models.
+Pure aliquots now scale extensive upstream cxxSolution state instead of re-equilibrating redox;
+composition_key allows recombining identical aliquots. H/O/water RAW scalars roundtrip 17 digits.
+Valence amounts checked separately on actual mixtures. See docs/AQUEOUS_EXTENSION.md.
+Fixed catalog buttons: enabled state derives from registry, no longer hard-coded id<=9.

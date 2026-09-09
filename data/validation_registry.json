@@ -1,5 +1,5 @@
 {
-  "model_version": "aqueous-0.1+batch-0.1",
+  "model_version": "aqueous-0.2+batch-0.1",
   "database_sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
   "verified_on": "2026-09-09",
   "verified_reagent_ids": [
@@ -13,8 +13,13 @@
     8,
     9,
     10,
+    11,
+    14,
+    15,
+    16,
     18,
-    19
+    19,
+    25
   ],
   "temperature_K": 298.15,
   "volume_ml": [
@@ -25,17 +30,18 @@
     1e-05,
     0.01
   ],
-  "forms": "IDs 1–9: water/prepared aqueous forms. 10: finite CO2 gas. 18: calcite solid. 19: gypsum dihydrate solid. Batch outputs can be separated and aliquoted into empty vessels.",
-  "combinations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only.",
+  "forms": "Water/prepared aqueous forms for IDs 1–9,11,14–16,25; finite CO2 gas and Calcite/Gypsum solid batch forms. Hydrated and raw solid forms of prepared stocks are not implemented.",
+  "combinations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only.",
   "evidence": [
     "tests/iphreeqc_probe.cpp",
     "tests/science_core_test.cpp",
     "godot/tests/native_smoke.gd",
     "godot/tests/visual_flow.gd",
     "tests/batch_test.cpp",
-    "godot/tests/batch_flow.gd"
+    "godot/tests/batch_flow.gd",
+    "tests/aqueous_expansion_test.cpp"
   ],
-  "runs": "81 stock/aliquot/dilution iterations (75 distinct stock conditions), dilute pH references, native integration, nine UI preparation/transfer/readout flows; 108 batch condition sets with repeat and aliquot checks; gypsum/Henry references and low-pressure gas law",
+  "runs": "81 stock/aliquot/dilution iterations (75 distinct stock conditions), dilute pH references, native integration, nine UI preparation/transfer/readout flows; 108 batch condition sets with repeat and aliquot checks; gypsum/Henry references and low-pressure gas law; 45 additional stock conditions, amounts, repeated aliquot transfers, sulfate neutralization; total 14 prepared aqueous UI flows",
   "not_validated": [
     "other raw solid dissolution",
     "arbitrary mixtures",
@@ -52,7 +58,12 @@
     6,
     7,
     8,
-    9
+    9,
+    11,
+    14,
+    15,
+    16,
+    25
   ],
   "batch": {
     "ids": [

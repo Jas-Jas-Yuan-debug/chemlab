@@ -1,0 +1,12 @@
+PASS: id=11, 9 stocks+aliquots+dilutions+self-mixes; pH(1mM)=2.74945
+REJECT: id=12: N(5)价态物质收支未通过，操作已取消
+REJECT: id=13: N(5)价态物质收支未通过，操作已取消
+PASS: id=14, 9 stocks+aliquots+dilutions+self-mixes; pH(1mM)=7.01209
+PASS: id=15, 9 stocks+aliquots+dilutions+self-mixes; pH(1mM)=6.94209
+PASS: id=16, 9 stocks+aliquots+dilutions+self-mixes; pH(1mM)=6.96251
+REJECT: id=20: N(-3)价态物质收支未通过，操作已取消
+REJECT: id=21: N(-3)价态物质收支未通过，操作已取消
+PASS: id=25, 9 stocks+aliquots+dilutions+self-mixes; pH(1mM)=6.99583
+REJECT: id=26: Cu(1)价态物质收支未通过，操作已取消
+REJECT: id=27: Fe(2)价态物质收支未通过，操作已取消
+REJECT: id=28: Fe(2)价态物质收支未通过，操作已取消

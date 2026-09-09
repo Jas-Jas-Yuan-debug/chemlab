@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "verified_operational_count": 12,
+  "verified_operational_count": 17,
   "reagents": [
     {
       "id": 1,
@@ -189,7 +189,8 @@
           "godot/tests/native_smoke.gd",
           "godot/tests/visual_flow.gd",
           "tests/batch_test.cpp",
-          "godot/tests/batch_flow.gd"
+          "godot/tests/batch_flow.gd",
+          "tests/aqueous_expansion_test.cpp"
         ],
         "plan": "无 CO2 纯水；稀释与体积/溶剂质量换算；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -204,7 +205,7 @@
             0.01
           ]
         },
-        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+        "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
       }
     },
     {
@@ -365,7 +366,8 @@
           "godot/tests/native_smoke.gd",
           "godot/tests/visual_flow.gd",
           "tests/batch_test.cpp",
-          "godot/tests/batch_flow.gd"
+          "godot/tests/batch_flow.gd",
+          "tests/aqueous_expansion_test.cpp"
         ],
         "plan": "稀水溶液；强酸与 NaOH/KOH 中和，禁止浓盐酸挥发模型；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -380,7 +382,7 @@
             0.01
           ]
         },
-        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+        "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
       }
     },
     {
@@ -455,7 +457,8 @@
           "godot/tests/native_smoke.gd",
           "godot/tests/visual_flow.gd",
           "tests/batch_test.cpp",
-          "godot/tests/batch_flow.gd"
+          "godot/tests/batch_flow.gd",
+          "tests/aqueous_expansion_test.cpp"
         ],
         "plan": "预配稀溶液；固体溶解度与溶解热另行验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -470,7 +473,7 @@
             0.01
           ]
         },
-        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+        "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
       }
     },
     {
@@ -576,7 +579,8 @@
           "godot/tests/native_smoke.gd",
           "godot/tests/visual_flow.gd",
           "tests/batch_test.cpp",
-          "godot/tests/batch_flow.gd"
+          "godot/tests/batch_flow.gd",
+          "tests/aqueous_expansion_test.cpp"
         ],
         "plan": "稀溶液配制与稀释；接近饱和时需检查活度模型；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -591,7 +595,7 @@
             0.01
           ]
         },
-        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+        "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
       }
     },
     {
@@ -665,7 +669,8 @@
           "godot/tests/native_smoke.gd",
           "godot/tests/visual_flow.gd",
           "tests/batch_test.cpp",
-          "godot/tests/batch_flow.gd"
+          "godot/tests/batch_flow.gd",
+          "tests/aqueous_expansion_test.cpp"
         ],
         "plan": "预配稀溶液；固体溶解和热效应未验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -680,7 +685,7 @@
             0.01
           ]
         },
-        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+        "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
       }
     },
     {
@@ -785,7 +790,8 @@
           "godot/tests/native_smoke.gd",
           "godot/tests/visual_flow.gd",
           "tests/batch_test.cpp",
-          "godot/tests/batch_flow.gd"
+          "godot/tests/batch_flow.gd",
+          "tests/aqueous_expansion_test.cpp"
         ],
         "plan": "稀溶液配制与稀释；饱和实验独立验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -800,7 +806,7 @@
             0.01
           ]
         },
-        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+        "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
       }
     },
     {
@@ -906,7 +912,8 @@
           "godot/tests/native_smoke.gd",
           "godot/tests/visual_flow.gd",
           "tests/batch_test.cpp",
-          "godot/tests/batch_flow.gd"
+          "godot/tests/batch_flow.gd",
+          "tests/aqueous_expansion_test.cpp"
         ],
         "plan": "无水固体与溶液分开；碳酸盐组合需指定沉淀相；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -921,7 +928,7 @@
             0.01
           ]
         },
-        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+        "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
       }
     },
     {
@@ -1034,7 +1041,8 @@
           "godot/tests/native_smoke.gd",
           "godot/tests/visual_flow.gd",
           "tests/batch_test.cpp",
-          "godot/tests/batch_flow.gd"
+          "godot/tests/batch_flow.gd",
+          "tests/aqueous_expansion_test.cpp"
         ],
         "plan": "缓冲与稀释；酸加入和 CO2 逸出需开放/封闭收支；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -1049,7 +1057,7 @@
             0.01
           ]
         },
-        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+        "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
       }
     },
     {
@@ -1157,7 +1165,8 @@
           "godot/tests/native_smoke.gd",
           "godot/tests/visual_flow.gd",
           "tests/batch_test.cpp",
-          "godot/tests/batch_flow.gd"
+          "godot/tests/batch_flow.gd",
+          "tests/aqueous_expansion_test.cpp"
         ],
         "plan": "无水式与十水碳酸钠固相不可混同；预配稀溶液可候选；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -1172,7 +1181,7 @@
             0.01
           ]
         },
-        "limitations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only."
+        "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
       }
     },
     {
@@ -1272,7 +1281,8 @@
           "godot/tests/native_smoke.gd",
           "godot/tests/visual_flow.gd",
           "tests/batch_test.cpp",
-          "godot/tests/batch_flow.gd"
+          "godot/tests/batch_flow.gd",
+          "tests/aqueous_expansion_test.cpp"
         ],
         "plan": "固定 pCO2 开放体系/有限气体封闭体系分别验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -1339,7 +1349,8 @@
         {
           "phase": "aqueous",
           "hydrate_water_per_formula": 0,
-          "inventory_mol": 0.0
+          "inventory_mol": 0.0,
+          "operational": true
         }
       ],
       "visual": {
@@ -1471,10 +1482,31 @@
         "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
       ],
       "validation": {
-        "status": "尚未支持",
-        "operational": false,
-        "science_tests": [],
-        "plan": "只限稀水溶液酸碱；固定 S(6)，禁止脱水和浓酸模型；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+        "status": "已验证（限定水溶液）",
+        "operational": true,
+        "science_tests": [
+          "tests/iphreeqc_probe.cpp",
+          "tests/science_core_test.cpp",
+          "godot/tests/native_smoke.gd",
+          "godot/tests/visual_flow.gd",
+          "tests/batch_test.cpp",
+          "godot/tests/batch_flow.gd",
+          "tests/aqueous_expansion_test.cpp"
+        ],
+        "plan": "只限稀水溶液酸碱；固定 S(6)，禁止脱水和浓酸模型；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
+        "verified_on": "2026-09-09",
+        "range": {
+          "temperature_K": 298.15,
+          "volume_ml": [
+            1,
+            250
+          ],
+          "concentration_mol_L": [
+            1e-05,
+            0.01
+          ]
+        },
+        "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
       }
     },
     {
@@ -1709,13 +1741,15 @@
         {
           "phase": "solid",
           "hydrate_water_per_formula": 0,
-          "inventory_mol": 0.0
+          "inventory_mol": 0.0,
+          "operational": false
         },
         {
           "phase": "aqueous",
           "hydrate_water_per_formula": 0,
           "inventory_mol": 0.0,
-          "concentration_mol_L": null
+          "concentration_mol_L": null,
+          "operational": true
         }
       ],
       "visual": {
@@ -1785,10 +1819,31 @@
         "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
       ],
       "validation": {
-        "status": "尚未支持",
-        "operational": false,
-        "science_tests": [],
-        "plan": "无水与十水相分开；硫酸盐络合及溶解验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+        "status": "已验证（限定水溶液）",
+        "operational": true,
+        "science_tests": [
+          "tests/iphreeqc_probe.cpp",
+          "tests/science_core_test.cpp",
+          "godot/tests/native_smoke.gd",
+          "godot/tests/visual_flow.gd",
+          "tests/batch_test.cpp",
+          "godot/tests/batch_flow.gd",
+          "tests/aqueous_expansion_test.cpp"
+        ],
+        "plan": "无水与十水相分开；硫酸盐络合及溶解验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
+        "verified_on": "2026-09-09",
+        "range": {
+          "temperature_K": 298.15,
+          "volume_ml": [
+            1,
+            250
+          ],
+          "concentration_mol_L": [
+            1e-05,
+            0.01
+          ]
+        },
+        "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
       }
     },
     {
@@ -1812,13 +1867,15 @@
         {
           "phase": "solid",
           "hydrate_water_per_formula": 0,
-          "inventory_mol": 0.0
+          "inventory_mol": 0.0,
+          "operational": false
         },
         {
           "phase": "aqueous",
           "hydrate_water_per_formula": 0,
           "inventory_mol": 0.0,
-          "concentration_mol_L": null
+          "concentration_mol_L": null,
+          "operational": true
         }
       ],
       "visual": {
@@ -1884,10 +1941,31 @@
         "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
       ],
       "validation": {
-        "status": "尚未支持",
-        "operational": false,
-        "science_tests": [],
-        "plan": "无水固体；溶液配制，水解及稀释；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+        "status": "已验证（限定水溶液）",
+        "operational": true,
+        "science_tests": [
+          "tests/iphreeqc_probe.cpp",
+          "tests/science_core_test.cpp",
+          "godot/tests/native_smoke.gd",
+          "godot/tests/visual_flow.gd",
+          "tests/batch_test.cpp",
+          "godot/tests/batch_flow.gd",
+          "tests/aqueous_expansion_test.cpp"
+        ],
+        "plan": "无水固体；溶液配制，水解及稀释；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
+        "verified_on": "2026-09-09",
+        "range": {
+          "temperature_K": 298.15,
+          "volume_ml": [
+            1,
+            250
+          ],
+          "concentration_mol_L": [
+            1e-05,
+            0.01
+          ]
+        },
+        "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
       }
     },
     {
@@ -1912,13 +1990,15 @@
         {
           "phase": "solid",
           "hydrate_water_per_formula": 0,
-          "inventory_mol": 0.0
+          "inventory_mol": 0.0,
+          "operational": false
         },
         {
           "phase": "aqueous",
           "hydrate_water_per_formula": 0,
           "inventory_mol": 0.0,
-          "concentration_mol_L": null
+          "concentration_mol_L": null,
+          "operational": true
         }
       ],
       "visual": {
@@ -1989,10 +2069,31 @@
         "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
       ],
       "validation": {
-        "status": "尚未支持",
-        "operational": false,
-        "science_tests": [],
-        "plan": "无水式与七水盐不可混同；验证 MgSO4 络合；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+        "status": "已验证（限定水溶液）",
+        "operational": true,
+        "science_tests": [
+          "tests/iphreeqc_probe.cpp",
+          "tests/science_core_test.cpp",
+          "godot/tests/native_smoke.gd",
+          "godot/tests/visual_flow.gd",
+          "tests/batch_test.cpp",
+          "godot/tests/batch_flow.gd",
+          "tests/aqueous_expansion_test.cpp"
+        ],
+        "plan": "无水式与七水盐不可混同；验证 MgSO4 络合；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
+        "verified_on": "2026-09-09",
+        "range": {
+          "temperature_K": 298.15,
+          "volume_ml": [
+            1,
+            250
+          ],
+          "concentration_mol_L": [
+            1e-05,
+            0.01
+          ]
+        },
+        "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
       }
     },
     {
@@ -2186,7 +2287,8 @@
           "godot/tests/native_smoke.gd",
           "godot/tests/visual_flow.gd",
           "tests/batch_test.cpp",
-          "godot/tests/batch_flow.gd"
+          "godot/tests/batch_flow.gd",
+          "tests/aqueous_expansion_test.cpp"
         ],
         "plan": "实验须明确选用方解石或文石；验证有限固体溶解；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -2338,7 +2440,8 @@
           "godot/tests/native_smoke.gd",
           "godot/tests/visual_flow.gd",
           "tests/batch_test.cpp",
-          "godot/tests/batch_flow.gd"
+          "godot/tests/batch_flow.gd",
+          "tests/aqueous_expansion_test.cpp"
         ],
         "plan": "二水石膏；水合水与元素守恒、饱和度；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -2750,13 +2853,15 @@
         {
           "phase": "solid",
           "hydrate_water_per_formula": 0,
-          "inventory_mol": 0.0
+          "inventory_mol": 0.0,
+          "operational": false
         },
         {
           "phase": "aqueous",
           "hydrate_water_per_formula": 0,
           "inventory_mol": 0.0,
-          "concentration_mol_L": null
+          "concentration_mol_L": null,
+          "operational": true
         }
       ],
       "visual": {
@@ -2830,10 +2935,31 @@
         "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
       ],
       "validation": {
-        "status": "尚未支持",
-        "operational": false,
-        "science_tests": [],
-        "plan": "无水式；BaSO4 沉淀须检查硫酸根活度、限定候选 Barite；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+        "status": "已验证（限定水溶液）",
+        "operational": true,
+        "science_tests": [
+          "tests/iphreeqc_probe.cpp",
+          "tests/science_core_test.cpp",
+          "godot/tests/native_smoke.gd",
+          "godot/tests/visual_flow.gd",
+          "tests/batch_test.cpp",
+          "godot/tests/batch_flow.gd",
+          "tests/aqueous_expansion_test.cpp"
+        ],
+        "plan": "无水式；BaSO4 沉淀须检查硫酸根活度、限定候选 Barite；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
+        "verified_on": "2026-09-09",
+        "range": {
+          "temperature_K": 298.15,
+          "volume_ml": [
+            1,
+            250
+          ],
+          "concentration_mol_L": [
+            1e-05,
+            0.01
+          ]
+        },
+        "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
       }
     },
     {

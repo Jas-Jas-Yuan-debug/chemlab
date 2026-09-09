@@ -1,24 +1,24 @@
 {
-  "started_utc": "2026-09-09T11:06:57Z",
+  "started_utc": "2026-09-09T11:18:52Z",
   "checks": [
     {
       "name": "native",
       "passed": true,
-      "duration_s": 0.216,
+      "duration_s": 0.732,
       "evidence": [
-        "100% tests passed, 0 tests failed out of 4"
+        "100% tests passed, 0 tests failed out of 5"
       ]
     },
     {
       "name": "import",
       "passed": true,
-      "duration_s": 1.563,
+      "duration_s": 2.643,
       "evidence": []
     },
     {
       "name": "native_smoke",
       "passed": true,
-      "duration_s": 0.235,
+      "duration_s": 0.239,
       "evidence": [
         "PASS: Godot native extension, prepare, pour, pH, conservation, stale-result reset"
       ]
@@ -26,16 +26,16 @@
     {
       "name": "visual_flow",
       "passed": true,
-      "duration_s": 1.763,
+      "duration_s": 3.744,
       "evidence": [
         "PASS: rendered UI prepare/reset defaults, aliquot buttons, acid/base neutralization, readout, search, screenshot",
-        "PASS: all 9 aqueous reagent forms prepared, transferred and measured through UI handlers"
+        "PASS: all 14 aqueous reagent forms prepared, transferred and measured through UI handlers"
       ]
     },
     {
       "name": "fall_flow",
       "passed": true,
-      "duration_s": 1.939,
+      "duration_s": 2.033,
       "evidence": [
         "PASS: rendered free-fall flow, configure/release/pause/resume/impact/repeat, curves, chemistry preservation"
       ]
@@ -43,7 +43,7 @@
     {
       "name": "batch_flow",
       "passed": true,
-      "duration_s": 1.312,
+      "duration_s": 2.003,
       "evidence": [
         "PASS: rendered calcite closed/open, gypsum finite solid, CO2 headspace, liquid separation and aliquot transfer, readout/curve/reset flows"
       ]

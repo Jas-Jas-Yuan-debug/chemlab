@@ -147,7 +147,7 @@ Dictionary LabCore::snapshot()const{
         d["elements_mol"]=elements;d["ingredients_mol"]=ingredients;items.push_back(d);
     }
     result["vessels"]=items;result["revision"]=static_cast<int64_t>(revision_);
-    result["model_version"]="aqueous-0.1";result["temperature_c"]=25.0;
+    result["model_version"]="aqueous-0.2+batch-0.1";result["temperature_c"]=25.0;
     return result;
 }
 Dictionary LabCore::poll(){

@@ -1,5 +1,8 @@
 #include "chemistry.hpp"
 #include <IPhreeqc.h>
+#include <phrqtype.h>
+#include <Solution.h>
+#include <Parser.h>
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
@@ -10,6 +13,7 @@
 namespace chemlab {
 namespace {
 const std::vector<std::string> element_names = {"Na","Cl","K","Ca","Mg","C","S","N","Ba","Fe","Cu"};
+const std::vector<std::string> valence_names = {"N(5)","N(-3)","N(0)","S(6)","S(-2)","Fe(2)","Fe(3)","C(4)","C(-4)","Cu(1)","Cu(2)"};
 void check(bool ok, const std::string& text) { if (!ok) throw std::runtime_error(text); }
 std::string num(double value) { std::ostringstream s; s << std::setprecision(17) << value; return s.str(); }
 std::string renamed(const Solution& s, int number) {
@@ -19,8 +23,10 @@ std::string renamed(const Solution& s, int number) {
 std::string selected() {
     std::string s = "SELECTED_OUTPUT 1\n-reset false\n-high_precision true\nUSER_PUNCH 1\n-headings ph volume water charge h o";
     for (const auto& name : element_names) s += " " + name;
+    for(const auto&name:valence_names)s+=" "+name;
     s += "\n-start\n10 PUNCH -LA(\"H+\"), SOLN_VOL, TOT(\"water\"), CHARGE_BALANCE, TOTMOLE(\"H\"), TOTMOLE(\"O\")\n20 PUNCH ";
     for (size_t i=0; i<element_names.size(); ++i) s += (i ? ", " : "") + std::string("TOTMOLE(\"") + element_names[i] + "\")";
+    for(const auto&name:valence_names)s+=", TOTMOLE(\""+name+"\")";
     return s + "\n-end\n";
 }
 double value(int id, int row, int col) {
@@ -35,6 +41,31 @@ double value(int id, int row, int col) {
 void balance(double actual, double expected, double absolute, const std::string& name) {
     check(std::abs(actual-expected) <= absolute + std::abs(expected)*1e-9, name+"物质收支未通过，操作已取消");
 }
+Solution scaled(const Solution& original,double fraction){
+    if(fraction<=0||original.empty())return {};
+    Solution s=original;
+    s.volume_l*=fraction;s.water_kg*=fraction;s.charge_eq*=fraction;
+    s.hydrogen_mol*=fraction;s.oxygen_mol*=fraction;
+    for(auto&[name,n]:s.elements)n*=fraction;
+    for(auto&[name,n]:s.valence_mol)n*=fraction;
+    for(auto&[id,n]:s.ingredients_mol)n*=fraction;
+    // Use the pinned upstream state schema and extensive-quantity multiplier.
+    // This is homogeneous sampling, so intensive state and redox stay unchanged.
+    std::istringstream source(original.raw);CParser parser(source);parser.set_echo_file(CParser::EO_NONE);parser.get_line();
+    cxxSolution raw;raw.read_raw(parser);
+    check(parser.get_input_error()==0&&raw.Get_base_error_count()==0,"无法读取分样状态");
+    raw.multiply(fraction);
+    raw.Set_total_h(s.hydrogen_mol);raw.Set_total_o(s.oxygen_mol);
+    raw.Set_mass_water(s.water_kg);raw.Set_soln_vol(s.volume_l);raw.Set_cb(s.charge_eq);
+    std::ostringstream output;int id=3;raw.dump_raw(output,0,&id);
+    s.raw=output.str();
+    // Upstream dump uses 14 digits. Keep our authoritative double H/O/water
+    // values at round-trip precision before any later chemical solve.
+    for(const auto&[key,x]:std::map<std::string,double>{{"total_h",s.hydrogen_mol},{"total_o",s.oxygen_mol},{"mass_water",s.water_kg},{"soln_vol",s.volume_l},{"cb",s.charge_eq}})
+        s.raw=std::regex_replace(s.raw,std::regex("(-"+key+"[ \\t]+)[^\\n]+"),"-"+key+" "+num(x));
+    return s;
+}
+
 }
 
 Chemistry::Chemistry(const std::string& database) : id_(CreateIPhreeqc()) {
@@ -49,16 +80,18 @@ Chemistry::Chemistry(const std::string& database) : id_(CreateIPhreeqc()) {
     SetOutputFileOn(id_, 0);
 }
 Chemistry::~Chemistry() { if (id_ >= 0) DestroyIPhreeqc(id_); }
-bool Chemistry::supported(int reagent) { return reagent >= 1 && reagent <= 9; }
+bool Chemistry::supported(int reagent) {
+    return (reagent>=1&&reagent<=9)||reagent==11||(reagent>=14&&reagent<=16)||reagent==25;
+}
 
 Solution Chemistry::solve(const std::string& input) {
-    const std::string script = "DELETE\n-all\nEND\n" + selected() + input + "DUMP\n-solution 3\nEND\n";
+    const std::string script = "DELETE\n-all\nEND\nKNOBS\n-convergence_tolerance 1e-12\n\n" + selected() + input + "DUMP\n-solution 3\nEND\n";
     const int errors = RunString(id_,script.c_str());
     check(errors == 0, "化学求解失败："+std::string(GetErrorString(id_)));
     check(GetWarningStringLineCount(id_) == 0, "化学求解警告："+std::string(GetWarningString(id_)));
     SetCurrentSelectedOutputUserNumber(id_,1);
     const int row = GetSelectedOutputRowCount(id_)-1;
-    check(row > 0 && GetSelectedOutputColumnCount(id_) == 6+int(element_names.size()), "化学读数不完整: row="+std::to_string(row)+", columns="+std::to_string(GetSelectedOutputColumnCount(id_)));
+    check(row > 0 && GetSelectedOutputColumnCount(id_) == 6+int(element_names.size()+valence_names.size()), "化学读数不完整: row="+std::to_string(row)+", columns="+std::to_string(GetSelectedOutputColumnCount(id_)));
     Solution s;
     s.ph=value(id_,row,0); s.volume_l=value(id_,row,1); s.water_kg=value(id_,row,2);
     s.charge_eq=value(id_,row,3); s.hydrogen_mol=value(id_,row,4); s.oxygen_mol=value(id_,row,5);
@@ -66,10 +99,12 @@ Solution Chemistry::solve(const std::string& input) {
         s.elements[element_names[i]]=value(id_,row,int(i)+6);
         check(s.elements[element_names[i]] >= -1e-15, "出现负物质的量");
     }
+    for(size_t i=0;i<valence_names.size();++i)s.valence_mol[valence_names[i]]=value(id_,row,int(i+element_names.size())+6);
     s.raw=GetDumpString(id_);
     const auto start=s.raw.find("SOLUTION_RAW");
     check(start != std::string::npos, "求解器未保存溶液状态");
     s.raw=s.raw.substr(start);
+    s.composition_key=s.raw;
     check(s.water_kg>0 && s.volume_l>0 && s.ph>=0 && s.ph<=14.5, "结果超出已验证的稀溶液范围");
     check(std::abs(s.charge_eq)<1e-9, "电荷收支未通过");
     return s;
@@ -96,6 +131,11 @@ Solution Chemistry::prepare(int reagent, double concentration, double volume) {
             case 7:add("Ca",1);add("Cl",2);break;
             case 8:add("Na",1);add("C(4)",1);break;
             case 9:add("Na",2);add("C(4)",1);break;
+            case 11:add("S(6)",1);break;
+            case 14:add("Na",2);add("S(6)",1);break;
+            case 15:add("Mg",1);add("Cl",2);break;
+            case 16:add("Mg",1);add("S(6)",1);break;
+            case 25:add("Ba",1);add("Cl",2);break;
         }
         result=solve(body+"END\n");
         if (std::abs(result.volume_l-volume)<1e-10) break;
@@ -173,7 +213,7 @@ void Chemistry::validate_combination(const Solution& a,const Solution& b) {
     int special=0;
     for (const auto* s : {&a,&b}) for (auto [id,moles] : s->ingredients_mol) {
         if (moles<=0) continue;
-        if (id>=7) { check(special==0 || special==id,"此原料组合尚未验证：沉淀或气液行为未启用"); special=id; }
+        if (id>=7&&id!=11&&id!=14) { check(special==0 || special==id,"此原料组合尚未验证：沉淀或气液行为未启用"); special=id; }
     }
     if (special) for (const auto* s : {&a,&b}) for (auto [id,moles] : s->ingredients_mol)
         check(moles<=0 || id==special,"此原料目前仅支持自身混合和蒸馏水稀释");
@@ -183,6 +223,10 @@ Solution Chemistry::mix(const Solution& a,double af,const Solution& b,double bf)
     check(std::isfinite(af)&&std::isfinite(bf)&&af>=0&&af<=1&&bf>=0&&bf<=1,"转移比例无效");
     if ((a.empty()||af==0)&&(b.empty()||bf==0)) return {};
     validate_combination(a,b);
+    if(a.empty()||af==0)return scaled(b,bf);
+    if(b.empty()||bf==0)return scaled(a,af);
+    if(!a.composition_key.empty()&&a.composition_key==b.composition_key)
+        return scaled(a,af+bf*b.volume_l/a.volume_l);
     std::string input;
     if (!a.empty()&&af>0) input+=renamed(a,1)+"\nEND\n";
     if (!b.empty()&&bf>0) input+=renamed(b,2)+"\nEND\n";
@@ -196,6 +240,10 @@ Solution Chemistry::mix(const Solution& a,double af,const Solution& b,double bf)
     for (const auto& name:element_names) {
         auto get=[&name](const Solution& s){auto i=s.elements.find(name);return i==s.elements.end()?0:i->second;};
         balance(r.elements[name],get(a)*af+get(b)*bf,1e-11,name);
+    }
+    for(const auto&name:valence_names){
+        auto get=[&](const Solution&s){auto i=s.valence_mol.find(name);return i==s.valence_mol.end()?0:i->second;};
+        balance(r.valence_mol[name],get(a)*af+get(b)*bf,1e-13,name+"价态");
     }
     balance(r.hydrogen_mol,a.hydrogen_mol*af+b.hydrogen_mol*bf,1e-8,"H");
     balance(r.oxygen_mol,a.oxygen_mol*af+b.oxygen_mol*bf,1e-8,"O");

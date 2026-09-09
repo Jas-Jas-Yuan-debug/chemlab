@@ -3,7 +3,7 @@
 Godot + C++ + IPhreeqc，中文界面。原创代码 **AGPL-3.0-only**。
 
 项目正在按阶段开发：Phase 0 已验证，三维器材交互与基础酸碱流程已运行。
-目前 **12/30 项原料**可在限定范围内加入、转移和测量；仍在开发，完整目标未完成。
+目前 **17/30 项原料**可在限定范围内加入、转移和测量；仍在开发，完整目标未完成。
 
 用户已明确选择保留 AGPL 并从 Unreal 改为 Godot，详见
 [决策记录](docs/PHASE0_DECISIONS.md)。原始目标保留于
@@ -37,15 +37,16 @@ tools/Godot.app/Contents/MacOS/Godot --path godot
 - 在实际窗口测试鼠标选择、拖动、防重叠、聚焦、重置与添加滴管。
 - 固定 25°C、1–250 mL、0.00001–0.01 mol/L。以求解的溶液体积反求水质量；不把 kg 水当 L 溶液。
 - HCl/NaOH/NaCl/KOH/KCl 支持限定稀溶液混合；CaCl₂/NaHCO₃/Na₂CO₃ 当前仅支持自身混合与水稀释。
+- 新增 H₂SO₄、Na₂SO₄、MgCl₂、MgSO₄、BaCl₂ 的 45 组配液/分装/稀释与连续转移；共 14 项水溶液界面流程通过。
 - 方解石、二水石膏与 CO₂ 在独立气液固实验页支持有限加入、最终平衡、清液分离与分装；108 组条件及完整界面流程通过。
-- 其余 18 项原料、更多物理实验及保存/导出尚待后续阶段。
+- 其余 13 项原料、更多物理实验及保存/导出尚待后续阶段。
 - 自由落体已可调整高度/重力、释放、暂停、继续、重复并查看高度/速率曲线；解析碰撞时刻与固定步进已核对。
 - 三种指示剂采用有来源的颜色近似，忽略微量加入影响；不模拟反应速率、热效应或空间浓度场。
 
 [支持矩阵](docs/SUPPORT_MATRIX.md) · [科学边界](docs/VALIDATION_SCOPE.md) ·
 [指示剂来源](docs/INDICATORS.md) · [进度与交接](HANDOFF.md)
 
-[物理模型与验证](docs/PHYSICS_MODELS.md) · [气液固模型、来源与验证](docs/BATCH_EQUILIBRIUM.md)
+[物理模型与验证](docs/PHYSICS_MODELS.md) · [气液固模型、来源与验证](docs/BATCH_EQUILIBRIUM.md) · [扩展溶液与价态边界](docs/AQUEOUS_EXTENSION.md)
 
 运行 `python3 scripts/verify.py` 可执行有超时与错误日志检查的科学/渲染流程验证。
 

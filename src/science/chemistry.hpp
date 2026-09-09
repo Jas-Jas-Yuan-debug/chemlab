@@ -13,7 +13,9 @@ struct Solution {
     double hydrogen_mol = 0;
     double oxygen_mol = 0;
     std::map<std::string, double> elements;
+    std::map<std::string, double> valence_mol;
     std::string raw;
+    std::string composition_key;
     std::map<int, double> ingredients_mol;
     bool empty() const { return volume_l <= 1e-12; }
 };
