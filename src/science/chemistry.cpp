@@ -56,8 +56,9 @@ Solution Chemistry::solve(const std::string& input) {
     const int errors = RunString(id_,script.c_str());
     check(errors == 0, "化学求解失败："+std::string(GetErrorString(id_)));
     check(GetWarningStringLineCount(id_) == 0, "化学求解警告："+std::string(GetWarningString(id_)));
+    SetCurrentSelectedOutputUserNumber(id_,1);
     const int row = GetSelectedOutputRowCount(id_)-1;
-    check(row > 0 && GetSelectedOutputColumnCount(id_) == 6+int(element_names.size()), "化学读数不完整");
+    check(row > 0 && GetSelectedOutputColumnCount(id_) == 6+int(element_names.size()), "化学读数不完整: row="+std::to_string(row)+", columns="+std::to_string(GetSelectedOutputColumnCount(id_)));
     Solution s;
     s.ph=value(id_,row,0); s.volume_l=value(id_,row,1); s.water_kg=value(id_,row,2);
     s.charge_eq=value(id_,row,3); s.hydrogen_mol=value(id_,row,4); s.oxygen_mol=value(id_,row,5);
@@ -106,7 +107,67 @@ Solution Chemistry::prepare(int reagent, double concentration, double volume) {
     return result;
 }
 
+BatchResult Chemistry::equilibrate(const Solution& base,const BatchConditions& c) {
+    check(!base.empty(),"请先加入水溶液");
+    for(auto [id,n]:base.ingredients_mol)
+        check(n<=0||id==2||id==8||id==9,"此反应器仅验证水、稀盐酸和单独碳酸钠/碳酸氢钠底液");
+    check(c.solid_reagent==0||c.solid_reagent==18||c.solid_reagent==19,"此固相尚未验证");
+    check(std::isfinite(c.solid_mol)&&c.solid_mol>=0&&c.solid_mol<=0.005,"固体加入量限 0–5 mmol");
+    check(c.solid_reagent!=0||c.solid_mol==0,"未选择固体");
+    check(std::isfinite(c.co2_added_mol)&&c.co2_added_mol>=0&&c.co2_added_mol<=0.001,"CO₂ 加入量限 0–1 mmol");
+    check(c.gas!=GasBoundary::None||c.co2_added_mol==0,"CO₂ 需要选择气相边界");
+    check(std::isfinite(c.headspace_l)&&c.headspace_l>=0.05&&c.headspace_l<=1,"顶空限 50–1000 mL");
+    check(std::isfinite(c.external_co2_atm)&&c.external_co2_atm>=0.0001&&c.external_co2_atm<=0.01,"外界 CO₂ 分压限 0.0001–0.01 atm");
+    check(base.volume_l>=0.01-1e-8&&base.volume_l<=0.25+1e-8,"反应器底液限 10–250 mL");
+    const std::string phase=c.solid_reagent==18?"Calcite":"Gypsum";
+    std::string input=renamed(base,3)+"\nEND\nMIX 3\n3 1\n";
+    if(c.solid_reagent||c.gas==GasBoundary::FixedCO2){
+        input+="EQUILIBRIUM_PHASES 3\n";
+        if(c.solid_reagent)input+=phase+" 0 "+num(c.solid_mol)+"\n";
+        // A finite 1 mol reservoir approximates a fixed external boundary here.
+        // Depletion is checked; its signed change is included in the ledger.
+        if(c.gas==GasBoundary::FixedCO2)input+="CO2(g) "+num(std::log10(c.external_co2_atm))+" 1\n";
+    }
+    if(c.gas==GasBoundary::ClosedVolume)
+        input+="GAS_PHASE 3\n-fixed_volume\n-volume "+num(c.headspace_l)+"\n-temperature 25\nCO2_ideal(g) 0\n";
+    if(c.co2_added_mol>0)input+="REACTION 3\nCO2 1\n"+num(c.co2_added_mol)+" moles\n";
+    const std::string extra="SELECTED_OUTPUT 2\n-reset false\n-high_precision true\nUSER_PUNCH 2\n-headings solid gas pressure reservoir si\n-start\n10 PUNCH EQUI(\""+phase+"\"), GAS(\"CO2_ideal(g)\"), GAS_P, EQUI(\"CO2(g)\"), SI(\""+phase+"\")\n-end\n";
+    BatchResult r;
+    // Preserve the exact CO2 equilibrium expression from the pinned database;
+    // omit only critical EOS parameters for an explicit ideal-gas approximation.
+    // The upstream PR path clips molar volume at 1e4 L/mol at very low pressure.
+    const std::string ideal="PHASES\nCO2_ideal(g)\nCO2 = CO2\n-log_k -1.468\n-delta_h -4.776 kcal\n-analytic 10.5624 -2.3547e-2 -3972.8 0 5.8746e5 1.9194e-5\nEND\n";
+    r.solution=solve(ideal+extra+input+"SAVE solution 3\nEND\n");
+    SetCurrentSelectedOutputUserNumber(id_,2);
+    const int row=GetSelectedOutputRowCount(id_)-1;
+    r.solid_remaining_mol=c.solid_reagent?value(id_,row,0):0;
+    r.gas_co2_mol=c.gas==GasBoundary::ClosedVolume?value(id_,row,1):0;
+    r.gas_pressure_atm=c.gas==GasBoundary::ClosedVolume?value(id_,row,2):0;
+    r.co2_to_environment_mol=c.gas==GasBoundary::FixedCO2?value(id_,row,3)-1:0;
+    r.solid_saturation_index=c.solid_reagent?value(id_,row,4):0;
+    check(c.gas!=GasBoundary::FixedCO2||value(id_,row,3)>0.99,"外界 CO₂ 储库超出已验证收支范围");
+    check(r.gas_pressure_atm<=1.0,"气相压力超过 1 atm 的验证范围");
+    const double reacted=c.solid_mol-r.solid_remaining_mol;
+    auto initial=[&](const std::string&e){auto it=base.elements.find(e);return it==base.elements.end()?0:it->second;};
+    r.carbon_residual_mol=r.solution.elements["C"]+r.gas_co2_mol+r.co2_to_environment_mol-initial("C")-c.co2_added_mol-(c.solid_reagent==18?reacted:0);
+    r.calcium_residual_mol=r.solution.elements["Ca"]-initial("Ca")-reacted;
+    r.sulfur_residual_mol=r.solution.elements["S"]-initial("S")-(c.solid_reagent==19?reacted:0);
+    check(std::abs(r.carbon_residual_mol)<1e-9&&std::abs(r.calcium_residual_mol)<1e-9&&std::abs(r.sulfur_residual_mol)<1e-9,"气液固物质收支未通过");
+    balance(r.solution.hydrogen_mol,base.hydrogen_mol+(c.solid_reagent==19?4*reacted:0),1e-8,"H");
+    balance(r.solution.oxygen_mol+2*(r.gas_co2_mol+r.co2_to_environment_mol),base.oxygen_mol+2*c.co2_added_mol+(c.solid_reagent==19?6*reacted:3*reacted),1e-8,"O");
+    r.solution.isolated_batch_sample=true;
+    r.solution.ingredients_mol=base.ingredients_mol;
+    // Provenance describes dissolved additions only; solids and headspace stay
+    // in the reactor and are not implicitly poured with a liquid aliquot.
+    if(c.solid_reagent&&reacted>0)r.solution.ingredients_mol[c.solid_reagent]+=reacted;
+    if(c.gas!=GasBoundary::None)r.solution.ingredients_mol[10]+=std::max(0.0,c.co2_added_mol-r.gas_co2_mol-r.co2_to_environment_mol);
+
+    return r;
+}
+
 void Chemistry::validate_combination(const Solution& a,const Solution& b) {
+    if(a.empty()||b.empty())return;
+    check(!a.isolated_batch_sample&&!b.isolated_batch_sample,"分离清液目前仅支持向空容器分装；再次混合或稀释尚未验证");
     // Monovalent strong electrolytes can share the tested acid/base model.
     // Calcium and carbonate initially permit only self-mixing and water dilution.
     int special=0;
@@ -129,6 +190,7 @@ Solution Chemistry::mix(const Solution& a,double af,const Solution& b,double bf)
     if (!a.empty()&&af>0) input+="1 "+num(af)+"\n";
     if (!b.empty()&&bf>0) input+="2 "+num(bf)+"\n";
     Solution r=solve(input+"SAVE solution 3\nEND\n");
+    r.isolated_batch_sample=a.isolated_batch_sample||b.isolated_batch_sample;
     for(auto [id,n]:a.ingredients_mol) if(n*af>0) r.ingredients_mol[id]+=n*af;
     for(auto [id,n]:b.ingredients_mol) if(n*bf>0) r.ingredients_mol[id]+=n*bf;
     for (const auto& name:element_names) {

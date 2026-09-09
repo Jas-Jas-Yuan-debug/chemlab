@@ -64,4 +64,7 @@ func run() -> void:
         assert(abs(lab.states[3].ph-lab.states[1].ph)<0.00001)
         await click("ResetExperiment")
     print("PASS: all 9 aqueous reagent forms prepared, transferred and measured through UI handlers")
+    lab.queue_free()
+    await process_frame
+    await process_frame
     quit(0)

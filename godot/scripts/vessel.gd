@@ -11,6 +11,10 @@ var visual := Node3D.new()
 var ring: MeshInstance3D
 var name_label: Label3D
 var reading: Dictionary = {}
+var wave := Vector2.ZERO
+var wave_velocity := Vector2.ZERO
+var previous_position := Vector3.ZERO
+var liquid_height := 0.0
 
 func build(id: int, vessel_kind: String, capacity: float) -> void:
     vessel_id = id
@@ -26,10 +30,8 @@ func build(id: int, vessel_kind: String, capacity: float) -> void:
         radius = 0.032
         height = 0.15
     add_child(visual)
-    var glass := Room.material(Color(0.83,0.96,1.0,0.13),0.12)
-    glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-    glass.cull_mode = BaseMaterial3D.CULL_DISABLED
-    glass.metallic_specular = 0.8
+    var glass := ShaderMaterial.new()
+    glass.shader = preload("res://shaders/glass.gdshader")
     var profile: Array[Vector2] = [Vector2(0,0),Vector2(radius,0),Vector2(radius,height),Vector2(radius-0.0015,height),Vector2(radius-0.0015,0.003),Vector2(0,0.003)]
     var surface := SurfaceTool.new()
     surface.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -57,8 +59,8 @@ func build(id: int, vessel_kind: String, capacity: float) -> void:
     liquid_mesh.radial_segments = 64
     liquid_mesh.height = 0.01
     liquid.mesh = liquid_mesh
-    var liquid_mat := Room.material(Color(0.53,0.78,0.82,0.65),0.15)
-    liquid_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+    var liquid_mat := ShaderMaterial.new()
+    liquid_mat.shader = preload("res://shaders/liquid.gdshader")
     liquid.material_override = liquid_mat
     visual.add_child(liquid)
     var body := StaticBody3D.new()
@@ -118,12 +120,28 @@ func update_state(state: Dictionary) -> void:
     var amount: float = state.get("volume_ml",0.0)
     liquid.visible = amount > 0.0001
     var fill: float = clampf(amount,0,capacity_ml)*0.000001/(PI*pow(radius-0.0018,2))
-    liquid.scale.y = max(fill/0.01,0.001)
-    liquid.position.y = 0.003+fill/2
+    liquid_height = fill
+    liquid.mesh.height = max(fill,0.00001)
+    liquid.position.y = 0.0031+fill/2
+    liquid.material_override.set_shader_parameter("fill_height",fill)
 
 func set_selected(yes: bool) -> void:
     ring.visible = yes
     name_label.modulate = Color("ffe0a0") if yes else Color("fff6dc")
 
 func set_indicator(color: Color) -> void:
-    liquid.material_override.albedo_color = color
+    liquid.material_override.set_shader_parameter("tint",color)
+
+func _process(delta: float) -> void:
+    if not liquid:
+        return
+    # Bounded, damped visual motion; no chemistry or numerical volume changes.
+    var motion := global_position-previous_position
+    previous_position = global_position
+    wave_velocity += Vector2(motion.x,motion.z).limit_length(0.02)*18.0
+    var dt := minf(delta,0.033)
+    wave_velocity += (-wave*110.0-wave_velocity*9.0)*dt
+    wave += wave_velocity*dt
+    var margin := minf(liquid_height*0.35,maxf(0.0,height-0.004-liquid_height)*0.35)
+    wave = wave.limit_length(minf(0.08,margin/maxf(radius,0.001)))
+    liquid.material_override.set_shader_parameter("slope",wave)

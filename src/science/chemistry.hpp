@@ -5,6 +5,7 @@
 
 namespace chemlab {
 struct Solution {
+    bool isolated_batch_sample = false;
     double ph = 0;
     double volume_l = 0;
     double water_kg = 0;
@@ -17,6 +18,27 @@ struct Solution {
     bool empty() const { return volume_l <= 1e-12; }
 };
 
+enum class GasBoundary { None, ClosedVolume, FixedCO2 };
+struct BatchConditions {
+    int solid_reagent = 0; // 18 Calcite, 19 Gypsum; no other candidate solids.
+    double solid_mol = 0;
+    GasBoundary gas = GasBoundary::None;
+    double co2_added_mol = 0;
+    double headspace_l = 0.1;
+    double external_co2_atm = 0.00042;
+};
+struct BatchResult {
+    Solution solution;
+    double solid_remaining_mol = 0;
+    double gas_co2_mol = 0;
+    double gas_pressure_atm = 0;
+    double co2_to_environment_mol = 0; // Negative means uptake.
+    double solid_saturation_index = 0;
+    double carbon_residual_mol = 0;
+    double calcium_residual_mol = 0;
+    double sulfur_residual_mol = 0;
+};
+
 // One owner thread per instance. No Godot types, graphics, or UI dependencies.
 class Chemistry {
 public:
@@ -25,6 +47,7 @@ public:
     Chemistry(const Chemistry&) = delete;
     Chemistry& operator=(const Chemistry&) = delete;
     Solution prepare(int reagent, double concentration_mol_l, double volume_l);
+    BatchResult equilibrate(const Solution& solution, const BatchConditions& conditions);
     Solution mix(const Solution& a, double af, const Solution& b, double bf);
     static bool supported(int reagent);
     static void validate_combination(const Solution& a, const Solution& b);

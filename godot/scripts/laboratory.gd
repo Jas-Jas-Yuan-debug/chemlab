@@ -53,6 +53,8 @@ var chemistry_panels: Array[Control] = []
 var physics_mode := false
 var fall_experiment: Node3D
 var ui_theme: Theme
+var batch_experiment: Node3D
+var batch_mode := false
 
 func _ready() -> void:
     add_child(Room.new())
@@ -80,6 +82,11 @@ func _ready() -> void:
     fall_experiment.lab = self
     fall_experiment.ui_theme = ui_theme
     add_child(fall_experiment)
+    batch_experiment = preload("res://scripts/batch_experiment.gd").new()
+    batch_experiment.core = core
+    batch_experiment.lab = self
+    batch_experiment.ui_theme = ui_theme
+    add_child(batch_experiment)
     set_status("正在准备实验台…")
 
 func style(bg: Color, border: Color = Color.TRANSPARENT) -> StyleBoxFlat:
@@ -164,7 +171,8 @@ func build_ui() -> void:
     name_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     button(row,"化学实验","ChemistryTab",func(): switch_experiment(false))
     button(row,"自由落体","FreeFallTab",func(): switch_experiment(true))
-    status_badge = label(row,"水溶液平衡  ·  25 °C  ·  已验证 9 / 30 项原料",14,Color("9ecdb8"))
+    button(row,"溶解与气液","BatchTab",switch_batch)
+    status_badge = label(row,"水溶液平衡  ·  25 °C  ·  已验证 12 / 30 项原料",14,Color("9ecdb8"))
     var left := panel(ui,Vector2(24,108),Vector2(274,822))
     chemistry_panels.append(left.get_parent())
     label(left,"实验材料",20,Color("f5e6c9"))
@@ -265,6 +273,13 @@ func refresh_reagents() -> void:
             b.text += "  · 未支持"
 
 func choose_reagent(id: int) -> void:
+    if id in [10,18,19]:
+        switch_batch()
+        batch_experiment.solid_picker.selected = 2 if id==10 else 0 if id==18 else 1
+        batch_experiment.boundary_picker.selected = 1 if id==10 else 0
+        batch_experiment.gas_amount.value = 0.1 if id==10 else 0
+        batch_experiment.update_inputs()
+        return
     chosen_reagent = id
     var item: Dictionary = catalog[id-1]
     reagent_title.text = "配制："+item.name_zh+" "+item.formula
@@ -281,6 +296,9 @@ func set_status(text: String) -> void:
         status.text = text
 
 func switch_experiment(physics: bool) -> void:
+    batch_mode = false
+    if batch_experiment:
+        batch_experiment.set_active(false)
     pouring = false
     dragging = false
     physics_mode = physics
@@ -293,8 +311,22 @@ func switch_experiment(physics: bool) -> void:
     orbit = Vector2(0.1,0.18) if physics else Vector2(0.1,0.50)
     distance = 3.8 if physics else 0.92
     update_camera()
-    status_badge.text = "力学实验  ·  忽略空气阻力" if physics else "水溶液平衡  ·  25 °C  ·  已验证 9 / 30 项原料"
+    status_badge.text = "力学实验  ·  忽略空气阻力" if physics else "水溶液平衡  ·  25 °C  ·  已验证 12 / 30 项原料"
     set_status("设置高度与重力，应用参数后释放小球。" if physics else "选择原料与器材，继续水溶液实验。")
+
+func switch_batch() -> void:
+    switch_experiment(false)
+    batch_mode = true
+    for p in chemistry_panels:
+        p.visible = false
+    for v in views.values():
+        v.visible = false
+    batch_experiment.set_active(true)
+    focus = Vector3(0.06,0.96,0)
+    distance = 0.70
+    update_camera()
+    status_badge.text = "气液固平衡 · 25°C"
+    set_status("每次配料定义独立试验；固体、清液和 CO₂ 分别记账。")
 
 func update_camera() -> void:
     camera.position = focus+Vector3(sin(orbit.x)*cos(orbit.y),sin(orbit.y),cos(orbit.x)*cos(orbit.y))*distance
@@ -400,11 +432,16 @@ func reset_lab() -> void:
     set_status("正在重置实验…")
 
 func apply_result(result: Dictionary) -> void:
+    if result.operation in ["batch","extract_batch"] or (batch_mode and not result.error.is_empty()):
+        batch_experiment.accept_result(result)
+        if result.operation=="batch" or not result.error.is_empty():
+            return
     if not result.error.is_empty():
         pouring = false
         set_status(result.error)
         return
     if result.operation=="reset":
+        batch_experiment.clear_trial()
         for v in views.values():
             v.queue_free()
         views.clear()
@@ -420,6 +457,7 @@ func apply_result(result: Dictionary) -> void:
         ensure_view(s)
         states[int(s.id)] = s
         views[int(s.id)].update_state(s)
+        views[int(s.id)].visible = not batch_mode and not physics_mode
     if result.operation=="pour":
         if result.transferred_ml>0:
             last_transfer_ms = Time.get_ticks_msec()
@@ -444,6 +482,9 @@ func apply_result(result: Dictionary) -> void:
     elif result.operation=="add_empty":
         select_vessel(result.to)
         set_status("已添加 "+views[result.to].kind+"。")
+    if result.operation=="extract_batch":
+        for v in views.values():
+            v.visible = not batch_mode
     pending_context = {}
     select_vessel(selected_id)
     update_targets()
@@ -509,7 +550,7 @@ func _unhandled_input(event: InputEvent) -> void:
             distance = min(2.8,distance*1.1)
             update_camera()
         elif event.button_index==MOUSE_BUTTON_LEFT:
-            if physics_mode:
+            if physics_mode or batch_mode:
                 return
             dragging = false
             if event.pressed:

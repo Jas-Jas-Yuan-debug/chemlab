@@ -1,14 +1,95 @@
 {
-  "model_version": "aqueous-0.1",
+  "model_version": "aqueous-0.1+batch-0.1",
   "database_sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
   "verified_on": "2026-09-09",
-  "verified_reagent_ids": [1,2,3,4,5,6,7,8,9],
+  "verified_reagent_ids": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    18,
+    19
+  ],
   "temperature_K": 298.15,
-  "volume_ml": [1,250],
-  "concentration_mol_L": [0.00001,0.01],
-  "forms": "Water and prepared aqueous solutions only; solid additions are not implemented",
+  "volume_ml": [
+    1,
+    250
+  ],
+  "concentration_mol_L": [
+    1e-05,
+    0.01
+  ],
+  "forms": "IDs 1–9: water/prepared aqueous forms. 10: finite CO2 gas. 18: calcite solid. 19: gypsum dihydrate solid. Batch outputs can be separated and aliquoted into empty vessels.",
   "combinations": "IDs 2-6: dilute monovalent strong-acid/base/salt mixtures and water. IDs 7-9: same reagent or water only.",
-  "evidence": ["tests/iphreeqc_probe.cpp", "tests/science_core_test.cpp", "godot/tests/native_smoke.gd", "godot/tests/visual_flow.gd"],
-  "runs": "81 stock/aliquot/dilution iterations (75 distinct stock conditions), dilute pH references, native integration, nine UI preparation/transfer/readout flows",
-  "not_validated": ["solid dissolution", "CO2 gas", "arbitrary mixtures", "reaction kinetics", "thermal effects", "performance target"]
+  "evidence": [
+    "tests/iphreeqc_probe.cpp",
+    "tests/science_core_test.cpp",
+    "godot/tests/native_smoke.gd",
+    "godot/tests/visual_flow.gd",
+    "tests/batch_test.cpp",
+    "godot/tests/batch_flow.gd"
+  ],
+  "runs": "81 stock/aliquot/dilution iterations (75 distinct stock conditions), dilute pH references, native integration, nine UI preparation/transfer/readout flows; 108 batch condition sets with repeat and aliquot checks; gypsum/Henry references and low-pressure gas law",
+  "not_validated": [
+    "other raw solid dissolution",
+    "arbitrary mixtures",
+    "reaction kinetics",
+    "thermal effects",
+    "performance target"
+  ],
+  "aqueous_prepared_reagent_ids": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "batch": {
+    "ids": [
+      10,
+      18,
+      19
+    ],
+    "volume_ml": [
+      10,
+      250
+    ],
+    "solid_mmol": [
+      0,
+      5
+    ],
+    "co2_mmol": [
+      0,
+      1
+    ],
+    "headspace_ml": [
+      50,
+      1000
+    ],
+    "co2_pressure_atm": [
+      0,
+      1
+    ],
+    "external_co2_atm": [
+      0.0001,
+      0.01
+    ],
+    "base_reagents": [
+      1,
+      2,
+      8,
+      9
+    ],
+    "limitations": "Separate independent final-equilibrium trials. One selected solid: Calcite or Gypsum. Closed ideal CO2 headspace or fixed external CO2. Extracted liquid only aliquots into empty vessels; no remix/dilution. Fixed 25 C, no kinetics, vapor, air or pressure correction."
+  }
 }

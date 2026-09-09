@@ -1,8 +1,8 @@
-# 原料支持矩阵 · Phase 0
+# 原料支持矩阵
 
-**产品已验证可操作：9/30。** 1–9 项仅限预配水溶液/蒸馏水；固体加入、气体及其余条目未支持。
+**产品已验证可操作：12/30。** 1–9 项为预配水溶液/蒸馏水；10 CO₂、18 方解石、19 石膏在独立气液固实验中支持有限加入和平衡，清液可分离及分装。其余条目未支持。
 
-已运行 tests/science_core_test.cpp 和 Godot 的 native_smoke / visual_flow；范围见 data/validation_registry.json。下表的数据库覆盖不等于其余条目已可操作。
+已运行 science_core / batch_test 和 Godot 的 native_smoke / visual_flow / batch_flow；范围见 data/validation_registry.json。下表的数据库覆盖不等于其余条目已可操作。
 
 固定数据库：`phreeqc.dat`，SHA-256 `59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10`。仅扫描这一份官方数据库，未合并其他库。
 
@@ -19,7 +19,7 @@
 | 7 | 氯化钙 CaCl₂ | Ca+2 L107；Cl- L138 | CaCl2 缺失 | 无水固体与溶液分开；碳酸盐组合需指定沉淀相 |
 | 8 | 碳酸氢钠 NaHCO₃ | Na+ L90；HCO3- L233；CO3-2 L144；CO2 L240 | Nahcolite 缺失 | 缓冲与稀释；酸加入和 CO2 逸出需开放/封闭收支 |
 | 9 | 碳酸钠 Na₂CO₃ | Na+ L90；CO3-2 L144；HCO3- L233 | Natron 缺失 | 无水式与十水碳酸钠固相不可混同；预配稀溶液可候选 |
-| 10 | 二氧化碳 CO₂ | CO2 L240；HCO3- L233；CO3-2 L144 | CO2(g) L1204 (log K 有) | 固定 pCO2 开放体系/有限气体封闭体系分别验证 |
+| 10 | 二氧化碳 CO₂ | CO2 L240；HCO3- L233；CO3-2 L144 | CO2(g) L1204 (log K 有) | 溶解与 CO₂ 平衡页：有限加入、最终平衡、清液分离与向空容器分装；25°C。固定 pCO2 开放体系/有限气体封闭体系分别验证 |
 | 11 | 硫酸 H₂SO₄ | H+ L67；HSO4- L259；SO4-2 L149 | 该条目无需原料纯固相；实验候选相另选 | 只限稀水溶液酸碱；固定 S(6)，禁止脱水和浓酸模型 |
 | 12 | 硝酸 HNO₃ | H+ L67；NO3- L154 | 该条目无需原料纯固相；实验候选相另选 | 固定 N(5) 稀溶液酸碱；不支持完整氧化性 |
 | 13 | 硝酸钠 NaNO₃ | Na+ L90；NO3- L154 | Nitratine 缺失 | 固定 N(5)，预配溶液和稀释 |
@@ -27,8 +27,8 @@
 | 15 | 氯化镁 MgCl₂ | Mg+2 L102；Cl- L138 | MgCl2 缺失 | 无水固体；溶液配制，水解及稀释 |
 | 16 | 硫酸镁 MgSO₄ | Mg+2 L102；SO4-2 L149；MgSO4 L421 | Epsomite L1036 (log K 有) | 无水式与七水盐不可混同；验证 MgSO4 络合 |
 | 17 | 氢氧化钙 Ca(OH)₂ | Ca+2 L107；OH- L212 | Portlandite 缺失 | 需要 Portlandite 可信溶度积；不得默认固体全溶 |
-| 18 | 碳酸钙 CaCO₃ | Ca+2 L107；CO3-2 L144；HCO3- L233 | Calcite L956 (log K 有)；Aragonite L962 (log K 有) | 实验须明确选用方解石或文石；验证有限固体溶解 |
-| 19 | 石膏 CaSO₄·2H₂O | Ca+2 L107；SO4-2 L149 | Gypsum L996 (log K 有) | 二水石膏；水合水与元素守恒、饱和度 |
+| 18 | 碳酸钙 CaCO₃ | Ca+2 L107；CO3-2 L144；HCO3- L233 | Calcite L956 (log K 有)；Aragonite L962 (log K 有) | 溶解与 CO₂ 平衡页：有限加入、最终平衡、清液分离与向空容器分装；25°C。实验须明确选用方解石或文石；验证有限固体溶解 |
+| 19 | 石膏 CaSO₄·2H₂O | Ca+2 L107；SO4-2 L149 | Gypsum L996 (log K 有) | 溶解与 CO₂ 平衡页：有限加入、最终平衡、清液分离与向空容器分装；25°C。二水石膏；水合水与元素守恒、饱和度 |
 | 20 | 氨水 NH₃(aq) | NH3 L314；NH4+ L306 | NH3(g) L1246 (log K 有) | NH3/NH4+ 平衡；固定 N(-3)，不使用纯 NH4OH 分子 |
 | 21 | 氯化铵 NH₄Cl | NH4+ L306；NH3 L314；Cl- L138 | Salammoniac 缺失 | 固定 N(-3)；氨/铵缓冲、过量加入和稀释 |
 | 22 | 乙酸 CH₃COOH | ；缺：CH3COOH, CH3COO- | 该条目无需原料纯固相；实验候选相另选 | 缺独立乙酸根主组分和酸解离参数时保持未支持 |

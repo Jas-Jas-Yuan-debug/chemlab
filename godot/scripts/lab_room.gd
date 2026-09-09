@@ -23,6 +23,34 @@ func _ready() -> void:
     var oak := material(Color("8b6548"), 0.62)
     var charcoal := material(Color("242c2b"), 0.32)
     var metal := material(Color("7a8989"), 0.24, 0.82)
+    var grain := NoiseTexture2D.new()
+    grain.width = 256
+    grain.height = 256
+    var noise := FastNoiseLite.new()
+    noise.seed = 2718
+    noise.frequency = 0.06
+    grain.noise = noise
+    var gradient := Gradient.new()
+    gradient.set_color(0,Color("78634b"))
+    gradient.set_color(1,Color("a78c63"))
+    grain.color_ramp = gradient
+    oak.albedo_color = Color.WHITE
+    oak.albedo_texture = grain
+    oak.uv1_scale = Vector3(0.25,5.0,1.0)
+    var stone := NoiseTexture2D.new()
+    stone.width = 256
+    stone.height = 256
+    var fine := FastNoiseLite.new()
+    fine.seed = 83
+    fine.frequency = 0.8
+    stone.noise = fine
+    var shades := Gradient.new()
+    shades.set_color(0,Color("252d2a"))
+    shades.set_color(1,Color("323b36"))
+    stone.color_ramp = shades
+    charcoal.albedo_color = Color.WHITE
+    charcoal.albedo_texture = stone
+    charcoal.roughness = 0.42
     box(Vector3(5,0.10,5),Vector3(0,-0.05,0),material(Color("b0afa4")))
     # Subtle grout lines preserve scale without large textures.
     for i in range(-5,6):
@@ -68,14 +96,14 @@ func _ready() -> void:
     var sun := DirectionalLight3D.new()
     sun.rotation_degrees = Vector3(-48,-24,0)
     sun.light_color = Color("ffe8c7")
-    sun.light_energy = 1.25
+    sun.light_energy = 0.9
     sun.shadow_enabled = true
     sun.directional_shadow_max_distance = 8
     add_child(sun)
     var fill := OmniLight3D.new()
     fill.position = Vector3(0.4,2.1,0.5)
     fill.light_color = Color("d2e6ef")
-    fill.light_energy = 1.5
+    fill.light_energy = 0.65
     fill.omni_range = 3.2
     add_child(fill)
     var env := WorldEnvironment.new()
@@ -84,7 +112,19 @@ func _ready() -> void:
     settings.background_color = Color("b4c7c9")
     settings.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
     settings.ambient_light_color = Color("d3e4e5")
-    settings.ambient_light_energy = 0.55
+    settings.ambient_light_energy = 0.30
     settings.tonemap_mode = Environment.TONE_MAPPER_FILMIC
     env.environment = settings
     add_child(env)
+
+    # A real stirring rod prop. Stirring kinetics remain unsupported.
+    var rod := MeshInstance3D.new()
+    var rod_mesh := CylinderMesh.new()
+    rod_mesh.top_radius = 0.0025
+    rod_mesh.bottom_radius = 0.0025
+    rod_mesh.height = 0.22
+    rod.mesh = rod_mesh
+    rod.rotation_degrees = Vector3(90,20,0)
+    rod.position = Vector3(0.48,0.893,0.25)
+    rod.material_override = material(Color("c0dedb"),0.12,0.15)
+    add_child(rod)

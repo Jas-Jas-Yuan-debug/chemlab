@@ -5,6 +5,7 @@
 #include <godot_cpp/variant/dictionary.hpp>
 #include <future>
 #include <functional>
+#include <optional>
 
 namespace godot {
 class LabCore : public RefCounted {
@@ -17,6 +18,7 @@ class LabCore : public RefCounted {
         double compute_ms=0;
         int from=0,to=0;
         uint64_t generation=0;
+        std::optional<chemlab::BatchResult> batch;
     };
     std::string database_;
     std::map<int,chemlab::Vessel> vessels_;
@@ -25,6 +27,7 @@ class LabCore : public RefCounted {
     uint64_t revision_=0;
     bool reset_queued_=false;
     chemlab::FreeFall fall_;
+    std::optional<chemlab::BatchResult> batch_;
     bool start(const std::function<void(chemlab::Chemistry&,Result&)>& job);
 protected:
     static void _bind_methods();
@@ -38,6 +41,9 @@ public:
     bool is_busy() const;
     Dictionary poll();
     Dictionary snapshot() const;
+    bool run_batch(const Dictionary& parameters);
+    bool extract_batch(int vessel_id);
+    Dictionary batch_snapshot() const;
     String configure_fall(double height_m,double gravity_m_s2);
     void start_fall();
     void pause_fall();

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "verified_operational_count": 9,
+  "verified_operational_count": 12,
   "reagents": [
     {
       "id": 1,
@@ -187,7 +187,9 @@
           "tests/iphreeqc_probe.cpp",
           "tests/science_core_test.cpp",
           "godot/tests/native_smoke.gd",
-          "godot/tests/visual_flow.gd"
+          "godot/tests/visual_flow.gd",
+          "tests/batch_test.cpp",
+          "godot/tests/batch_flow.gd"
         ],
         "plan": "无 CO2 纯水；稀释与体积/溶剂质量换算；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -361,7 +363,9 @@
           "tests/iphreeqc_probe.cpp",
           "tests/science_core_test.cpp",
           "godot/tests/native_smoke.gd",
-          "godot/tests/visual_flow.gd"
+          "godot/tests/visual_flow.gd",
+          "tests/batch_test.cpp",
+          "godot/tests/batch_flow.gd"
         ],
         "plan": "稀水溶液；强酸与 NaOH/KOH 中和，禁止浓盐酸挥发模型；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -449,7 +453,9 @@
           "tests/iphreeqc_probe.cpp",
           "tests/science_core_test.cpp",
           "godot/tests/native_smoke.gd",
-          "godot/tests/visual_flow.gd"
+          "godot/tests/visual_flow.gd",
+          "tests/batch_test.cpp",
+          "godot/tests/batch_flow.gd"
         ],
         "plan": "预配稀溶液；固体溶解度与溶解热另行验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -568,7 +574,9 @@
           "tests/iphreeqc_probe.cpp",
           "tests/science_core_test.cpp",
           "godot/tests/native_smoke.gd",
-          "godot/tests/visual_flow.gd"
+          "godot/tests/visual_flow.gd",
+          "tests/batch_test.cpp",
+          "godot/tests/batch_flow.gd"
         ],
         "plan": "稀溶液配制与稀释；接近饱和时需检查活度模型；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -655,7 +663,9 @@
           "tests/iphreeqc_probe.cpp",
           "tests/science_core_test.cpp",
           "godot/tests/native_smoke.gd",
-          "godot/tests/visual_flow.gd"
+          "godot/tests/visual_flow.gd",
+          "tests/batch_test.cpp",
+          "godot/tests/batch_flow.gd"
         ],
         "plan": "预配稀溶液；固体溶解和热效应未验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -773,7 +783,9 @@
           "tests/iphreeqc_probe.cpp",
           "tests/science_core_test.cpp",
           "godot/tests/native_smoke.gd",
-          "godot/tests/visual_flow.gd"
+          "godot/tests/visual_flow.gd",
+          "tests/batch_test.cpp",
+          "godot/tests/batch_flow.gd"
         ],
         "plan": "稀溶液配制与稀释；饱和实验独立验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -892,7 +904,9 @@
           "tests/iphreeqc_probe.cpp",
           "tests/science_core_test.cpp",
           "godot/tests/native_smoke.gd",
-          "godot/tests/visual_flow.gd"
+          "godot/tests/visual_flow.gd",
+          "tests/batch_test.cpp",
+          "godot/tests/batch_flow.gd"
         ],
         "plan": "无水固体与溶液分开；碳酸盐组合需指定沉淀相；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -1018,7 +1032,9 @@
           "tests/iphreeqc_probe.cpp",
           "tests/science_core_test.cpp",
           "godot/tests/native_smoke.gd",
-          "godot/tests/visual_flow.gd"
+          "godot/tests/visual_flow.gd",
+          "tests/batch_test.cpp",
+          "godot/tests/batch_flow.gd"
         ],
         "plan": "缓冲与稀释；酸加入和 CO2 逸出需开放/封闭收支；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -1139,7 +1155,9 @@
           "tests/iphreeqc_probe.cpp",
           "tests/science_core_test.cpp",
           "godot/tests/native_smoke.gd",
-          "godot/tests/visual_flow.gd"
+          "godot/tests/visual_flow.gd",
+          "tests/batch_test.cpp",
+          "godot/tests/batch_flow.gd"
         ],
         "plan": "无水式与十水碳酸钠固相不可混同；预配稀溶液可候选；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
         "verified_on": "2026-09-09",
@@ -1178,7 +1196,8 @@
         {
           "phase": "gas",
           "hydrate_water_per_formula": 0,
-          "inventory_mol": 0.0
+          "inventory_mol": 0.0,
+          "operational": true
         }
       ],
       "visual": {
@@ -1239,16 +1258,63 @@
           }
         }
       },
-      "applicability": "固定 pCO2 开放体系/有限气体封闭体系分别验证",
+      "applicability": "溶解与 CO₂ 平衡页：有限加入、最终平衡、清液分离与向空容器分装；25°C。固定 pCO2 开放体系/有限气体封闭体系分别验证",
       "sources": [
         "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
         "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
       ],
       "validation": {
-        "status": "尚未支持",
-        "operational": false,
-        "science_tests": [],
-        "plan": "固定 pCO2 开放体系/有限气体封闭体系分别验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+        "status": "已验证（气液固独立实验）",
+        "operational": true,
+        "science_tests": [
+          "tests/iphreeqc_probe.cpp",
+          "tests/science_core_test.cpp",
+          "godot/tests/native_smoke.gd",
+          "godot/tests/visual_flow.gd",
+          "tests/batch_test.cpp",
+          "godot/tests/batch_flow.gd"
+        ],
+        "plan": "固定 pCO2 开放体系/有限气体封闭体系分别验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
+        "verified_on": "2026-09-09",
+        "range": {
+          "ids": [
+            10,
+            18,
+            19
+          ],
+          "volume_ml": [
+            10,
+            250
+          ],
+          "solid_mmol": [
+            0,
+            5
+          ],
+          "co2_mmol": [
+            0,
+            1
+          ],
+          "headspace_ml": [
+            50,
+            1000
+          ],
+          "co2_pressure_atm": [
+            0,
+            1
+          ],
+          "external_co2_atm": [
+            0.0001,
+            0.01
+          ],
+          "base_reagents": [
+            1,
+            2,
+            8,
+            9
+          ],
+          "limitations": "Separate independent final-equilibrium trials. One selected solid: Calcite or Gypsum. Closed ideal CO2 headspace or fixed external CO2. Extracted liquid only aliquots into empty vessels; no remix/dilution. Fixed 25 C, no kinetics, vapor, air or pressure correction."
+        },
+        "limitations": "Separate independent final-equilibrium trials. One selected solid: Calcite or Gypsum. Closed ideal CO2 headspace or fixed external CO2. Extracted liquid only aliquots into empty vessels; no remix/dilution. Fixed 25 C, no kinetics, vapor, air or pressure correction."
       }
     },
     {
@@ -2023,13 +2089,16 @@
         {
           "phase": "solid",
           "hydrate_water_per_formula": 0,
-          "inventory_mol": 0.0
+          "inventory_mol": 0.0,
+          "operational": true
         },
         {
           "phase": "aqueous",
           "hydrate_water_per_formula": 0,
           "inventory_mol": 0.0,
-          "concentration_mol_L": null
+          "concentration_mol_L": null,
+          "operational": false,
+          "status": "仅分离得到的清液；不支持直接预配"
         }
       ],
       "visual": {
@@ -2103,16 +2172,63 @@
           }
         }
       },
-      "applicability": "实验须明确选用方解石或文石；验证有限固体溶解",
+      "applicability": "溶解与 CO₂ 平衡页：有限加入、最终平衡、清液分离与向空容器分装；25°C。实验须明确选用方解石或文石；验证有限固体溶解",
       "sources": [
         "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
         "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
       ],
       "validation": {
-        "status": "尚未支持",
-        "operational": false,
-        "science_tests": [],
-        "plan": "实验须明确选用方解石或文石；验证有限固体溶解；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+        "status": "已验证（气液固独立实验）",
+        "operational": true,
+        "science_tests": [
+          "tests/iphreeqc_probe.cpp",
+          "tests/science_core_test.cpp",
+          "godot/tests/native_smoke.gd",
+          "godot/tests/visual_flow.gd",
+          "tests/batch_test.cpp",
+          "godot/tests/batch_flow.gd"
+        ],
+        "plan": "实验须明确选用方解石或文石；验证有限固体溶解；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
+        "verified_on": "2026-09-09",
+        "range": {
+          "ids": [
+            10,
+            18,
+            19
+          ],
+          "volume_ml": [
+            10,
+            250
+          ],
+          "solid_mmol": [
+            0,
+            5
+          ],
+          "co2_mmol": [
+            0,
+            1
+          ],
+          "headspace_ml": [
+            50,
+            1000
+          ],
+          "co2_pressure_atm": [
+            0,
+            1
+          ],
+          "external_co2_atm": [
+            0.0001,
+            0.01
+          ],
+          "base_reagents": [
+            1,
+            2,
+            8,
+            9
+          ],
+          "limitations": "Separate independent final-equilibrium trials. One selected solid: Calcite or Gypsum. Closed ideal CO2 headspace or fixed external CO2. Extracted liquid only aliquots into empty vessels; no remix/dilution. Fixed 25 C, no kinetics, vapor, air or pressure correction."
+        },
+        "limitations": "Separate independent final-equilibrium trials. One selected solid: Calcite or Gypsum. Closed ideal CO2 headspace or fixed external CO2. Extracted liquid only aliquots into empty vessels; no remix/dilution. Fixed 25 C, no kinetics, vapor, air or pressure correction."
       }
     },
     {
@@ -2138,13 +2254,16 @@
         {
           "phase": "solid",
           "hydrate_water_per_formula": 2,
-          "inventory_mol": 0.0
+          "inventory_mol": 0.0,
+          "operational": true
         },
         {
           "phase": "aqueous",
           "hydrate_water_per_formula": 0,
           "inventory_mol": 0.0,
-          "concentration_mol_L": null
+          "concentration_mol_L": null,
+          "operational": false,
+          "status": "仅分离得到的清液；不支持直接预配"
         }
       ],
       "visual": {
@@ -2205,16 +2324,63 @@
           }
         }
       },
-      "applicability": "二水石膏；水合水与元素守恒、饱和度",
+      "applicability": "溶解与 CO₂ 平衡页：有限加入、最终平衡、清液分离与向空容器分装；25°C。二水石膏；水合水与元素守恒、饱和度",
       "sources": [
         "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
         "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
       ],
       "validation": {
-        "status": "尚未支持",
-        "operational": false,
-        "science_tests": [],
-        "plan": "二水石膏；水合水与元素守恒、饱和度；另测 1/50/250 mL、稀释、过量和重复转移、元素收支"
+        "status": "已验证（气液固独立实验）",
+        "operational": true,
+        "science_tests": [
+          "tests/iphreeqc_probe.cpp",
+          "tests/science_core_test.cpp",
+          "godot/tests/native_smoke.gd",
+          "godot/tests/visual_flow.gd",
+          "tests/batch_test.cpp",
+          "godot/tests/batch_flow.gd"
+        ],
+        "plan": "二水石膏；水合水与元素守恒、饱和度；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
+        "verified_on": "2026-09-09",
+        "range": {
+          "ids": [
+            10,
+            18,
+            19
+          ],
+          "volume_ml": [
+            10,
+            250
+          ],
+          "solid_mmol": [
+            0,
+            5
+          ],
+          "co2_mmol": [
+            0,
+            1
+          ],
+          "headspace_ml": [
+            50,
+            1000
+          ],
+          "co2_pressure_atm": [
+            0,
+            1
+          ],
+          "external_co2_atm": [
+            0.0001,
+            0.01
+          ],
+          "base_reagents": [
+            1,
+            2,
+            8,
+            9
+          ],
+          "limitations": "Separate independent final-equilibrium trials. One selected solid: Calcite or Gypsum. Closed ideal CO2 headspace or fixed external CO2. Extracted liquid only aliquots into empty vessels; no remix/dilution. Fixed 25 C, no kinetics, vapor, air or pressure correction."
+        },
+        "limitations": "Separate independent final-equilibrium trials. One selected solid: Calcite or Gypsum. Closed ideal CO2 headspace or fixed external CO2. Extracted liquid only aliquots into empty vessels; no remix/dilution. Fixed 25 C, no kinetics, vapor, air or pressure correction."
       }
     },
     {

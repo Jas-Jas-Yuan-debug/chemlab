@@ -105,20 +105,28 @@ for i,(name,formula,ascii_formula,phase,hydrate,atoms,aqueous,candidates,plan) i
              'validation':{'status':'尚未支持','operational':False,'science_tests':[],
                            'plan':plan+'；另测 1/50/250 mL、稀释、过量和重复转移、元素收支'}}
     if i==24:entry['sources'].append('https://www.ciaaw.org/silver.htm')
-    if i in REGISTRY['verified_reagent_ids']:
+    if i in REGISTRY['aqueous_prepared_reagent_ids']:
         entry['validation'].update({'status':'已验证（限定水溶液）','operational':True,
             'science_tests':REGISTRY['evidence'],'verified_on':REGISTRY['verified_on'],
             'range':{'temperature_K':298.15,'volume_ml':[1,250],'concentration_mol_L':[0.00001,0.01]},
             'limitations':REGISTRY['combinations']})
         for form in entry['forms']:
             form['operational'] = form['phase'] in ('aqueous','liquid')
+    if i in REGISTRY['batch']['ids']:
+        entry['validation'].update({'status':'已验证（气液固独立实验）','operational':True,
+            'science_tests':REGISTRY['evidence'],'verified_on':REGISTRY['verified_on'],
+            'range':REGISTRY['batch'],'limitations':REGISTRY['batch']['limitations']})
+        entry['applicability']='溶解与 CO₂ 平衡页：有限加入、最终平衡、清液分离与向空容器分装；25°C。'+plan
+        for form in entry['forms']:
+            form['operational']=form['phase'] in ('gas','solid')
+            if form['phase']=='aqueous':form['status']='仅分离得到的清液；不支持直接预配'
     catalog.append(entry)
 assert len(catalog)==30 and len({e['id'] for e in catalog})==30
 count = sum(e['validation']['operational'] for e in catalog)
 (ROOT/'data/reagents.json').write_text(json.dumps({'schema_version':1,'verified_operational_count':count,'reagents':catalog},ensure_ascii=False,indent=2)+'\n')
-report=['# 原料支持矩阵 · Phase 0','',
-        f'**产品已验证可操作：{count}/30。** 1–9 项仅限预配水溶液/蒸馏水；固体加入、气体及其余条目未支持。', '',
-        '已运行 tests/science_core_test.cpp 和 Godot 的 native_smoke / visual_flow；范围见 data/validation_registry.json。下表的数据库覆盖不等于其余条目已可操作。', '',
+report=['# 原料支持矩阵','',
+        f'**产品已验证可操作：{count}/30。** 1–9 项为预配水溶液/蒸馏水；10 CO₂、18 方解石、19 石膏在独立气液固实验中支持有限加入和平衡，清液可分离及分装。其余条目未支持。', '',
+        '已运行 science_core / batch_test 和 Godot 的 native_smoke / visual_flow / batch_flow；范围见 data/validation_registry.json。下表的数据库覆盖不等于其余条目已可操作。', '',
         '固定数据库：`phreeqc.dat`，SHA-256 `'+LOCK['database']['sha256']+'`。仅扫描这一份官方数据库，未合并其他库。', '',
         '摩尔质量按所选数据库原子量计算（水合水已计入），显示值后续按有效数字取舍；银原子量来自 CIAAW。', '',
         '| # | 原料 | 水溶液物种覆盖 | 候选固/气相与参数 | 适用条件 / 验证计划 |',

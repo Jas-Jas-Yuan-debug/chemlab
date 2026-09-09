@@ -50,4 +50,7 @@ func run() -> void:
     assert(not lab.physics_mode)
     assert(lab.states.size()==4)
     print("PASS: rendered free-fall flow, configure/release/pause/resume/impact/repeat, curves, chemistry preservation")
+    lab.queue_free()
+    await process_frame
+    await process_frame
     quit(0)
