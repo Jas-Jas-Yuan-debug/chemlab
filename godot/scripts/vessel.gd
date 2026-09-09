@@ -15,6 +15,11 @@ var wave := Vector2.ZERO
 var wave_velocity := Vector2.ZERO
 var previous_position := Vector3.ZERO
 var liquid_height := 0.0
+var slices: Array[Vector2] = []
+var plane_center := 0.0
+var liquid_slope := Vector2.ZERO
+var last_slope := Vector2(INF,INF)
+var last_fill := -1.0
 
 func build(id: int, vessel_kind: String, capacity: float) -> void:
     vessel_id = id
@@ -53,12 +58,15 @@ func build(id: int, vessel_kind: String, capacity: float) -> void:
     rim(height,Room.material(Color("c5dee1"),0.12,0.25))
     rim(0.002,Room.material(Color("aec7c9"),0.2,0.25))
     liquid = MeshInstance3D.new()
-    var liquid_mesh := CylinderMesh.new()
-    liquid_mesh.top_radius = radius-0.0018
-    liquid_mesh.bottom_radius = radius-0.0018
-    liquid_mesh.radial_segments = 64
-    liquid_mesh.height = 0.01
-    liquid.mesh = liquid_mesh
+    liquid.mesh = make_liquid_mesh()
+    var weight_sum := 0.0
+    for i in range(96):
+        var x := (i+0.5)/48.0-1
+        var weight := sqrt(1-x*x)
+        slices.append(Vector2(x*(radius-0.0018),weight))
+        weight_sum += weight
+    for i in slices.size():
+        slices[i].y /= weight_sum
     var liquid_mat := ShaderMaterial.new()
     liquid_mat.shader = preload("res://shaders/liquid.gdshader")
     liquid.material_override = liquid_mat
@@ -121,9 +129,8 @@ func update_state(state: Dictionary) -> void:
     liquid.visible = amount > 0.0001
     var fill: float = clampf(amount,0,capacity_ml)*0.000001/(PI*pow(radius-0.0018,2))
     liquid_height = fill
-    liquid.mesh.height = max(fill,0.00001)
-    liquid.position.y = 0.0031+fill/2
-    liquid.material_override.set_shader_parameter("fill_height",fill)
+    liquid.material_override.set_shader_parameter("container_height",height-0.006)
+    update_liquid_plane(Vector2.ZERO,true)
 
 func set_selected(yes: bool) -> void:
     ring.visible = yes
@@ -144,4 +151,70 @@ func _process(delta: float) -> void:
     wave += wave_velocity*dt
     var margin := minf(liquid_height*0.35,maxf(0.0,height-0.004-liquid_height)*0.35)
     wave = wave.limit_length(minf(0.08,margin/maxf(radius,0.001)))
-    liquid.material_override.set_shader_parameter("slope",wave)
+    var gravity_local: Vector3 = visual.global_basis.inverse()*Vector3.UP
+    var gravity_slope := -Vector2(gravity_local.x,gravity_local.z)/maxf(0.01,gravity_local.y)
+    update_liquid_plane(gravity_slope+wave)
+
+# Polar top grid permits clipping of the free surface at the glass base/rim.
+# This mesh is a visual volume approximation, not a fluid dynamics solver.
+func make_liquid_mesh() -> ArrayMesh:
+    var mesh := SurfaceTool.new()
+    mesh.begin(Mesh.PRIMITIVE_TRIANGLES)
+    var r := radius-0.0018
+    for ring_index in range(12):
+        for j in range(64):
+            var a := TAU*j/64.0
+            var b := TAU*(j+1)/64.0
+            var v0 := Vector3(cos(a),1,sin(a))*Vector3(r*ring_index/12.0,1,r*ring_index/12.0)
+            var v1 := Vector3(cos(a),1,sin(a))*Vector3(r*(ring_index+1)/12.0,1,r*(ring_index+1)/12.0)
+            var v2 := Vector3(cos(b),1,sin(b))*Vector3(r*(ring_index+1)/12.0,1,r*(ring_index+1)/12.0)
+            var v3 := Vector3(cos(b),1,sin(b))*Vector3(r*ring_index/12.0,1,r*ring_index/12.0)
+            mesh.set_normal(Vector3.UP)
+            mesh.set_uv(Vector2(1,0))
+            for point in [v0,v1,v2,v0,v2,v3]:
+                mesh.add_vertex(point)
+            if ring_index==11:
+                for point in [v1,Vector3(v1.x,0,v1.z),Vector3(v2.x,0,v2.z),v1,Vector3(v2.x,0,v2.z),v2]:
+                    mesh.set_uv(Vector2(point.y,0))
+                    mesh.set_normal(Vector3(point.x,0,point.z).normalized())
+                    mesh.add_vertex(point)
+    return mesh.commit()
+
+func mean_fill(center: float,slope_length: float) -> float:
+    var total := 0.0
+    for sample in slices:
+        total += sample.y*clampf(center+slope_length*sample.x,0,height-0.006)
+    return total
+
+func update_liquid_plane(slope: Vector2,force: bool = false) -> void:
+    if not force and slope.distance_to(last_slope)<0.003 and abs(last_fill-liquid_height)<0.000001:
+        return
+    liquid_slope = slope
+    last_slope = slope
+    last_fill = liquid_height
+    var magnitude := slope.length()
+    plane_center = liquid_height
+    if liquid_height-magnitude*radius<0 or liquid_height+magnitude*radius>height-0.006:
+        var low := -magnitude*radius
+        var high := height+magnitude*radius
+        for i in range(22):
+            var mid := (low+high)/2
+            if mean_fill(mid,magnitude)<liquid_height:
+                low = mid
+            else:
+                high = mid
+        plane_center = (low+high)/2
+    liquid.material_override.set_shader_parameter("plane_center",plane_center)
+    liquid.material_override.set_shader_parameter("slope",slope)
+
+func pour_angle() -> float:
+    var low := 0.0
+    var high := 1.55
+    for i in range(16):
+        var angle := (low+high)/2
+        var slope := tan(angle)
+        if mean_fill(height-0.006-(radius-0.0018)*slope,slope)>liquid_height:
+            low = angle
+        else:
+            high = angle
+    return (low+high)/2

@@ -17,3 +17,6 @@ Binaries/
 DerivedDataCache/
 Intermediate/
 Saved/
+
+dist/
+godot/bin/macos-template.zip

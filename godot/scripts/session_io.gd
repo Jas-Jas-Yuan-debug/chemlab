@@ -202,7 +202,7 @@ static func export_csv(lab: Node3D,path: String) -> String:
         var e: Dictionary = native.events[i]
         var row: Dictionary = e.readings.duplicate(true)
         row.merge({"section":"chemistry","step":i+1,"operation":e.operation,"from":e.from,"to":e.to,
-            "time_s":lab.operation_times[i],"transferred_ml":e.transferred_ml,"parameters_json":JSON.stringify(native.commands[i].parameters)},true)
+            "time_s":lab.operation_times[i],"transferred_ml":e.transferred_ml,"parameters_json":parameters_json(native.commands[i].parameters)},true)
         rows.append(row)
     for r in lab.fall_experiment.samples:
         var row: Dictionary = r.duplicate(true)
@@ -211,7 +211,7 @@ static func export_csv(lab: Node3D,path: String) -> String:
     for r in lab.bench_experiment.samples:
         var row: Dictionary = r.duplicate(true)
         row.section = r.kind
-        row.parameters_json = JSON.stringify(row.parameters)
+        row.parameters_json = parameters_json(row.parameters)
         row.erase("parameters")
         rows.append(row)
     var headings: Array[String] = ["section","step","operation","from","to","time_s","transferred_ml","volume_ml","ph","temperature_c","parameters_json"]
@@ -231,7 +231,8 @@ static func export_csv(lab: Node3D,path: String) -> String:
         row.database_sha256 = native.database_sha256
         var values := PackedStringArray()
         for key in headings:
-            values.append(str(row.get(key,"")))
+            var value = row.get(key,"")
+            values.append(csv_number(value) if finite(value) else str(value))
         file.store_csv_line(values)
     file.flush()
     var error := file.get_error()
@@ -240,3 +241,24 @@ static func export_csv(lab: Node3D,path: String) -> String:
         return "CSV 写入失败；原文件保留。"
     error = DirAccess.rename_absolute(ProjectSettings.globalize_path(temporary),ProjectSettings.globalize_path(path))
     return "" if error==OK else "CSV 临时文件已保存，但替换目标失败。"
+
+# Stable, at most ten significant digits for CSV; model precision is separate.
+static func csv_number(value: float) -> String:
+    if value==0:
+        return "0"
+    var exponent := int(floor(log(absf(value))/log(10.0)))
+    var mantissa := value/pow(10.0,exponent)
+    var text := String.num(mantissa,9)
+    if absf(float(text))>=10.0:
+        text = "1" if value>0 else "-1"
+        exponent += 1
+    return text+"e"+str(exponent)
+
+static func parameters_json(parameters: Dictionary) -> String:
+    var keys := parameters.keys()
+    keys.sort()
+    var entries := PackedStringArray()
+    for key in keys:
+        var value = parameters[key]
+        entries.append(JSON.stringify(key)+":"+(csv_number(float(value)) if finite(value) or value is bool else JSON.stringify(value)))
+    return "{"+",".join(entries)+"}"

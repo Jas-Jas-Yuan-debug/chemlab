@@ -1,0 +1,70 @@
+{
+  "created_utc": "2026-09-09T12:40:58Z",
+  "source_sha256": "e55536ba4849cfb504386984ddfc04fb16f72160127ab332290db6af7f277865",
+  "architecture": "arm64",
+  "runtime": "official Godot 4.7.2 release template, thinned from universal",
+  "signing": "ad-hoc, codesign --verify --deep --strict passed",
+  "notarized": false,
+  "files": {
+    "Contents/Frameworks/libchemlab_native.dylib": {
+      "bytes": 2565520,
+      "sha256": "e8a148af55b094a95f77045f458b386693f2e99e7641f6c36ebd30ac7b8897cf"
+    },
+    "Contents/Info.plist": {
+      "bytes": 1873,
+      "sha256": "2d94761634664d73e1d16349640dacd8072f30d2f0401d495a529ffa3c097572"
+    },
+    "Contents/MacOS/ChemLab \u00b7 \u89c2\u7269\u5b9e\u9a8c\u5ba4": {
+      "bytes": 82439632,
+      "sha256": "f0bf9c34c4185b73e34f3be49ca08b69e4777123215c0468e744ba6fa43cb4c8"
+    },
+    "Contents/PkgInfo": {
+      "bytes": 9,
+      "sha256": "7e50a30efad50208a173203ced60818d693bb61266b75aa10927d1a2adce80cb"
+    },
+    "Contents/Resources/ChemLab \u00b7 \u89c2\u7269\u5b9e\u9a8c\u5ba4.pck": {
+      "bytes": 5051512,
+      "sha256": "fd6b190fe8d57ca8a23b7a9c2b0b7045cfb2ae5abb1c2266cf394348d58dbf64"
+    },
+    "Contents/Resources/Licenses/GODOT-CPP-LICENSE.txt": {
+      "bytes": 1093,
+      "sha256": "26a5b210d90760156ce886267ce9df235787dcc6cebfd7ecd95ef5b6fdcc95bf"
+    },
+    "Contents/Resources/Licenses/GODOT-ENGINE-LICENSE.txt": {
+      "bytes": 1149,
+      "sha256": "b0435e3b3e4e55238f05f4b306f30524a1b2e20147810d436eaa554fa6855c80"
+    },
+    "Contents/Resources/Licenses/GODOT-THIRD-PARTY.json": {
+      "bytes": 114894,
+      "sha256": "0e012ef5f7fe547457e51cf56ef477c5383bc5d319ae1473587438f6e446f538"
+    },
+    "Contents/Resources/Licenses/LICENSE": {
+      "bytes": 34523,
+      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0"
+    },
+    "Contents/Resources/Licenses/SUNDIALS-NOTICE.txt": {
+      "bytes": 4585,
+      "sha256": "3293d864bbf61632b6062f00c245c3348ba5fcd3c8da54ff4cf107d80773fbd2"
+    },
+    "Contents/Resources/Licenses/THIRD_PARTY_NOTICES.md": {
+      "bytes": 2182,
+      "sha256": "f3ac083d175079d37ea9a5a6cfa8986ff4fc0a66b7d512eba14f94aa10a4c4df"
+    },
+    "Contents/Resources/Licenses/USGS-PHREEQC-NOTICE.txt": {
+      "bytes": 2706,
+      "sha256": "f5c97c1c0fea8c27096d3e7b298a627264a71683dc2debb374d07baaea168b34"
+    },
+    "Contents/Resources/PrivacyInfo.xcprivacy": {
+      "bytes": 229,
+      "sha256": "0535353bb08c25b8ce5ed9ac7e442a5994f402e0f6cbc4bed668cfc63c2ceac3"
+    },
+    "Contents/Resources/icon.icns": {
+      "bytes": 67500,
+      "sha256": "779ff524928785811d6d4c61f47a26491160b1092db9b610e85fcdfd9b2d2b2a"
+    },
+    "Contents/_CodeSignature/CodeResources": {
+      "bytes": 5036,
+      "sha256": "7947b1149738b1cb0be9c4aa400c14bb4e99e20143ca99176876e390ee09f4c9"
+    }
+  }
+}

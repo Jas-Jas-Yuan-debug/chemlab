@@ -14,7 +14,7 @@ godot = str(ROOT / 'tools/Godot.app/Contents/MacOS/Godot')
 checks = [('native', ['ctest','--test-dir','build','--output-on-failure'], '100% tests passed')]
 if not args.native_only:
     checks += [('import', [godot,'--headless','--editor','--path','godot','--import'], 'Godot Engine')]
-    for flow in ['native_smoke','session_native','visual_flow','fall_flow','batch_flow','barite_flow','physics_flow','session_flow']:
+    for flow in ['native_smoke','session_native','visual_flow','fall_flow','batch_flow','barite_flow','physics_flow','session_flow','pouring_flow']:
         command = [godot]
         if flow in ['native_smoke','session_native']: command += ['--headless']
         command += ['--path','godot','--script',f'tests/{flow}.gd','--quit-after','12000']

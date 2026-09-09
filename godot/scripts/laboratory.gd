@@ -22,6 +22,9 @@ var drag_offset := Vector3.ZERO
 var pouring := false
 var paused := false
 var pour_clock := 0.0
+var pour_ready := false
+var target_pour_angle := 0.0
+var pour_angle_volume := -1.0
 var elapsed := 0.0
 var stream: MeshInstance3D
 var last_transfer_ms := 0
@@ -50,6 +53,8 @@ var volume: SpinBox
 var amount: SpinBox
 var rate: SpinBox
 var plot: Control
+var plot_title: Label
+var last_compute_ms := 0.0
 var pause_button: Button
 var pour_button: Button
 var file_dialog: FileDialog
@@ -99,6 +104,13 @@ func _ready() -> void:
     bench_experiment.ui_theme = ui_theme
     add_child(bench_experiment)
     set_status("正在准备实验台…")
+    for argument in OS.get_cmdline_user_args():
+        if argument.begins_with("--chemlab-benchmark="):
+            var runner := preload("res://scripts/benchmark.gd").new()
+            runner.lab = self
+            runner.output = argument.trim_prefix("--chemlab-benchmark=")
+            add_child(runner)
+
 
 func style(bg: Color, border: Color = Color.TRANSPARENT) -> StyleBoxFlat:
     var s := StyleBoxFlat.new()
@@ -150,6 +162,16 @@ func panel(parent: Node,pos: Vector2,extent: Vector2) -> VBoxContainer:
     p.size = extent
     p.add_theme_stylebox_override("panel",style(Color(0.065,0.095,0.092,0.96),Color(0.6,0.8,0.7,0.16)))
     parent.add_child(p)
+    # Preserve side-panel margins when a wide window expands the canvas.
+    if pos.x>=1200:
+        p.anchor_left = 1.0
+        p.anchor_right = 1.0
+        p.offset_left = pos.x-1600
+        p.offset_right = pos.x+extent.x-1600
+    elif extent.x>=800:
+        p.anchor_right = 1.0
+        p.offset_left = pos.x
+        p.offset_right = pos.x+extent.x-1600
     var box := VBoxContainer.new()
     box.add_theme_constant_override("separation",10)
     p.add_child(box)
@@ -249,14 +271,14 @@ func build_ui() -> void:
     button(right,"加入指定体积","TransferAliquot",pour_once)
     rate = number(right,"倾倒流量 / mL·s⁻¹",0.1,20,0.1,5,"PourRate")
     pour_button = button(right,"按住连续倾倒","ContinuousPour",func(): pass)
-    pour_button.button_down.connect(func(): pouring = true; pour_clock = 0.0)
+    pour_button.button_down.connect(func(): pouring = selected_id!=target_id; pour_clock = 0.0; pour_angle_volume = -1.0)
     pour_button.button_up.connect(func(): pouring = false)
     pause_button = button(right,"暂停实验","PauseExperiment",toggle_pause)
     reagent_title = label(right,"配制：盐酸 HCl",16,Color("f5e6c9"))
     concentration = number(right,"浓度 / mol·L⁻¹",0.00001,0.01,0.00001,0.001,"Concentration")
     volume = number(right,"初始体积 / mL",1,250,1,50,"InitialVolume")
     button(right,"重新配制所选容器","PrepareSolution",prepare_selected)
-    label(right,"pH — 累计加入体积",15,Color("f5e6c9"))
+    plot_title = label(right,"pH — 累计加入体积",15,Color("f5e6c9"))
     plot = Plot.new()
     plot.custom_minimum_size = Vector2(298,132)
     right.add_child(plot)
@@ -272,6 +294,15 @@ func build_ui() -> void:
     button(record_row,"保存","SaveSession",func(): open_session_dialog("save"))
     button(record_row,"加载","LoadSession",func(): open_session_dialog("load"))
     button(record_row,"导出 CSV","ExportCSV",func(): open_session_dialog("csv"))
+    var about := AcceptDialog.new()
+    about.title = "关于 ChemLab · 观物实验室"
+    about.dialog_text = "化学与物理虚拟实验室 · 0.1\n\n当前验证 17 / 30 项原料，3 种指示剂。\n化学采用 25°C 稀水溶液最终平衡；各实验说明给出适用范围。\n液面、颜色和粒子采用视觉近似，不表示空间浓度或反应速率。\n\n原创代码：AGPL-3.0-only\n第三方引擎、计算库与数据保留原许可。\n源代码、模型说明、数据来源及第三方声明可在仓库查看。"
+    about.add_button("源代码与说明",true,"source")
+    about.custom_action.connect(func(action):
+        if action=="source":
+            OS.shell_open("https://github.com/Jas-Jas-Yuan-debug/chemlab"))
+    ui.add_child(about)
+    button(record_row,"关于","AboutLab",func(): about.popup_centered(Vector2i(750,440)))
     file_dialog = FileDialog.new()
     file_dialog.access = FileDialog.ACCESS_FILESYSTEM
     file_dialog.file_selected.connect(file_selected)
@@ -401,6 +432,8 @@ func ensure_view(state: Dictionary) -> void:
     v.visible = not physics_mode
 
 func select_vessel(id: int) -> void:
+    if id!=selected_id:
+        pouring = false
     selected_id = id
     for key in views:
         views[key].set_selected(key==id)
@@ -419,7 +452,9 @@ func update_readout() -> void:
     readout.text = "[font_size=27][color=#cce8dc]%.2f mL[/color]   [color=#f0d39d]pH %s[/color][/font_size]\n[color=#a5b9ae]容量 %.0f mL    温度 25.0 °C[/color]"%[s.volume_ml,ph_text,s.capacity_ml]
     if indicator_by_vessel.get(selected_id,0)==1 and s.ph!=null and (s.ph<2 or s.ph>11.5):
         readout.text += "\n[color=#f0b785]酚酞：此 pH 的颜色未支持[/color]"
-    plot.points.assign(curves.get(selected_id,[]))
+    var curve_id := selected_id if curves.has(selected_id) and not curves[selected_id].is_empty() else target_id
+    plot_title.text = "容器 %d：pH — 累计加入体积"%curve_id
+    plot.points.assign(curves.get(curve_id,[]))
     plot.queue_redraw()
 
 func update_targets() -> void:
@@ -471,6 +506,7 @@ func reset_lab() -> void:
     set_status("正在重置实验…")
 
 func apply_result(result: Dictionary) -> void:
+    last_compute_ms = result.get("compute_ms",0.0)
     if result.operation=="load":
         if not result.error.is_empty():
             set_status("加载失败，原实验保留："+result.error)
@@ -554,22 +590,41 @@ func _process(delta: float) -> void:
         apply_result(result)
     if not paused:
         elapsed += delta
-    if pouring and not paused:
+    update_pour_pose(delta)
+    if pouring and not paused and pour_ready:
         pour_clock += delta
         if pour_clock>=0.1 and not core.is_busy():
             request_pour(rate.value*pour_clock)
             pour_clock = 0.0
-    if views.has(selected_id):
-        for id in views:
-            var goal := -0.7 if pouring and id==selected_id else 0.0
-            views[id].visual.rotation.z = move_toward(views[id].visual.rotation.z,goal,delta*3)
-    stream.visible = pouring and Time.get_ticks_msec()-last_transfer_ms<240 and views.has(target_id) and views.has(selected_id)
+    stream.visible = pouring and not paused and pour_ready and Time.get_ticks_msec()-last_transfer_ms<240 and views.has(target_id) and views.has(selected_id)
     if stream.visible:
-        var a: Vector3 = views[selected_id].visual.to_global(Vector3(views[selected_id].radius,views[selected_id].height,0))
-        var b: Vector3 = views[target_id].global_position+Vector3(0,0.04,0)
+        var source = views[selected_id]
+        var target = views[target_id]
+        var a: Vector3 = source.visual.to_global(Vector3(source.radius,source.height-0.003,0))
+        var b: Vector3 = target.global_position+Vector3(0,target.liquid_height+0.004,0)
         stream.position = (a+b)/2
         stream.scale.y = a.distance_to(b)
         stream.quaternion = Quaternion(Vector3.UP,(b-a).normalized())
+
+func update_pour_pose(delta: float) -> void:
+    pour_ready = false
+    for id in views:
+        var v = views[id]
+        var angle := 0.0
+        var offset := Vector3.ZERO
+        if pouring and id==selected_id and views.has(target_id) and id!=target_id:
+            if abs(pour_angle_volume-v.reading.volume_ml)>0.0001:
+                target_pour_angle = v.pour_angle()
+                pour_angle_volume = v.reading.volume_ml
+            angle = -target_pour_angle
+            var basis := Basis(Vector3(0,0,1),angle)
+            var target = views[target_id]
+            var lip: Vector3 = target.position+Vector3(0,target.height+0.09,0)
+            offset = lip-v.position-basis*Vector3(v.radius,v.height-0.003,0)
+            pour_ready = abs(v.visual.rotation.z-angle)<0.035 and v.visual.position.distance_to(offset)<0.008
+        v.visual.rotation.z = move_toward(v.visual.rotation.z,angle,delta*2.5)
+        v.visual.position = v.visual.position.move_toward(offset,delta*0.6)
+        v.name_label.position = v.visual.position+Vector3(0,v.height+0.018,0)
 
 func drag_to(screen_position: Vector2) -> void:
     var plane := Plane(Vector3.UP,0.89)

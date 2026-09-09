@@ -1,47 +1,50 @@
-# Current state / handoff
+# ChemLab handoff
 
-Updated 2026-09-09. Keep following `docs/GOAL_OBJECTIVE.md` through Phase 9.
-User explicitly approved replacing Unreal with Godot to retain AGPL-3.0, and
-explicitly requested a **public** GitHub repository. Do not ask again for those decisions.
-Repository: https://github.com/Jas-Jas-Yuan-debug/chemlab (public, main, AGPL-3.0).
-Use Git; push meaningful verified stages. No unapproved paid resources or large installs.
+Updated 2026-09-09. Continue `docs/GOAL_OBJECTIVE.md`; goal remains active.
 
-## Verified now
+## Immediate user constraint
 
-- Phase 0: original directory empty; environment and license decisions recorded.
-  Godot 4.7.2 portable official macOS binary SHA checked, arm64 startup verified.
-  godot-cpp 4.5 API pinned commit works in that runtime. IPhreeqc 3.8.6 pinned
-  original source and `phreeqc.dat` independently built and executed in arm64.
-  All 30 catalog entries have phase/hydration/formula weight/composition/mapping/source/status.
-- Phase 1 foundation: rendered 3D room, physical-scale containers, glass shells,
-  four selectable vessels, orbit/zoom/focus, table-plane dragging with collision rejection,
-  add beaker/cylinder/dropper/bottle, Chinese material search/controls/readouts.
-  CUA mouse testing found and fixed drag events swallowed by GUI: motion/release now in `_input`,
-  initial world pick in `_unhandled_input`, with grab offset. Observed move and overlap rejection.
-  Real observation-only rod prop is present; stirring kinetics remain unsupported.
-- Phase 2: first nine reagents are operational ONLY as water/prepared dilute aqueous forms.
-  Concentrations 1e-5–0.01 mol/L, initial volumes 1–250 mL, 25 C. Solution volume is solved
-  iteratively for solvent mass, not equated to kg. MIX uses full SOLUTION_RAW snapshots and
-  checks Na/Cl/K/Ca/Mg/C/S/N/Ba/Fe/Cu and total H/O conservation. Empty/full/overdraw checks.
-  IDs 2–6 may mix; 7–9 only self/water, otherwise reject pending validated gas/solid models.
-  Three sourced indicator approximations added; trace addition ignored; phenolphthalein range guarded.
-  PHREEQC worker requests serialize; reset generation discards stale results; errors keep valid state.
-- Phase 3: C++ FreeFall fixed-step clock and analytic impact event, Godot sphere/ruler/control panels,
-  parameter editing, release/pause/resume/repeat, height/speed curves and chemistry/physics mode tabs.
-  `mechanics_test` and rendered `fall_flow.gd` pass; screenshot artifacts/free-fall.png.
-  Post-impact velocity is zero with impact speed reported separately. See docs/PHYSICS_MODELS.md.
+**User has now explicitly said "now you can run the tests". Window tests are authorized again.** The earlier ten-minute pause was honored; the user confirmed that they manually closed the interrupted benchmark windows while using the computer. Those SIGTERM interruptions are not evidence of application crashes. Preserve later user steering.
 
-- Phase 4 partial: Fresnel glass, bounded damped liquid-surface slope, seeded 256px procedural
-  wood/stone materials and reduced lighting. Liquid numerical amount never comes from visuals.
-  Avoid ReflectionProbe on this Metal Mobile build: it caused 7 leaked Texture RID warnings on shutdown;
-  removed it, reran all render flows without warnings. Pour stream/pose still needs refinement.
-- Phase 5 partial: 17/30 total now verified. Added finite CO2, Calcite and Gypsum in dedicated batch UI,
-  closed liquid/solid, ideal closed CO2 volume, fixed external CO2, real remaining solids, gas/element ledger,
-  filtered liquid extraction and empty-vessel aliquots. 108 condition sets with repeat and transfer checks;
-  USGS gypsum and independent Henry/Ka references; full rendered UI tested. See docs/BATCH_EQUILIBRIUM.md.
-  Batch sample provenance prevents unverified remixing/dilution. Reset clears batch UI and state.
+## Authorization and repository
 
-## Tests and commands
+User approved Godot instead of Unreal, keeping AGPL-3.0; explicitly requested Git and a public repository named `chemlab`. Repo https://github.com/Jas-Jas-Yuan-debug/chemlab is public, main, recognized AGPL-3.0. Do not ask again. Latest pushed milestone is `9d12dff` (session replay and CSV). Current working tree contains later visual, packaging and benchmark work; preserve it. No paid resources, Unreal installation or global Godot install.
+
+## Implemented and actually verified
+
+- Godot 4.7.2 official portable macOS engine, godot-cpp 4.5 API commit, IPhreeqc 3.8.6-17100, original phreeqc.dat: pinned hashes, native arm64 build and execution.
+- Room, scaled glass containers, orbit/zoom/focus, select/drag with grab offset, table bounds and collision rejection, beaker/cylinder/dropper/bottle addition, Chinese search/category/controls/readouts. CUA real mouse selection/drag/overlap/focus/reset was checked earlier. Stirring rod is an observation prop, clearly labeled.
+- 17/30 raw reagents operational, without double counting forms: water/prepared aqueous IDs 1–9,11,14,15,16,25; dedicated CO2 10, Calcite 18, Gypsum 19. Ordinary mixtures restricted to validated scopes. Dedicated BaCl2 + Na2SO4 Barite precipitation, undersaturation and excess checks. Independent solid/gas/aqueous inventories; filtered liquid may only transfer to empty vessels.
+- Pure homogeneous aliquots scale extensive raw state and keep pH/valence. Different compositions still use IPhreeqc MIX and element/H/O/valence guards. No reaction rates, arbitrary redox, combustion or spatial concentration model.
+- Free fall plus spring, small-angle pendulum, isolated two-water heat exchange, series/parallel DC, thin lens. C++ 1/120 s clocks, analytical checks, pause/repeat, same state for geometry/readings/curves. All six UI flows tested.
+- Versioned JSON session, white-listed native replay, geometry/indicator/camera/curve restoration, CSV, paused load, invalid-file/failed-replay state preservation. `session_native` and rendered `session_flow` passed, including the CSV precision adjustment and byte-identical save/load export.
+- New controlled pour pose: move source lip above receiver, gravity-level clipped liquid surface, canonical volume. `pouring_flow` passed held-button transfer, horizontal surface, actual triangle-volume approximation, empty/release stops, chloride conservation, indicator boundaries.
+- Full `scripts/verify.py` at 2026-09-09 12:33:14 UTC passed 7 CTest cases, import, native/session and all eight rendered flows, including pouring, About/wide-window changes and CSV canonicalization. No ERROR/leak warnings. Only the opt-in benchmark/headless delivery harness changed afterward.
+- Official macOS template member downloaded alone (~117 MiB via HTTP range; CRC + pinned extracted SHA-256). `scripts/build_macos.py` extracted arm64 from official universal binaries, exported an ~86 MiB standalone app, copied license notices, ad-hoc signed and verified. The app was rebuilt at 12:40:58 UTC with the latest visual/CSV/benchmark changes. Exported release headless smoke from `/tmp` verified PCK/native initialization, neutralization, chloride conservation, Barite, heat energy, save/load and paused restoration; `artifacts/packaged-smoke.json` has no failures. This is not a rendered performance result.
+
+## Current work / remaining delivery gates
+
+1. User added adjustable-temperature heating equipment and stirring, and reminded us to commit. Implement a controllable magnetic stirring hotplate with a validated water energy model, independent heater/motor switches and saved control history; then run updated checks and performance. User explicitly authorized tests again.
+2. Benchmark actual 1920x1080 image, editor game run with editor UI open and independent exported release runtime. **Editor-run benchmark now passed all nine scenes at about 60 FPS, p99 17.3–18.2 ms, minimum complete second 59–60 FPS.** See `artifacts/performance-editor-run.json`; this predates the newly requested heater/stirrer. Packaged performance is still pending. Early runs were manually closed by the user (SIGTERM -15), without receipt. Do not interpret partial segment logs as passing evidence.
+3. `get_viewport().get_texture().get_size()` misleadingly reports (2075,1167) for a 1920x1080 physical window with stretch. Actual `get_texture().get_image().get_size()` was verified (1920,1080). Benchmark now checks the real image once before measurement, and counts actual `frame_post_draw` timestamps without forced renders in measured segments. Project uses canvas_items + expand, side panels now anchored for wide windows.
+4. App is rebuilt and headless-smoke verified; use `scripts/benchmark.py --packaged --stress-seconds 180` (or longer) for lifecycle/memory testing. Default editor run is `python3 scripts/benchmark.py --stress-seconds 0`. Script owns and cleans its editor process. Each mode runs nine measured scene segments and records external RSS once per second; packaged mode also repeats reset/neutralize/save/load/model changes. Report failure if interrupted or incomplete.
+5. Finalize performance/stability and build receipts, application startup instructions, known visual/model limitations; push verified changes. Source/repo and local .app should be delivered. Do not mark goal complete before these gates.
+
+## Technical findings to preserve
+
+- `phreeqc.dat` is Latin-1; compare/hash original bytes. Product uses Godot FileAccess bytes and `LoadDatabaseString` so PCK loading works. Hash mismatch is an error.
+- IPhreeqc may return warning with exit zero; wrapper rejects warnings. Unknown species must not silently disappear.
+- Upstream `transport.cpp` and godot-cpp both export C `token`: a source-scoped compile definition renames only the IPhreeqc translation unit. Keep this adaptation.
+- godot-cpp needs exceptions enabled and slim profile OS/FileAccess/Image/WorkerThreadPool/XMLParser/RefCounted. Native Chinese errors use `String::utf8`.
+- IPhreeqc raw DUMP uses 14 digits. Homogeneous aliquot H/O/water/volume fields are rewritten at 17 digits after upstream cxxSolution scaling. Microscopic remainder is folded into actual transfer, not re-solved as 1e-20 L or silently discarded.
+- Low-pressure upstream Peng–Robinson volume clips at 1e4 L/mol. Closed gas uses explicit `CO2_ideal(g)` with exact same database equilibrium coefficients and no EOS critical parameters; PV=nRT checked. Original database untouched.
+- ReflectionProbe caused seven leaked Texture RID warnings on this engine/Metal configuration, so it was removed. Fixed an unparented initial physics MeshInstance3D allocation too. Last full render check had no leaks/errors.
+- Screenshots in automated UI flows use explicit force_draw(false)/force_sync before reading pixels: waiting for frame_post_draw can hang if an app is occluded. **These are screenshot checks, not FPS measurements.** Benchmark avoids force draw in measured segments and checks enough actual frames.
+- `JSON.stringify(... full_precision=true)` / parse can shift final floating-point bits; a batch parameter 0.00042 and elapsed times exposed byte differences in CSV. New CSV formatting canonicalizes at most ten significant digits and scalar parameter JSON; passed the complete post-pause regression. Numerical state comparison remains tolerance-based.
+- Godot arrays/dictionary keys distinguish int and float in some membership operations. JSON IDs are validated then converted to int; do not use float directly to look up vessel keys.
+- Official template archive only has `.universal` names, while arm64 export requests `.arm64`. Build script uses lipo on those official binaries to make a project-local arm64 template. Export uses `binary_format/architecture`, codesign=3 (Xcode, identity `-`), not 2 (rcodesign). ETC2/ASTC import enabled. No Developer ID/notarization is configured.
+
+## Build / verify commands
 
 ```sh
 python3 scripts/bootstrap.py --with-godot
@@ -49,81 +52,11 @@ python3 scripts/build_catalog.py
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 -DCHEMLAB_BUILD_GODOT=ON
 cmake --build build --parallel 4
 python3 scripts/verify.py
-tools/Godot.app/Contents/MacOS/Godot --headless --editor --path godot --import
-tools/Godot.app/Contents/MacOS/Godot --headless --path godot --script tests/native_smoke.gd
-tools/Godot.app/Contents/MacOS/Godot --path godot --script tests/visual_flow.gd
-tools/Godot.app/Contents/MacOS/Godot --path godot --script tests/fall_flow.gd --quit-after 1800
+python3 scripts/build_macos.py
 ```
 
-`Start ChemLab.command` builds cached sources and launches the scene. No global installation.
-Native smoke validates pH, transfer and stale reset. Rendered UI flow exercises nine reagent
-preparations/transfers and saves screenshots in artifacts. Inspect logs for SCRIPT ERROR as
-Godot may return exit 0 even when a script fails. Native test has 81 stock/aliquot/dilution
-iterations (75 distinct initial conditions), independent dilute pH limits, failure guards.
+`artifacts/verification.json` records scientific/UI regressions, not performance. Test scripts require PASS markers and no SCRIPT ERROR/ERROR/leak warnings, because Godot may exit zero on script failures. Build/download caches, binaries, logs and local environment records are ignored.
 
-## Integration findings
+## Unsupported scope
 
-- `phreeqc.dat` is Latin-1; hash bytes, decode Latin-1 for the coverage scanner.
-- PHREEQC can report an unknown species as warning instead of nonzero RunString result;
-  wrapper rejects warnings as well as errors. Never silently ignore unsupported components.
-- IPhreeqc transport.cpp and godot-cpp expose a C symbol `token`. A scoped compilation
-  definition renames only the PHREEQC translation unit's token; upstream source unchanged,
-  adaptation disclosed in THIRD_PARTY_NOTICES. Do not remove this (previously caused crash).
-- godot-cpp slim profile needs OS, FileAccess, Image, WorkerThreadPool, XMLParser as well as
-  RefCounted. Enable exceptions on this extension build; catch chemistry exceptions before API return.
-- Tiny floating point remainder after emptying must be included in actual transfer, not
-  solved as a fictitious 1e-20 L solution or discarded. Covered by repeat-transfer test.
-
-## Remaining work (goal NOT complete)
-
-1. Finish Phase 1/2 usability and indicators tests, continuous-pour UI regression and visual motion.
-2. Phase 3 free fall is implemented and tested; maintain regression while adding other experiments.
-3. Phase 4 improve realism (current materials are an early approximation, not photoreal validation).
-4. Phases 5/6 expand supported validated scope beyond the 17 entries; basic CO2 now works. Selected DB lacks silver,
-   acetate, Portlandite, Brucite, Chalcanthite etc. Keep unsupported or validate a coherent alternative;
-   never splice databases or promise arbitrary mixing. Gas bubbles/solids must derive from solver amounts.
-5. Phase 7 spring/pendulum/heat/DC/optics, independently validated models and full UI workflows.
-6. Phase 8 transactional save/load including model/database versions, action log, CSV export.
-7. Phase 9 1920x1080 editor AND packaged runtime performance, stress/memory, export app and documentation.
-
-No performance claim yet. No 30-material or full phase-completion claim. The present original code
-and source lock are on main; build/download caches and local environment identifiers are ignored.
-
-Batch solver finding: upstream PR EOS clips V_m at 1e4 L/mol, giving a low-pressure floor.
-Use the explicit CO2_ideal(g) copy of the exact pinned database equilibrium parameters (no EOS critical
-parameters); test PV=nRT. No upstream source/database edits. Do not silently revert to PR gas path.
-`artifacts/verification.json` is a reproducible test receipt, NOT a performance benchmark.
-
-Aqueous expansion: 11/14/15/16/25 now operational as prepared stocks. 45 parameter sets,
-repeated transfers and 14 UI reagent flows pass. Sulfuric acid and sodium sulfate may join
-2–6 acid/base/salt mixtures; Mg/Ba stocks only self/water. Candidate N/Fe/Cu automatic-MIX
-valence audit failed; raw audit file retained, these forms remain disabled pending dedicated models.
-Pure aliquots now scale extensive upstream cxxSolution state instead of re-equilibrating redox;
-composition_key allows recombining identical aliquots. H/O/water RAW scalars roundtrip 17 digits.
-Valence amounts checked separately on actual mixtures. See docs/AQUEOUS_EXTENSION.md.
-Fixed catalog buttons: enabled state derives from registry, no longer hard-coded id<=9.
-
-Phase 6 partial: dedicated BaCl2/Na2SO4 → Barite equilibrium UI and C++ model.
-27 native condition sets plus rendered barite_flow pass (including no precipitate below saturation,
-limiting-ion excess, extraction/aliquot). Source of current solid volume is solver amount × database Vm.
-Total remains 17/30 (no new raw entry counted). See docs/PRECIPITATION.md.
-Next proceed Phase 7 physics models/UI; sources consulted OpenStax SHM, pendulum, calorimetry,
-resistor series/parallel, thin lenses. Phase 8/9 still unimplemented.
-
-Phase 7 implemented: src/science/physics_models.* (spring, small-angle pendulum, two-water
-thermal exchange, series/parallel DC, thin lens real/virtual/infinite), LabCore bench methods,
-godot/scripts/physics_experiment.gd with parameter/simulation/measurement/curve/3D flow.
-physics_models_test passes independent relationships, conserved energy, frame-step independence.
-physics_flow passed native-to-visual transforms and complete controls; float input comparison uses
-tolerance (SpinBox value is not exactly decimal 0.2). Fixed native errors to String::utf8 so Chinese
-invalid-parameter errors render correctly. Added dark optics board for contrast. Readings remain unchanged
-on invalid configuration. Five screenshot artifacts physics-*.png. All 7 CTest cases and native/import/six rendered flows pass without error/leak warnings.
-Fixed an orphan initial MeshInstance3D in physics view (allocated before parenting and overwritten).
-This milestone is ready for push.
-Next: Phase 8 durable save/load/replay & CSV, then full Phase 9 packaging/performance/stress.
-Remaining early-phase concerns: continuous-pour real UI regression; indicator boundary tests;
-pour pose/stream realism and vessel liquid clipping under tilt are still approximations.
-
-## Phase 8 更新（2026-09-09）
-
-新增 LabSession 顺序操作日志、版本锁定的 JSON 重建、器材/指示剂/相机/曲线恢复以及 CSV 原子导出。原生测试与完整渲染流程通过；损坏和不兼容文件保留原状态。接下来补齐连续倾倒视觉/交互验证，再进行官方 macOS 模板打包与 1080p 实测。详细格式见 docs/SESSION_FORMAT.md。
+13 raw entries remain disabled. Selected DB lacks silver/acetate and certain requested solid phases; N/Fe/Cu automatic MIX candidate audit showed unapproved valence changes. Pure aliquot fix does not establish valid dilution, redox or solid-phase behavior for those candidates. Preserve audit evidence and explain these limitations; do not combine databases or count unverified items. See SUPPORT_MATRIX, AQUEOUS_EXTENSION and VISUAL_MODEL. Visual verification supports geometry/readout/interaction consistency; it is not photoreal optical calibration.

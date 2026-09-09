@@ -1,0 +1,37 @@
+{
+	"adapter": "",
+	"database_sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+	"driver": "metal",
+	"editor_binary": false,
+	"engine": "4.7.2-stable (official)",
+	"failures": [],
+	"frames": {},
+	"observations": [],
+	"phase_seconds": 10.0,
+	"renderer": "mobile",
+	"request_to_commit": {
+		"count": 5,
+		"max_ms": 20.812,
+		"mean_ms": 19.345200000000002,
+		"over_33_334_ms_percent": 0.0,
+		"p50_ms": 18.992,
+		"p95_ms": 20.376,
+		"p99_ms": 20.376
+	},
+	"schema": 1,
+	"smoke_only": true,
+	"solver_compute": {
+		"count": 5,
+		"max_ms": 3.949583,
+		"mean_ms": 2.8528582000000005,
+		"over_33_334_ms_percent": 0.0,
+		"p50_ms": 2.6195,
+		"p95_ms": 2.869875,
+		"p99_ms": 2.869875
+	},
+	"viewport_size": [
+		0,
+		0
+	],
+	"wall_seconds": 0.110829
+}
