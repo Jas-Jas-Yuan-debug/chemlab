@@ -1,5 +1,5 @@
 #pragma once
-#include "science/chemistry.hpp"
+#include "science/session.hpp"
 #include "science/mechanics.hpp"
 #include "science/physics_models.hpp"
 #include <godot_cpp/classes/ref_counted.hpp>
@@ -12,24 +12,26 @@ namespace godot {
 class LabCore : public RefCounted {
     GDCLASS(LabCore, RefCounted)
     struct Result {
-        std::map<int,chemlab::Vessel> vessels;
+        chemlab::LabSession session;
         std::string error;
         std::string operation;
         double transferred_ml=0;
         double compute_ms=0;
         int from=0,to=0;
         uint64_t generation=0;
-        std::optional<chemlab::BatchResult> batch;
+        std::optional<chemlab::FreeFall> restored_fall;
+        std::optional<chemlab::PhysicsExperiment> restored_bench;
     };
     std::string database_;
-    std::map<int,chemlab::Vessel> vessels_;
+    chemlab::LabSession session_;
+    std::string database_error_;
     std::future<Result> pending_;
     uint64_t generation_=0;
     uint64_t revision_=0;
     bool reset_queued_=false;
     chemlab::FreeFall fall_;
     chemlab::PhysicsExperiment bench_;
-    std::optional<chemlab::BatchResult> batch_;
+    bool submit(const chemlab::Command& command);
     bool start(const std::function<void(chemlab::Chemistry&,Result&)>& job);
 protected:
     static void _bind_methods();
@@ -43,6 +45,10 @@ public:
     bool is_busy() const;
     Dictionary poll();
     Dictionary snapshot() const;
+    Dictionary save_session() const;
+    Dictionary preview_bench(const String& kind,const Dictionary& parameters,double elapsed_s,bool running=false) const;
+    Dictionary preview_fall(double height_m,double gravity_m_s2,double elapsed_s) const;
+    String load_session(const Dictionary& document);
     bool run_batch(const Dictionary& parameters);
     bool extract_batch(int vessel_id);
     Dictionary batch_snapshot() const;

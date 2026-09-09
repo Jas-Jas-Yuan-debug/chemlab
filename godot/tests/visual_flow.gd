@@ -40,7 +40,8 @@ func run() -> void:
     lab.refresh_reagents()
     for i in range(30):
         await process_frame
-    await RenderingServer.frame_post_draw
+    RenderingServer.force_draw(false)
+    RenderingServer.force_sync()
     var output := ProjectSettings.globalize_path("res://../artifacts/laboratory-neutralization.png")
     assert(root.get_texture().get_image().save_png(output)==OK)
     print("PASS: rendered UI prepare/reset defaults, aliquot buttons, acid/base neutralization, readout, search, screenshot")
@@ -48,7 +49,8 @@ func run() -> void:
     assert(lab.states[3].volume_ml==0)
     for i in range(10):
         await process_frame
-    await RenderingServer.frame_post_draw
+    RenderingServer.force_draw(false)
+    RenderingServer.force_sync()
     root.get_texture().get_image().save_png(ProjectSettings.globalize_path("res://../artifacts/laboratory-initial.png"))
     for item in lab.catalog:
         var b = lab.reagent_list.find_child("Reagent%d"%item.id,true,false)

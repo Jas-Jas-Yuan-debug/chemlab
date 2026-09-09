@@ -21,6 +21,12 @@ void FreeFall::advance(double elapsed){
     remainder_=std::max(0.0,remainder_-steps*timestep_s);
     if(reading().landed)running_=false;
 }
+void FreeFall::restore(double time,bool landed){
+    const double impact=std::sqrt(2*initial_height_/gravity_);
+    if(!std::isfinite(time)||time<0||time>impact+1e-8|| (landed&&std::abs(time-impact)>1e-8))throw std::invalid_argument("保存的自由落体时间无效");
+    ticks_=landed?static_cast<uint64_t>(std::ceil(impact/timestep_s)):static_cast<uint64_t>(std::llround(time/timestep_s));
+    remainder_=0;running_=false;
+}
 FallReading FreeFall::reading()const{
     const double impact=std::sqrt(2*initial_height_/gravity_);
     const double time=std::min(ticks_*timestep_s,impact);

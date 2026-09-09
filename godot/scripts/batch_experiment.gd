@@ -272,3 +272,52 @@ func _process(delta: float) -> void:
         if bubbles[i].visible:
             var t := fmod(bubble_time*0.6+i*0.13,1.0)
             bubbles[i].position = Vector3(sin(i*2.4)*0.018,0.894+reactor.liquid_height*t,cos(i*2.4)*0.018)
+
+func restore_view(saved_parameters: Dictionary,history: Array) -> void:
+    clear_trial()
+    if saved_parameters.is_empty():
+        return
+    var p := {"barite":false,"base_reagent":1,"concentration":0.001,"volume_ml":100,"solid_reagent":18,"solid_mmol":2,
+        "gas_boundary":0,"co2_mmol":0,"headspace_ml":100,"external_co2_atm":0.00042,"sulfate_ml":50,"sulfate_concentration":0.001}
+    p.merge(saved_parameters,true)
+    if p.barite:
+        p.solid_mmol = p.sulfate_ml*p.sulfate_concentration
+    set_barite(bool(p.barite))
+    parameters = p
+    pending_parameters = p.duplicate(true)
+    if p.barite:
+        ba_volume.value = p.volume_ml
+        ba_concentration.value = p.concentration
+        sulfate_volume.value = p.sulfate_ml
+        sulfate_concentration.value = p.sulfate_concentration
+    else:
+        base_picker.selected = [1,2,8,9].find(int(p.base_reagent))
+        solid_picker.selected = [18,19,0].find(int(p.solid_reagent))
+        boundary_picker.selected = int(p.gas_boundary)
+        volume.value = p.volume_ml
+        concentration.value = p.concentration
+        solid_amount.value = p.solid_mmol
+        gas_amount.value = p.co2_mmol
+        headspace.value = p.headspace_ml
+        external_co2.value = p.external_co2_atm
+        update_inputs()
+    var r := core.batch_snapshot()
+    if not r.is_empty() and r.ph!=null:
+        accept_result({"operation":"batch","error":""})
+    elif not r.is_empty():
+        reactor.update_state(r)
+        measurements.text = "清液已分离，平衡试验已结束。\n\n剩余固体  %.4f mmol\n保留 CO₂  %.4f mmol"%[r.solid_remaining_mmol,r.gas_co2_mmol]
+        solid.visible = r.solid_remaining_mmol>0.000001
+        var vm := 52.9 if r.mineral=="Barite" else 36.9 if r.mineral=="Calcite" else 73.9
+        var height: float = r.solid_remaining_mmol/1000*vm*0.000001/(PI*0.02*0.02)
+        solid.mesh.height = maxf(height,0.000001)
+        solid.position.y = 0.8931+height/2
+        status.text = "已恢复分离后的状态。"
+    samples = history.duplicate(true)
+    plot.points.clear()
+    for trial in history:
+        var amount: float = trial.parameters.get("solid_mmol",0)
+        if trial.parameters.get("barite",false):
+            amount = trial.parameters.get("sulfate_ml",50)*trial.parameters.get("sulfate_concentration",0.001)
+        plot.points.append(Vector2(amount,trial.reading.get("solid_mmol",0)))
+    plot.queue_redraw()

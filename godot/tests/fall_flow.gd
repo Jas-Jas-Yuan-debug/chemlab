@@ -42,7 +42,8 @@ func run() -> void:
     # Godot transforms use float32; the scientific state above is checked in float64.
     assert(abs(fall.ball.position.y-0.908)<1e-6)
     assert(fall.height_plot.points.size()>2)
-    await RenderingServer.frame_post_draw
+    RenderingServer.force_draw(false)
+    RenderingServer.force_sync()
     assert(root.get_texture().get_image().save_png(ProjectSettings.globalize_path("res://../artifacts/free-fall.png"))==OK)
     await press("RepeatFall")
     assert(lab.core.fall_snapshot().height_m>1.4)

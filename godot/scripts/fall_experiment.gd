@@ -155,3 +155,21 @@ func update_reading(r: Dictionary) -> void:
 func _physics_process(delta: float) -> void:
     if active:
         update_reading(core.advance_fall(delta))
+
+func restore_view(reading: Dictionary,history: Array) -> void:
+    height_input.value = reading.initial_height_m
+    gravity_input.value = reading.gravity_m_s2
+    samples.clear()
+    height_plot.points.clear()
+    speed_plot.points.clear()
+    last_sample_time = -1
+    impact_recorded = false
+    height_plot.y_max = reading.initial_height_m
+    height_plot.x_max = reading.impact_time_s
+    speed_plot.x_max = reading.impact_time_s
+    speed_plot.y_max = reading.impact_speed_m_s
+    for sample in history:
+        update_reading(sample)
+    update_reading(reading)
+    pause_button.text = "继续"
+    status.text = "已恢复；点击继续可从保存时刻运行。" if not reading.landed else "已恢复落地状态，可重复本次实验。"

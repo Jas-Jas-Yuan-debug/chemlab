@@ -64,3 +64,5 @@ tools/Godot.app/Contents/MacOS/Godot --path godot
 - [第三方声明](THIRD_PARTY_NOTICES.md) 保留各依赖原许可与署名。
 - 数据库有覆盖不代表实验已经验证，更不代表支持任意混合。
 - 尚未测得编辑器/打包程序帧率，未宣称达到 30 FPS。
+
+实验记录已实现：[保存文件与 CSV 格式](docs/SESSION_FORMAT.md)。加载后先暂停，科学读数由固定版本模型重新计算。

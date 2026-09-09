@@ -68,9 +68,9 @@ Solution scaled(const Solution& original,double fraction){
 
 }
 
-Chemistry::Chemistry(const std::string& database) : id_(CreateIPhreeqc()) {
+Chemistry::Chemistry(const std::string& database,bool database_is_text) : id_(CreateIPhreeqc()) {
     check(id_ >= 0, "无法创建化学求解器");
-    if (LoadDatabase(id_,database.c_str()) != 0) {
+    if ((database_is_text?LoadDatabaseString(id_,database.c_str()):LoadDatabase(id_,database.c_str())) != 0) {
         const std::string error = GetErrorString(id_); DestroyIPhreeqc(id_); id_ = -1;
         throw std::runtime_error("无法加载数据库："+error);
     }

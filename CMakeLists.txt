@@ -19,7 +19,7 @@ set_property(SOURCE "${IPHREEQC_ROOT}/src/phreeqcpp/transport.cpp"
 add_executable(iphreeqc_probe tests/iphreeqc_probe.cpp)
 target_link_libraries(iphreeqc_probe PRIVATE IPhreeqc)
 target_compile_options(iphreeqc_probe PRIVATE -Wall -Wextra -Wpedantic)
-add_library(chemlab_science STATIC src/science/chemistry.cpp src/science/mechanics.cpp src/science/physics_models.cpp)
+add_library(chemlab_science STATIC src/science/chemistry.cpp src/science/mechanics.cpp src/science/physics_models.cpp src/science/session.cpp)
 target_include_directories(chemlab_science PUBLIC src)
 target_link_libraries(chemlab_science PUBLIC IPhreeqc)
 target_compile_options(chemlab_science PRIVATE -Wall -Wextra -Wpedantic)

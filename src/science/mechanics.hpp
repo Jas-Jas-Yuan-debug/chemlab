@@ -20,6 +20,9 @@ public:
     void reset();
     void advance(double elapsed_s);
     FallReading reading() const;
+    double initial_height()const{return initial_height_;}
+    double gravity()const{return gravity_;}
+    void restore(double time_s,bool landed);
 private:
     double initial_height_=1.0;
     double gravity_=9.80665;

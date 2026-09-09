@@ -12,6 +12,7 @@ public:
     void reset();
     void advance(double elapsed_s);
     Scalars reading() const;
+    void restore(double elapsed_s);
     const Scalars& parameters() const{return parameters_;}
     const std::string& kind()const{return kind_;}
     static constexpr double step_s=1.0/120.0;

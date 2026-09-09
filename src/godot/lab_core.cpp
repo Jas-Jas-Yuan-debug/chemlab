@@ -1,11 +1,33 @@
 #include "lab_core.hpp"
 #include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/classes/file_access.hpp>
 #include <godot_cpp/variant/array.hpp>
 #include <chrono>
 #include <cmath>
 
 namespace godot {
+namespace {
+const char* database_hash="59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10";
+const char* session_model="aqueous-0.2+batch-0.1+barite-0.1+physics-0.1";
+chemlab::Scalars scalars(const Dictionary&d){
+    if(d.size()>32)throw std::runtime_error("记录参数过多");
+    chemlab::Scalars r;Array keys=d.keys();
+    for(int i=0;i<keys.size();++i){
+        if(keys[i].get_type()!=Variant::STRING)throw std::runtime_error("记录参数名称无效");
+        String key=keys[i];Variant value=d[key];
+        if((value.get_type()!=Variant::FLOAT&&value.get_type()!=Variant::INT&&value.get_type()!=Variant::BOOL)||!std::isfinite(double(value)))throw std::runtime_error("记录参数必须为有限数值");
+        r[key.utf8().get_data()]=double(value);
+    }
+    return r;
+}
+Dictionary dictionary(const chemlab::Scalars&values){Dictionary d;for(auto[key,value]:values)d[String::utf8(key.c_str())]=value;return d;}
+}
+
 void LabCore::_bind_methods(){
+    ClassDB::bind_method(D_METHOD("preview_bench","kind","parameters","elapsed_s","running"),&LabCore::preview_bench,DEFVAL(false));
+    ClassDB::bind_method(D_METHOD("preview_fall","height_m","gravity_m_s2","elapsed_s"),&LabCore::preview_fall);
+    ClassDB::bind_method(D_METHOD("save_session"),&LabCore::save_session);
+    ClassDB::bind_method(D_METHOD("load_session","document"),&LabCore::load_session);
     ClassDB::bind_method(D_METHOD("configure_bench","kind","parameters"),&LabCore::configure_bench);
     ClassDB::bind_method(D_METHOD("start_bench"),&LabCore::start_bench);
     ClassDB::bind_method(D_METHOD("pause_bench"),&LabCore::pause_bench);
@@ -39,6 +61,7 @@ Dictionary LabCore::fall_snapshot()const{
     const auto r=fall_.reading();Dictionary d;
     d["time_s"]=r.time_s;d["height_m"]=r.height_m;d["velocity_m_s"]=r.velocity_m_s;
     d["impact_time_s"]=r.impact_time_s;d["impact_speed_m_s"]=r.impact_speed_m_s;
+    d["initial_height_m"]=fall_.initial_height();d["gravity_m_s2"]=fall_.gravity();
     d["landed"]=r.landed;d["running"]=r.running;return d;
 }
 Dictionary LabCore::advance_fall(double elapsed){
@@ -65,18 +88,25 @@ Dictionary LabCore::advance_bench(double elapsed){
 }
 
 bool LabCore::is_busy()const{return pending_.valid();}
-void LabCore::initialize(const String& database){database_=database.utf8().get_data();reset_lab();}
+void LabCore::initialize(const String& database){
+    database_error_.clear();
+    if(FileAccess::get_sha256(database)!=database_hash)database_error_="数据库版本或校验值不匹配，无法开始实验";
+    const PackedByteArray bytes=FileAccess::get_file_as_bytes(database);
+    if(bytes.is_empty())database_.clear();else database_.assign(reinterpret_cast<const char*>(bytes.ptr()),bytes.size());
+    if(database_.empty())database_error_="无法读取化学数据库";
+    reset_lab();
+}
 bool LabCore::start(const std::function<void(chemlab::Chemistry&,Result&)>& job){
-    if(is_busy()||database_.empty())return false;
-    const auto previous=vessels_;
-    const auto batch=batch_;
+    if(is_busy()||(database_.empty()&&database_error_.empty()))return false;
+    const auto previous=session_;
+    const auto database_error=database_error_;
     const auto database=database_;
     const auto gen=generation_;
-    pending_=std::async(std::launch::async,[previous,batch,database,gen,job]{
-        Result result;result.vessels=previous;result.generation=gen;result.batch=batch;
+    pending_=std::async(std::launch::async,[previous,database_error,database,gen,job]{
+        Result result;result.session=previous;result.generation=gen;
         const auto begin=std::chrono::steady_clock::now();
-        try{chemlab::Chemistry solver(database);job(solver,result);}
-        catch(const std::exception&e){result.error=e.what();result.vessels=previous;result.batch=batch;}
+        try{if(!database_error.empty())throw std::runtime_error(database_error);chemlab::Chemistry solver(database,true);job(solver,result);}
+        catch(const std::exception&e){result.error=e.what();result.session=previous;}
         result.compute_ms=std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-begin).count();
         return result;
     });
@@ -87,71 +117,72 @@ bool LabCore::reset_lab(){
     if(is_busy()){reset_queued_=true;return true;}
     reset_queued_=false;
     return start([](chemlab::Chemistry& solver,Result&r){
-        r.vessels.clear();
-        r.batch.reset();
-        r.vessels[1]={1,0.25,solver.prepare(2,0.001,0.05)};
-        r.vessels[2]={2,0.25,solver.prepare(3,0.001,0.05)};
-        r.vessels[3]={3,0.25,{}};
-        r.vessels[4]={4,0.25,solver.prepare(1,0,0.10)};
+        r.session.reset(solver);
         r.operation="reset";
     });
 }
-bool LabCore::prepare(int id,int reagent,double concentration,double volume_ml,double capacity_ml){
-    return start([=](chemlab::Chemistry&solver,Result&r){
-        if(id<1||id>12||!std::isfinite(capacity_ml)||capacity_ml<volume_ml||capacity_ml>1000)
-            throw std::runtime_error("容器或容量参数不正确");
-        r.vessels[id]={id,capacity_ml/1000.0,solver.prepare(reagent,concentration,volume_ml/1000.0)};
-        r.operation="prepare";r.to=id;
+
+bool LabCore::submit(const chemlab::Command&command){
+    return start([command](chemlab::Chemistry&solver,Result&r){
+        r.operation=command.operation;const auto e=r.session.apply(solver,command);
+        r.from=e.from;r.to=e.to;r.transferred_ml=e.transferred_ml;
     });
 }
-bool LabCore::pour(int from,int to,double amount_ml){
-    return start([=](chemlab::Chemistry&solver,Result&r){
-        const auto a=r.vessels.find(from),b=r.vessels.find(to);
-        if(a==r.vessels.end()||b==r.vessels.end())throw std::runtime_error("请先选择两个有效容器");
-        const auto t=chemlab::transfer(solver,a->second,b->second,amount_ml/1000.0);
-        r.vessels[from]=t.source;r.vessels[to]=t.target;r.transferred_ml=t.transferred_l*1000;
-        r.operation="pour";r.from=from;r.to=to;
-    });
+bool LabCore::prepare(int id,int reagent,double concentration,double volume,double capacity){
+    return submit({"prepare",{{"id",double(id)},{"reagent",double(reagent)},{"concentration",concentration},{"volume_ml",volume},{"capacity_ml",capacity}}});
 }
-bool LabCore::add_empty(int id,double capacity_ml){
-    return start([=](chemlab::Chemistry&,Result&r){
-        if(id<1||id>12||r.vessels.count(id)||!std::isfinite(capacity_ml)||capacity_ml<1||capacity_ml>1000)
-            throw std::runtime_error("无法添加此器材：已存在或容量无效");
-        r.vessels[id]={id,capacity_ml/1000.0,{}};r.operation="add_empty";r.to=id;
-    });
-}
+bool LabCore::pour(int from,int to,double amount){return submit({"pour",{{"from",double(from)},{"to",double(to)},{"amount_ml",amount}}});}
+bool LabCore::add_empty(int id,double capacity){return submit({"add_empty",{{"id",double(id)},{"capacity_ml",capacity}}});}
 bool LabCore::run_batch(const Dictionary&p){
-    const bool barite=p.get("barite",false);
-    const double sulfate_concentration=p.get("sulfate_concentration",0.001),sulfate_ml=p.get("sulfate_ml",50.0);
-    const int reagent=p.get("base_reagent",1), solid=p.get("solid_reagent",18), boundary=p.get("gas_boundary",0);
-    const double concentration=p.get("concentration",0.001),volume=p.get("volume_ml",100.0);
-    chemlab::BatchConditions c;c.solid_reagent=solid;c.solid_mol=double(p.get("solid_mmol",2.0))/1000;
-    c.co2_added_mol=double(p.get("co2_mmol",0.0))/1000;c.headspace_l=double(p.get("headspace_ml",100.0))/1000;
-    c.external_co2_atm=p.get("external_co2_atm",0.00042);c.gas=static_cast<chemlab::GasBoundary>(boundary);
-    return start([=](chemlab::Chemistry&solver,Result&r){
-        r.operation="batch";
-        if(boundary<0||boundary>2)throw std::runtime_error("气相边界无效");
-        auto base=solver.prepare(barite?25:reagent,!barite&&reagent==1?0:concentration,volume/1000);
-        if(barite)r.batch=solver.precipitate_barite(base,solver.prepare(14,sulfate_concentration,sulfate_ml/1000));
-        else r.batch=solver.equilibrate(base,c);r.operation="batch";
-    });
+    try{return submit({"batch",scalars(p)});}catch(const std::exception&e){const std::string error=e.what();return start([error](chemlab::Chemistry&,Result&r){r.operation="batch";throw std::runtime_error(error);});}
 }
-bool LabCore::extract_batch(int to){
-    return start([=](chemlab::Chemistry&,Result&r){
-        r.operation="extract_batch";
-        if(!r.batch||r.batch->solution.empty())throw std::runtime_error("反应器中没有可分离的液体");
-        if(to<1||to>12||r.vessels.count(to))throw std::runtime_error("需要一个新的接收容器");
-        // Separate all liquid from the retained solid/headspace. This ends the
-        // equilibrium trial; later air exchange/reequilibration is not implied.
-        const auto solution=r.batch->solution;
-        if(solution.volume_l>0.250)throw std::runtime_error("液体超过接收烧杯的 250 mL 容量");
-        r.vessels[to]={to,0.25,solution};r.batch->solution={};
-        r.operation="extract_batch";r.to=to;r.transferred_ml=solution.volume_l*1000;
-    });
+bool LabCore::extract_batch(int to){return submit({"extract_batch",{{"to",double(to)}}});}
+
+Dictionary LabCore::preview_bench(const String&kind,const Dictionary&p,double elapsed,bool running)const{
+    try{chemlab::PhysicsExperiment model;model.configure(kind.utf8().get_data(),scalars(p));model.restore(elapsed);if(running)model.start();Dictionary r=dictionary(model.reading());r["parameters"]=dictionary(model.parameters());r["kind"]=kind;return r;}
+    catch(const std::exception&e){Dictionary r;r["error"]=String::utf8(e.what());return r;}
+}
+Dictionary LabCore::preview_fall(double height,double gravity,double elapsed)const{
+    try{chemlab::FreeFall model;model.configure(height,gravity);model.restore(elapsed,std::abs(elapsed-model.reading().impact_time_s)<1e-8);const auto r=model.reading();Dictionary d;d["time_s"]=r.time_s;d["height_m"]=r.height_m;d["velocity_m_s"]=r.velocity_m_s;d["impact_time_s"]=r.impact_time_s;d["impact_speed_m_s"]=r.impact_speed_m_s;d["initial_height_m"]=height;d["gravity_m_s2"]=gravity;d["landed"]=r.landed;d["running"]=false;return d;}
+    catch(const std::exception&e){Dictionary r;r["error"]=String::utf8(e.what());return r;}
+}
+Dictionary LabCore::save_session()const{
+    Dictionary d;d["schema_version"]=1;d["model_version"]=session_model;d["database_sha256"]=database_hash;d["iphreeqc_version"]="3.8.6-17100";
+    Array commands,events;
+    for(const auto&c:session_.journal){Dictionary item;item["operation"]=String(c.operation.c_str());item["parameters"]=dictionary(c.parameters);commands.push_back(item);}
+    for(const auto&e:session_.events){Dictionary item;item["operation"]=String(e.operation.c_str());item["from"]=e.from;item["to"]=e.to;item["transferred_ml"]=e.transferred_ml;item["readings"]=dictionary(e.readings);events.push_back(item);}
+    d["commands"]=commands;d["events"]=events;d["fall"]=fall_snapshot();d["bench"]=bench_snapshot();return d;
+}
+String LabCore::load_session(const Dictionary&d){
+    if(is_busy())return String::utf8("请等待当前操作完成后再加载");
+    try{
+        if(int(d.get("schema_version",0))!=1||String(d.get("model_version",""))!=session_model||String(d.get("database_sha256",""))!=database_hash||String(d.get("iphreeqc_version",""))!="3.8.6-17100")throw std::runtime_error("保存文件的模型或数据库版本不兼容");
+        if(!d.has("commands")||d["commands"].get_type()!=Variant::ARRAY||!d.has("fall")||d["fall"].get_type()!=Variant::DICTIONARY||!d.has("bench")||d["bench"].get_type()!=Variant::DICTIONARY)throw std::runtime_error("保存文件缺少必要状态");
+        Array input=d["commands"];if(input.size()>5000)throw std::runtime_error("保存文件操作数量超出范围");
+        std::vector<chemlab::Command> commands;
+        for(int i=0;i<input.size();++i){
+            if(input[i].get_type()!=Variant::DICTIONARY)throw std::runtime_error("操作记录格式无效");
+            Dictionary item=input[i];
+            if(!item.has("operation")||item["operation"].get_type()!=Variant::STRING||!item.has("parameters")||item["parameters"].get_type()!=Variant::DICTIONARY)throw std::runtime_error("操作记录缺少必要字段");
+            String op=item["operation"];commands.push_back({op.utf8().get_data(),scalars(item["parameters"])});
+        }
+        Dictionary f=d["fall"],b=d["bench"];
+        if(!f.has("initial_height_m")||!f.has("gravity_m_s2")||!f.has("time_s")||!f.has("landed")||!b.has("kind")||!b.has("parameters")||b["parameters"].get_type()!=Variant::DICTIONARY||!b.has("time_s"))throw std::runtime_error("保存文件的物理状态不完整");
+        chemlab::Scalars fv=scalars(f);chemlab::FreeFall fall;fall.configure(fv.at("initial_height_m"),fv.at("gravity_m_s2"));fall.restore(fv.at("time_s"),fv.at("landed")!=0);
+        if(b["kind"].get_type()!=Variant::STRING||(b["time_s"].get_type()!=Variant::FLOAT&&b["time_s"].get_type()!=Variant::INT))throw std::runtime_error("物理实验类型或时间格式无效");
+        chemlab::PhysicsExperiment bench;String kind=b["kind"];bench.configure(kind.utf8().get_data(),scalars(b["parameters"]));bench.restore(b["time_s"]);
+        bool started=start([commands,fall,bench](chemlab::Chemistry&solver,Result&r){
+            r.operation="load";chemlab::LabSession restored;restored.reset(solver);
+            for(const auto&c:commands)restored.apply(solver,c);
+            r.session=std::move(restored);r.restored_fall=fall;r.restored_bench=bench;
+        });
+        if(!started)throw std::runtime_error("无法开始加载");
+        return "";
+    }catch(const std::exception&e){return String::utf8(e.what());}
 }
 Dictionary LabCore::batch_snapshot()const{
-    Dictionary d;if(!batch_)return d;
-    const auto&r=*batch_;const auto&s=r.solution;
+    Dictionary d;if(!session_.batch)return d;
+    const auto&r=*session_.batch;const auto&s=r.solution;
     d["mineral"]=String(r.mineral.c_str());
     d["volume_ml"]=s.volume_l*1000;d["ph"]=s.empty()?Variant():Variant(s.ph);
     d["solid_remaining_mmol"]=r.solid_remaining_mol*1000;
@@ -165,7 +196,7 @@ Dictionary LabCore::batch_snapshot()const{
 
 Dictionary LabCore::snapshot()const{
     Dictionary result;Array items;
-    for(const auto&[id,v]:vessels_){
+    for(const auto&[id,v]:session_.vessels){
         Dictionary d;d["id"]=id;d["capacity_ml"]=v.capacity_l*1000;
         const auto&s=v.solution;
         d["volume_ml"]=s.volume_l*1000;d["ph"]=s.empty()?Variant():Variant(s.ph);
@@ -185,7 +216,7 @@ Dictionary LabCore::poll(){
     auto completed=pending_.get();
     if(completed.generation==generation_){
         result["ready"]=true;result["error"]=String::utf8(completed.error.c_str());
-        if(completed.error.empty()){vessels_=std::move(completed.vessels);batch_=std::move(completed.batch);++revision_;}
+        if(completed.error.empty()){session_=std::move(completed.session);if(completed.restored_fall)fall_=*completed.restored_fall;if(completed.restored_bench)bench_=*completed.restored_bench;++revision_;}
         result["state"]=snapshot();result["operation"]=String(completed.operation.c_str());
         result["from"]=completed.from;result["to"]=completed.to;
         result["transferred_ml"]=completed.transferred_ml;result["compute_ms"]=completed.compute_ms;

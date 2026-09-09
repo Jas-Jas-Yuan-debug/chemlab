@@ -28,7 +28,8 @@ func run() -> void:
     assert(experiment.solid.visible)
     for i in range(20):
         await process_frame
-    await RenderingServer.frame_post_draw
+    RenderingServer.force_draw(false)
+    RenderingServer.force_sync()
     root.get_texture().get_image().save_png(ProjectSettings.globalize_path("res://../artifacts/barite-precipitation.png"))
     await click("ExtractBatch")
     assert(lab.states.has(5))

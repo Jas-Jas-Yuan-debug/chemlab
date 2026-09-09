@@ -1,10 +1,10 @@
 {
-  "started_utc": "2026-09-09T11:38:46Z",
+  "started_utc": "2026-09-09T12:06:05Z",
   "checks": [
     {
       "name": "native",
       "passed": true,
-      "duration_s": 0.767,
+      "duration_s": 0.762,
       "evidence": [
         "100% tests passed, 0 tests failed out of 7"
       ]
@@ -12,21 +12,29 @@
     {
       "name": "import",
       "passed": true,
-      "duration_s": 1.624,
+      "duration_s": 1.541,
       "evidence": []
     },
     {
       "name": "native_smoke",
       "passed": true,
-      "duration_s": 0.246,
+      "duration_s": 0.243,
       "evidence": [
         "PASS: Godot native extension, prepare, pour, pH, conservation, stale-result reset"
       ]
     },
     {
+      "name": "session_native",
+      "passed": true,
+      "duration_s": 0.241,
+      "evidence": [
+        "PASS: JSON session replay restores solution/solid inventories, operation events and paused physics; incompatible and failed replay preserve valid state"
+      ]
+    },
+    {
       "name": "visual_flow",
       "passed": true,
-      "duration_s": 3.764,
+      "duration_s": 2.464,
       "evidence": [
         "PASS: rendered UI prepare/reset defaults, aliquot buttons, acid/base neutralization, readout, search, screenshot",
         "PASS: all 14 aqueous reagent forms prepared, transferred and measured through UI handlers"
@@ -35,7 +43,7 @@
     {
       "name": "fall_flow",
       "passed": true,
-      "duration_s": 2.067,
+      "duration_s": 2.024,
       "evidence": [
         "PASS: rendered free-fall flow, configure/release/pause/resume/impact/repeat, curves, chemistry preservation"
       ]
@@ -43,7 +51,7 @@
     {
       "name": "batch_flow",
       "passed": true,
-      "duration_s": 2.019,
+      "duration_s": 1.391,
       "evidence": [
         "PASS: rendered calcite closed/open, gypsum finite solid, CO2 headspace, liquid separation and aliquot transfer, readout/curve/reset flows"
       ]
@@ -51,7 +59,7 @@
     {
       "name": "barite_flow",
       "passed": true,
-      "duration_s": 1.209,
+      "duration_s": 0.973,
       "evidence": [
         "PASS: rendered Barite precipitation/undersaturation/excess, phase amount, liquid extraction and aliquot transfer"
       ]
@@ -59,9 +67,17 @@
     {
       "name": "physics_flow",
       "passed": true,
-      "duration_s": 3.409,
+      "duration_s": 3.309,
       "evidence": [
         "PASS: all five rendered physics controls, native readings, body transforms, curves, pause/repeat, parallel circuit, real/virtual/infinite lens and invalid-parameter preservation"
+      ]
+    },
+    {
+      "name": "session_flow",
+      "passed": true,
+      "duration_s": 1.625,
+      "evidence": [
+        "PASS: session file picker wiring, atomic JSON save/load, equipment/indicator/camera/curve restoration, CSV identity, corrupt file rejection, paused physics resume"
       ]
     }
   ],

@@ -123,3 +123,7 @@ This milestone is ready for push.
 Next: Phase 8 durable save/load/replay & CSV, then full Phase 9 packaging/performance/stress.
 Remaining early-phase concerns: continuous-pour real UI regression; indicator boundary tests;
 pour pose/stream realism and vessel liquid clipping under tilt are still approximations.
+
+## Phase 8 更新（2026-09-09）
+
+新增 LabSession 顺序操作日志、版本锁定的 JSON 重建、器材/指示剂/相机/曲线恢复以及 CSV 原子导出。原生测试与完整渲染流程通过；损坏和不兼容文件保留原状态。接下来补齐连续倾倒视觉/交互验证，再进行官方 macOS 模板打包与 1080p 实测。详细格式见 docs/SESSION_FORMAT.md。

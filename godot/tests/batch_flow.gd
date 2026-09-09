@@ -37,7 +37,8 @@ func run() -> void:
     assert(experiment.samples.size()==3)
     for i in range(30):
         await process_frame
-    await RenderingServer.frame_post_draw
+    RenderingServer.force_draw(false)
+    RenderingServer.force_sync()
     assert(root.get_texture().get_image().save_png(ProjectSettings.globalize_path("res://../artifacts/solid-equilibrium.png"))==OK)
     await click("ExtractBatch")
     assert(lab.states.has(5))
@@ -60,7 +61,8 @@ func run() -> void:
     assert(abs(co2.gas_pressure_atm*0.1-co2.gas_co2_mmol/1000*0.082057366*298.15)<0.0000002)
     for i in range(20):
         await process_frame
-    await RenderingServer.frame_post_draw
+    RenderingServer.force_draw(false)
+    RenderingServer.force_sync()
     root.get_texture().get_image().save_png(ProjectSettings.globalize_path("res://../artifacts/co2-equilibrium.png"))
     await click("ResetExperiment")
     assert(lab.core.batch_snapshot().is_empty())

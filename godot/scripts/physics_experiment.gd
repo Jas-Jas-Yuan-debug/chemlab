@@ -109,7 +109,7 @@ func frame_camera() -> void:
     lab.distance = 3.2 if kind_index==1 else 2.05 if kind_index==4 else 1.65
     lab.update_camera()
 
-func select_model(index: int) -> void:
+func select_model(index: int,apply_parameters: bool = true) -> void:
     core.pause_bench()
     kind_index = index
     fields.clear()
@@ -124,7 +124,8 @@ func select_model(index: int) -> void:
     samples.clear()
     first_plot.points.clear()
     second_plot.points.clear()
-    configure()
+    if apply_parameters:
+        configure()
 
 func configure() -> void:
     var p := {}
@@ -398,3 +399,24 @@ func _process(delta: float) -> void:
             status.text = r.error
             core.pause_bench()
         update_reading(r,kind_index!=4)
+
+func restore_view(reading: Dictionary,history: Array) -> void:
+    var index := KINDS.find(reading.kind)
+    picker.selected = index
+    select_model(index,false)
+    applied = reading.parameters.duplicate(true)
+    for key in fields:
+        fields[key].value = applied[key]
+    if kind_index==3:
+        topology.selected = int(applied.parallel)
+    build_geometry()
+    samples.clear()
+    first_plot.points.clear()
+    second_plot.points.clear()
+    last_sample = -1
+    for sample in history:
+        applied = sample.parameters.duplicate(true)
+        update_reading(sample,true)
+    applied = reading.parameters.duplicate(true)
+    update_reading(reading,false)
+    status.text = "已恢复，实验处于暂停状态。"

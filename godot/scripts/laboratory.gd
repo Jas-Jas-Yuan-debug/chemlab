@@ -1,5 +1,6 @@
 extends Node3D
 
+const SessionIO = preload("res://scripts/session_io.gd")
 const Room = preload("res://scripts/lab_room.gd")
 const VesselView = preload("res://scripts/vessel.gd")
 const Plot = preload("res://scripts/ph_plot.gd")
@@ -27,6 +28,9 @@ var last_transfer_ms := 0
 var total_added: Dictionary = {}
 var curves: Dictionary = {}
 var records: Array = []
+var operation_times: Array[float] = []
+var pending_session := {}
+var dialog_action := ""
 var indicator_by_vessel: Dictionary = {}
 var indicator_picker: OptionButton
 var pending_context: Dictionary = {}
@@ -78,7 +82,7 @@ func _ready() -> void:
     stream.visible = false
     add_child(stream)
     core = LabCore.new()
-    core.initialize(ProjectSettings.globalize_path("res://data/phreeqc.dat"))
+    core.initialize("res://data/phreeqc.dat")
     fall_experiment = FallExperiment.new()
     fall_experiment.core = core
     fall_experiment.lab = self
@@ -261,6 +265,17 @@ func build_ui() -> void:
     status = label(footer,"",14,Color("e7e1d1"))
     status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     label(footer,"左键选择并拖动  ·  右键环绕  ·  滚轮缩放  ·  F 聚焦所选器材",13,Color("9eb3a8"))
+    var record_panel := panel(ui,Vector2(354,110),Vector2(842,62))
+    var record_row := HBoxContainer.new()
+    record_panel.add_child(record_row)
+    label(record_row,"实验记录",15,Color("d1e5d7"))
+    button(record_row,"保存","SaveSession",func(): open_session_dialog("save"))
+    button(record_row,"加载","LoadSession",func(): open_session_dialog("load"))
+    button(record_row,"导出 CSV","ExportCSV",func(): open_session_dialog("csv"))
+    file_dialog = FileDialog.new()
+    file_dialog.access = FileDialog.ACCESS_FILESYSTEM
+    file_dialog.file_selected.connect(file_selected)
+    ui.add_child(file_dialog)
     refresh_reagents()
 
 func refresh_reagents() -> void:
@@ -456,6 +471,16 @@ func reset_lab() -> void:
     set_status("正在重置实验…")
 
 func apply_result(result: Dictionary) -> void:
+    if result.operation=="load":
+        if not result.error.is_empty():
+            set_status("加载失败，原实验保留："+result.error)
+        else:
+            SessionIO.restore(self,pending_session,result.state)
+            set_status("实验已恢复。已应用参数与状态均处于暂停，点击继续可运行。")
+        pending_session = {}
+        return
+    if result.error.is_empty() and result.operation!="reset":
+        operation_times.append(elapsed)
     if result.operation in ["batch","extract_batch"] or (batch_mode and not result.error.is_empty()):
         batch_experiment.accept_result(result)
         if result.operation=="batch" or not result.error.is_empty():
@@ -472,6 +497,7 @@ func apply_result(result: Dictionary) -> void:
         curves.clear()
         total_added.clear()
         records.clear()
+        operation_times.clear()
         indicator_by_vessel.clear()
         selected_id = 1
         target_id = 3
@@ -591,7 +617,75 @@ func _unhandled_input(event: InputEvent) -> void:
             orbit += Vector2(-event.relative.x,-event.relative.y)*0.005
             orbit.y = clamp(orbit.y,0.16,1.30)
             update_camera()
-    elif event is InputEventKey and event.pressed and event.keycode==KEY_F and views.has(selected_id):
-        focus = fall_experiment.ball.global_position if physics_mode else views[selected_id].position+Vector3(0,0.045,0)
-        distance = 0.60 if physics_mode else 0.38
-        update_camera()
+    elif event is InputEventKey and event.pressed and event.keycode==KEY_F:
+        if bench_mode:
+            bench_experiment.frame_camera()
+        elif batch_mode:
+            focus = Vector3(0.06,0.96,0)
+            distance = 0.7
+            update_camera()
+        elif views.has(selected_id):
+            focus = fall_experiment.ball.global_position if physics_mode else views[selected_id].position+Vector3(0,0.045,0)
+            distance = 0.60 if physics_mode else 0.38
+            update_camera()
+
+func open_session_dialog(action: String) -> void:
+    if core.is_busy():
+        set_status("请等待当前操作完成，再保存或加载。")
+        return
+    dialog_action = action
+    file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE if action=="load" else FileDialog.FILE_MODE_SAVE_FILE
+    file_dialog.filters = PackedStringArray(["*.csv ; CSV 数据"] if action=="csv" else ["*.json ; ChemLab 实验"])
+    file_dialog.current_file = "chemlab-data.csv" if action=="csv" else "chemlab-session.json"
+    file_dialog.title = "导出实验数据" if action=="csv" else "加载实验" if action=="load" else "保存当前实验"
+    file_dialog.popup_centered(Vector2i(1000,640))
+
+func file_selected(path: String) -> void:
+    if dialog_action=="load":
+        load_from_path(path)
+    elif dialog_action=="csv":
+        export_to_path(path)
+    else:
+        save_to_path(path)
+
+func save_to_path(path: String) -> bool:
+    if core.is_busy():
+        set_status("正在计算，请完成后再保存。")
+        return false
+    var error: String = SessionIO.save(self,path)
+    set_status("已保存实验："+path if error.is_empty() else error)
+    return error.is_empty()
+
+func export_to_path(path: String) -> bool:
+    if core.is_busy():
+        set_status("正在计算，请完成后再导出。")
+        return false
+    var error: String = SessionIO.export_csv(self,path)
+    set_status("已导出操作读数与保留的物理曲线："+path if error.is_empty() else error)
+    return error.is_empty()
+
+func load_from_path(path: String) -> bool:
+    if core.is_busy():
+        set_status("请等待当前操作完成后加载。")
+        return false
+    var file := FileAccess.open(path,FileAccess.READ)
+    if file==null or file.get_length()>16*1024*1024:
+        set_status("无法读取文件，或文件超过 16 MiB 限制。")
+        return false
+    var json := JSON.new()
+    var error := json.parse(file.get_as_text())
+    file.close()
+    if error!=OK:
+        set_status("JSON 格式错误；原实验保留。")
+        return false
+    var checked: Dictionary = SessionIO.validate(json.data,self)
+    if not checked.error.is_empty():
+        set_status(checked.error)
+        return false
+    var message := core.load_session(checked.document.science)
+    if not message.is_empty():
+        set_status(message)
+        return false
+    pending_session = checked
+    set_status("正在恢复实验与操作记录…")
+    return true

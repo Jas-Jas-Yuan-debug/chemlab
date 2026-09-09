@@ -8,7 +8,8 @@ func click(name: String) -> void:
     b.pressed.emit()
     await process_frame
 func capture(name: String) -> void:
-    await RenderingServer.frame_post_draw
+    RenderingServer.force_draw(false)
+    RenderingServer.force_sync()
     assert(root.get_texture().get_image().save_png(ProjectSettings.globalize_path("res://../artifacts/physics-"+name+".png"))==OK)
 func run() -> void:
     lab = load("res://scenes/laboratory.tscn").instantiate()

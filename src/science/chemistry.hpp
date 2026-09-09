@@ -48,7 +48,7 @@ struct BatchResult {
 // One owner thread per instance. No Godot types, graphics, or UI dependencies.
 class Chemistry {
 public:
-    explicit Chemistry(const std::string& database);
+    explicit Chemistry(const std::string& database, bool database_is_text = false);
     ~Chemistry();
     Chemistry(const Chemistry&) = delete;
     Chemistry& operator=(const Chemistry&) = delete;

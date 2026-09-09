@@ -37,6 +37,10 @@ void PhysicsExperiment::advance(double elapsed){
  auto steps=static_cast<uint64_t>(std::floor((remainder_+1e-12)/step_s));
  ticks_+=steps;remainder_=std::max(0.0,remainder_-steps*step_s);
 }
+void PhysicsExperiment::restore(double elapsed){
+ if(!std::isfinite(elapsed)||elapsed<0||elapsed>86400)throw std::invalid_argument("保存的物理实验时间无效");
+ ticks_=static_cast<uint64_t>(std::llround(elapsed/step_s));remainder_=0;running_=false;
+}
 Scalars PhysicsExperiment::reading()const{
  const double t=ticks_*step_s;
  Scalars r={{"time_s",t},{"running",running_?1.0:0.0}};
