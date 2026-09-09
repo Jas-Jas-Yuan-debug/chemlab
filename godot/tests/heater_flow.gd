@@ -88,6 +88,12 @@ func run() -> void:
     await click("ToggleStirrer")
     await create_timer(0.1).timeout
     assert(lab.core.bench_snapshot().stir_turns>r.stir_turns)
+    lab.switch_experiment(false)
+    await physics_frame
+    await physics_frame
+    var query := PhysicsRayQueryParameters3D.create(Vector3(0,2,0),Vector3(0,0,0))
+    var hit: Dictionary = lab.get_world_3d().direct_space_state.intersect_ray(query)
+    assert(hit.is_empty() or not hit.collider.has_meta("vessel_id") or hit.collider.get_meta("vessel_id")!=0,"Fixed experiment vessels must not intercept chemistry selection")
     print("PASS: six rendered heat sources, live target/power/RPM controls, independent switches, thermostat/energy/cooling, rotor motion, paused save/load and identical CSV, invalid control preservation")
     lab.queue_free()
     await process_frame

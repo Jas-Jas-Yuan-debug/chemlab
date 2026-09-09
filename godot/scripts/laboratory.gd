@@ -662,7 +662,7 @@ func _unhandled_input(event: InputEvent) -> void:
                 var origin := camera.project_ray_origin(event.position)
                 var query := PhysicsRayQueryParameters3D.create(origin,origin+camera.project_ray_normal(event.position)*10)
                 var hit := get_world_3d().direct_space_state.intersect_ray(query)
-                if hit and hit.collider.has_meta("vessel_id"):
+                if hit and hit.collider.has_meta("vessel_id") and views.has(int(hit.collider.get_meta("vessel_id"))):
                     select_vessel(int(hit.collider.get_meta("vessel_id")))
                     dragging = true
                     var point = Plane(Vector3.UP,0.89).intersects_ray(origin,camera.project_ray_normal(event.position))

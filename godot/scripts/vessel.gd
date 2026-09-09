@@ -73,6 +73,11 @@ func build(id: int, vessel_kind: String, capacity: float) -> void:
     visual.add_child(liquid)
     var body := StaticBody3D.new()
     body.set_meta("vessel_id",id)
+    # Zero-ID vessels belong to fixed batch/heating apparatus, not the
+    # draggable chemistry inventory. Visibility alone never disables picking.
+    if id<=0:
+        body.collision_layer = 0
+        body.collision_mask = 0
     var collider := CollisionShape3D.new()
     var shape := CylinderShape3D.new()
     shape.radius = max(radius,0.018)

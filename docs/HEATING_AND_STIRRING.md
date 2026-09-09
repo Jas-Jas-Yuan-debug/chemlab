@@ -38,4 +38,4 @@ Qinput − Qambient = ΔU
 
 `tests/physics_models_test.cpp` 用独立小步积分对照解析温升，核对恒温功率、冷却曲线、六类热源的 95°C 上限、输入/散热/内能账、变速和暂停、控制历史回放，以及 30/60/144 FPS 时间分割一致性。
 
-`godot/tests/heater_flow.gd` 覆盖真实界面处理器、六项器材切换与渲染、运行中调温、独立加热/搅拌开关、旋转姿态、保存恢复与 CSV 一致性，并拒绝越界目标温度。实际执行结果见 `artifacts/verification.json`；截图为 `artifacts/heater-0.png` 至 `heater-5.png`。
+`godot/tests/heater_flow.gd` 覆盖真实界面处理器、六项器材切换与渲染、运行中调温、独立加热/搅拌开关、旋转姿态、保存恢复与 CSV 一致性，拒绝越界目标温度，并检查隐藏加热器材不会拦截化学台的鼠标选取。实际执行结果见 `artifacts/verification.json`；截图为 `artifacts/heater-0.png` 至 `heater-5.png`。

@@ -14,6 +14,7 @@ var phase_seconds := 10.0
 var started := 0
 var render_size := Vector2i.ZERO
 var smoke_only := false
+var finishing := false
 func _ready() -> void:
     for arg in OS.get_cmdline_user_args():
         if arg.begins_with("--chemlab-stress-seconds="):
@@ -28,6 +29,8 @@ func check(condition: bool,message: String) -> void:
     if not condition:
         failures.append(message)
         push_error("FAIL: "+message)
+        if not finishing:
+            call_deferred("finish")
 func rendered() -> void:
     var now := Time.get_ticks_usec()
     if not segment.is_empty() and previous_frame>0:
@@ -167,10 +170,16 @@ func run() -> void:
         lab.request_pour(25)
         await idle()
         check(abs(lab.states[3].ph-7)<0.03,"Repeated neutralization")
+        var before_restore: Dictionary = lab.states[3].duplicate(true)
+        check(abs(before_restore.elements_mol.Cl-0.000025)<1e-10 and abs(before_restore.elements_mol.Na-0.000025)<1e-10,"Repeated neutralization element inventories")
         check(lab.save_to_path("user://benchmark-repeat.json"),"Repeated save")
         check(lab.load_from_path("user://benchmark-repeat.json"),"Repeated load")
         await idle()
-        check(abs(lab.states[3].volume_ml-50)<0.00001,"Repeated restore inventory")
+        # Solution volumes are not strictly additive across an actual reaction.
+        # Compare the solved state before/after replay, not nominal aliquot sum.
+        check(abs(lab.states[3].volume_ml-before_restore.volume_ml)<1e-8,"Repeated restore solved volume")
+        for element in before_restore.elements_mol:
+            check(abs(lab.states[3].elements_mol[element]-before_restore.elements_mol[element])<1e-12,"Repeated restore element inventory: "+element)
         lab.switch_bench()
         lab.bench_experiment.select_model(cycle%lab.bench_experiment.KINDS.size())
         lab.bench_experiment.start()
@@ -197,6 +206,9 @@ func stats(values: Array) -> Dictionary:
         "p95_ms":ordered[int((values.size()-1)*0.95)],"p99_ms":ordered[int((values.size()-1)*0.99)],
         "max_ms":ordered[-1],"over_33_334_ms_percent":100.0*slow/values.size()}
 func finish() -> void:
+    if finishing:
+        return
+    finishing = true
     segment = ""
     var frame_stats := {}
     for key in segments:

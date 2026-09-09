@@ -24,10 +24,17 @@ receipt = {'started_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'chec
 try:
     for name, command, marker in checks:
         start = time.monotonic()
-        process = subprocess.run(command,cwd=ROOT,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=90)
-        output = process.stdout
+        try:
+            process = subprocess.run(command,cwd=ROOT,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=90)
+            output = process.stdout
+            returncode = process.returncode
+        except subprocess.TimeoutExpired as error:
+            output = error.stdout or ''
+            if isinstance(output,bytes):output=output.decode('utf-8',errors='replace')
+            output += '\nFAIL: verification exceeded 90-second bound\n'
+            returncode = 124
         (ROOT/'artifacts'/f'verify-{name}.log').write_text(output)
-        passed = process.returncode == 0 and marker in output and not any(s in output for s in ['SCRIPT ERROR:', 'ERROR:', 'FAIL:', 'were leaked'])
+        passed = returncode == 0 and marker in output and not any(s in output for s in ['SCRIPT ERROR:', 'ERROR:', 'FAIL:', 'were leaked'])
         receipt['checks'].append({'name':name,'passed':passed,'duration_s':round(time.monotonic()-start,3),
             'evidence':[line for line in output.splitlines() if 'PASS:' in line or '100% tests passed' in line]})
         print(('PASS' if passed else 'FAIL')+': '+name,flush=True)

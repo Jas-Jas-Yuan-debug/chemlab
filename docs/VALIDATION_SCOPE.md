@@ -23,4 +23,4 @@
 - [USER_PUNCH：读取计算结果](https://water.usgs.gov/water-resources/software/PHREEQC/documentation/phreeqc3-html/phreeqc3-60.htm)
 - [Basic：TOTMOLE 与 TOT 的量纲](https://water.usgs.gov/water-resources/software/PHREEQC/documentation/phreeqc3-html/phreeqc3-61.htm)
 
-新增范围与数值回归见 [气液固](BATCH_EQUILIBRIUM.md)、[扩展溶液](AQUEOUS_EXTENSION.md)、[沉淀](PRECIPITATION.md)。六类物理实验采用独立模型，详见 [物理模型](PHYSICS_MODELS.md)。保存与导出验证见 [实验记录](SESSION_FORMAT.md)。
+新增范围与数值回归见 [气液固](BATCH_EQUILIBRIUM.md)、[扩展溶液](AQUEOUS_EXTENSION.md)、[沉淀](PRECIPITATION.md)。七类物理实验采用独立模型，详见 [物理模型](PHYSICS_MODELS.md)。保存与导出验证见 [实验记录](SESSION_FORMAT.md)。
