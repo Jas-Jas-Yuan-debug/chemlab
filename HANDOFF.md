@@ -2,6 +2,14 @@
 
 Updated 2026-09-10 for version 0.2. Follow `docs/GOAL_OBJECTIVE.md` and the user's approved Godot / AGPL changes. User explicitly requested commit, push, and README updates. Public repository: https://github.com/Jas-Jas-Yuan-debug/chemlab, branch main.
 
+## Latest delivered state
+
+- Latest application change: [`0915c1e62776c71063ffda1574d1ff48ce4ea562`](https://github.com/Jas-Jas-Yuan-debug/chemlab/commit/0915c1e62776c71063ffda1574d1ff48ce4ea562), committed and pushed to `main`. This handoff-only update follows that application commit; it does not change runtime source.
+- `/Users/jason/Desktop/chemlab/dist/ChemLab.app` was rebuilt, strictly verified with its ad-hoc signature, opened, and visually inspected after the correction. It is about 86.55 MiB. The app is a local deliverable, not a committed binary or published GitHub Release.
+- Build receipt timestamp: `2026-09-10T10:41:07Z`. Runtime source SHA-256: `85dc533ecc241fd2f37452926c30e477f41c01bb2a344d2b93165d5c6bf437dd`. The build receipt, targeted-validation receipt, and final runtime source matched; every packaged file was checked against the build receipt.
+- README, concentration/support limits, session format, geometry explanation, third-party database notice, and `docs/REACTION_DYNAMICS.md` were updated in the application commit. Actual render evidence: `artifacts/glassware-corrected.png`, `artifacts/reaction-ph-time.png`, `artifacts/reaction-rate-time.png`, and `artifacts/beginner-glassware-corrected.png`.
+- User's latest request is to refresh this handoff. This is documentation-only: no simulation, build, suite, or benchmark rerun is needed. Continue from the next concrete user request rather than restarting the delivered work.
+
 ## Current implementation
 
 - Godot 4.7.2, C++17 and IPhreeqc 3.8.6; Apple Silicon native build. Pinned original PHREEQC database remains unchanged. The supported reagent count remains 17/30; concentration and kinetics scope has expanded; unsupported chemistry stays explicit.
@@ -19,11 +27,14 @@ Updated 2026-09-10 for version 0.2. Follow `docs/GOAL_OBJECTIVE.md` and the user
 - Native two-zone H+/OH- mass-action kinetics with exact local integration, symmetric finite exchange and representative aliquots. Dilute 25 C k=1.4e11 L/(mol s); high-I rate extrapolation uncalibrated. This is NOT 3D reactive CFD or RPM-derived mixing. Q is user model input. No thermal coupling or arbitrary reaction kinetics.
 - Three plots use current selected vessel: probe pH/time, rate/time, source-isolated final-equilibrium titration. Source/receiver reprepare and source switch split titration series. Dynamics use integrated vessel time, never UI wall time or solver wait. Busy/paused frames produce no reaction samples.
 - Session saves kinetic inventory/time/thermodynamic closure and sampled history; chemistry journal replays, final dynamic state is cross-checked. Full Q history is not recorded: past kinetic samples are validated for bounds/order, not independently recomputed. Both database hashes checked; CSV roundtrip covered.
+- Paused re-preparation refreshes the beginner probe and equilibrium readout immediately. A zero-volume/empty-source pour leaves the receiver's non-equilibrium inventory, clock, and rate unchanged; do not reinitialize kinetics on a no-op transfer.
 - Four targeted corrections checks plus one final headless empty-source boundary check passed; see `artifacts/reaction-dynamics-validation.json`. No full-suite or benchmark repeats. A GDScript formatting error and clock/readout corrections were handled with focused checks. Current future full verify registration is 10 native plus import and 13 flows; historical `verification.json` remains untouched and incomplete.
+
+The five recorded checks are `reaction_dynamics_native` (20 concentration/reagent preparations plus kinetics and conservation), `reaction_dynamics_flow` (rendered geometry, 1 M UI, curves, save/CSV), `pouring_flow` (affected tilted-volume and pouring regression), `reaction_clock_flow` (integrated time, busy waits, Pitzer identity and immediate readout), and `empty_source_boundary` (one headless no-op-transfer check). The last boundary case is retained in `godot/tests/reaction_clock_flow.gd` for future runs; that whole flow was not rerun after adding the case. CSV's constant `pitzer_sha256` provenance column was added after the CSV workflow check and reviewed without repeating that workflow. Receipt notes preserve these limits.
 
 ## Evidence and delivery
 
-The user explicitly said "stop running the same test everytime". Do not repeat suites or performance runs without a concrete need and new authorization. Prior full expansion suite and focused beginner save regression passed. Latest suite stopped at physics_flow without PASS; editor benchmark ended -15; initial packaged performance failed in chemistry/vessel scenes. Final full-suite and all-scene 30 FPS are NOT claimed. See `artifacts/expansion-validation.json` and `docs/PERFORMANCE.md`. Continue commit/documentation work; do not disguise partial receipts as passes.
+The user explicitly said "stop running the same test everytime". Do not rerun unchanged suites or benchmarks as a routine completion step. A new code change or observed failure can justify a focused check; documentation-only edits do not justify rerunning simulation tests. Prior full expansion suite and focused beginner save regression passed. Latest full suite stopped at physics_flow without PASS; editor benchmark ended -15; initial packaged performance failed in chemistry/vessel scenes. Final full-suite and all-scene 30 FPS are NOT claimed. See `artifacts/expansion-validation.json` and `docs/PERFORMANCE.md`. Keep these historical results distinct from the five successful corrective checks; do not disguise partial receipts as full passes.
 
 - `artifacts/verification.json`: latest incomplete verification attempt, 9 CTest cases, Godot import and 11 runtime flows (2 headless, 9 rendered). Native combustion compares all 20 independently generated Cantera reference cases. Field tests check fuel/energy conservation, source changes, cooling, frame partition consistency and snapshot replay.
 - `artifacts/combustion-validation.json`: 20 cases, maximum numerical temperature difference about 6.22e-7 K and species difference 3.48e-10 mol/mol fuel. This compares implementations using the same thermochemical data, not experimental flame accuracy.
@@ -32,6 +43,8 @@ The user explicitly said "stop running the same test everytime". Do not repeat s
 - Initial extension performance attempt exposed a stale heater-view load error; fixed and regression-tested. Benchmark now explicitly fails if any scene misses the documented P99/minimum-complete-second 30 FPS criterion, in addition to checking sample count and lifecycle conservation. Source and packaged receipts must match.
 
 ## Build and run
+
+Commands below are reference recipes, not instructions to rerun the full pipeline when resuming or updating documentation. The delivered app and receipts already exist.
 
 ```sh
 python3 scripts/bootstrap.py --with-godot
@@ -51,7 +64,7 @@ Actual exported executable name is in Info.plist. Its opt-in bundled benchmark s
 
 ## Preserve these technical decisions
 
-- phreeqc.dat is Latin-1; hash original bytes. Product loads FileAccess resource bytes and LoadDatabaseString, so PCK works. Reject mismatches and IPhreeqc warnings, including exit-zero warnings.
+- phreeqc.dat is Latin-1; hash original bytes. Preserve both original databases byte-for-byte, including upstream whitespace in `pitzer.dat`; do not format the database to satisfy whitespace lint. Product loads FileAccess resource bytes and LoadDatabaseString, so PCK works. Reject mismatches and IPhreeqc warnings, including exit-zero warnings.
 - Source-scoped `token=chemlab_phreeqc_transport_token` only for IPhreeqc transport.cpp resolves a C symbol collision with godot-cpp. Exceptions enabled; slim build profile includes FileAccess/OS/Image/WorkerThreadPool/XMLParser/RefCounted. Chinese native errors use String::utf8.
 - Homogeneous aliquots scale upstream cxxSolution state; rewrite extensive RAW fields at 17 digits because upstream DUMP uses 14. Keep intensives/valence, fold microscopic remainder into actual transfer. Different compositions use IPhreeqc MIX plus H/O/element/valence guards.
 - Closed CO2 uses explicit ideal-gas phase with exact same database equilibrium coefficients, avoiding upstream Peng–Robinson low-pressure volume clipping. Original DB untouched.
