@@ -11,6 +11,7 @@ ROOT=Path(__file__).resolve().parents[1]
 p=argparse.ArgumentParser()
 p.add_argument('--packaged',action='store_true')
 p.add_argument('--stress-seconds',type=int,default=180)
+p.add_argument('--phase-seconds',type=float,default=10)
 args=p.parse_args()
 label='packaged' if args.packaged else 'editor-run'
 report=ROOT/f'artifacts/performance-{label}.json'
@@ -32,7 +33,7 @@ else:
     editor=subprocess.Popen([godot,'--editor','--minimized','--path',str(ROOT/'godot')],stdout=editor_log,stderr=subprocess.STDOUT)
     time.sleep(5)
     command=[godot,'--path',str(ROOT/'godot')]
-command+=['--resolution','1920x1080','--position','10,60','--',f'--chemlab-benchmark={report}',f'--chemlab-stress-seconds={args.stress_seconds}']
+command+=['--resolution','1920x1080','--position','10,60','--',f'--chemlab-benchmark={report}',f'--chemlab-stress-seconds={args.stress_seconds}',f'--chemlab-phase-seconds={args.phase_seconds}']
 rss=[]
 started=time.monotonic()
 process=None

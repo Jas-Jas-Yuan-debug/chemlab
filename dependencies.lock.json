@@ -39,5 +39,15 @@
     "sha256": "88df5e2e6fee99088699be66e6d42e4da4fb0c5619d054297d755a49558a4792",
     "downloaded_bytes": 122879307,
     "license": "MIT"
+  },
+  "combustion_thermochemistry": {
+    "source": "https://raw.githubusercontent.com/Cantera/cantera/v3.2.0/data/nasa_gas.yaml",
+    "version": "3.2.0",
+    "derived_path": "data/combustion-thermo.json",
+    "derived_sha256": "55b03af44d32bc51eb15e36198543e36cef86e5898576c3df8cac1a5d63e43b2",
+    "species_count": 16,
+    "license_notice": "third_party/licenses/Cantera-LICENSE.txt",
+    "ethanol_liquid_offset_source": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C64175&Mask=4&Plot=on&Type=HVAP-FORM1",
+    "runtime": "Original C++ solver; no Python or Cantera runtime dependency"
   }
 }

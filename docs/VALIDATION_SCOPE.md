@@ -24,3 +24,5 @@
 - [Basic：TOTMOLE 与 TOT 的量纲](https://water.usgs.gov/water-resources/software/PHREEQC/documentation/phreeqc3-html/phreeqc3-61.htm)
 
 新增范围与数值回归见 [气液固](BATCH_EQUILIBRIUM.md)、[扩展溶液](AQUEOUS_EXTENSION.md)、[沉淀](PRECIPITATION.md)。七类物理实验采用独立模型，详见 [物理模型](PHYSICS_MODELS.md)。保存与导出验证见 [实验记录](SESSION_FORMAT.md)。
+
+0.2 扩展另有 173 项器材和 143 个固体包装，以及独立燃烧热化学和可开关三维近似场。这些目录与独立模块不改变上述 17/30 水溶液/气液固计数。详见 [扩展范围与验证](expansion/SCIENTIFIC_MODELS.md)。

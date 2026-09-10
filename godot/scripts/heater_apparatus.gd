@@ -1,5 +1,5 @@
 extends Node3D
-# Prescribed heat-source appearance, never a combustion/species calculation.
+# Bulk heating and optional computed 3D reaction field share the native fuel state.
 const Vessel = preload("res://scripts/vessel.gd")
 const Room = preload("res://scripts/lab_room.gd")
 const SOURCES = ["电热板","酒精灯","本生灯","氢氧焰","乙炔氧焰","酒精喷灯"]
@@ -11,6 +11,9 @@ var rotor: Node3D
 var flame: Node3D
 var display: Label3D
 var heat_light: MeshInstance3D
+var field_volume: MeshInstance3D
+var field_texture: ImageTexture
+var nozzle_position := Vector3.ZERO
 func _ready() -> void:
     add_child(equipment)
 func shape(mesh: Mesh,pos: Vector3,color: Color,metal: float = 0.0,parent: Node3D = null) -> MeshInstance3D:
@@ -37,6 +40,8 @@ func make_source(index: int) -> void:
     for child in equipment.get_children():
         equipment.remove_child(child)
         child.queue_free()
+    field_volume = null
+    field_texture = null
     source_id = index
     var cup_y := 0.955 if index==0 else 1.125
     block(Vector3(0.34,0.025,0.25),Vector3(0,0.9025,0),Color("d8ded8"))
@@ -72,6 +77,7 @@ func make_source(index: int) -> void:
             cylinder(0.007,0.027,Vector3(-0.082,0.985,0),Color("78847b"),0.6)
         flame = Node3D.new()
         flame.position = Vector3(0,nozzle_y,0)
+        nozzle_position=flame.position
         equipment.add_child(flame)
         for inner in [false,true]:
             var cone := CylinderMesh.new()
@@ -120,3 +126,27 @@ func update_state(r: Dictionary) -> void:
     else:
         heat_light.material_override.albedo_color = Color("e0a568") if r.power_w>0 else Color("604632")
     display.text = "%s\n水温 %.1f°C  /  设定 %.0f°C\n搅拌 %.0f rpm"%[SOURCES[source_id],r.temperature_c,r.target_c,r.stir_rpm]
+
+func update_flame_field(field: Dictionary) -> void:
+    if not field.get("enabled",false) or source_id<=0:return
+    if not field_volume:
+        field_volume=MeshInstance3D.new()
+        var volume_mesh := BoxMesh.new()
+        volume_mesh.size=Vector3.ONE
+        field_volume.mesh=volume_mesh
+        field_volume.scale=Vector3(0.096,0.168,0.096)
+        field_volume.position=nozzle_position+Vector3(0,0.084,0)
+        var material := ShaderMaterial.new()
+        material.shader=preload("res://shaders/flame_volume.gdshader")
+        field_volume.material_override=material
+        equipment.add_child(field_volume)
+    var image := Image.create_from_data(64,112,false,Image.FORMAT_RGBA8,field.atlas)
+    if not field_texture:
+        field_texture=ImageTexture.create_from_image(image)
+        field_volume.material_override.set_shader_parameter("field_atlas",field_texture)
+    else:field_texture.update(image)
+    flame.visible=false
+    field_volume.visible=true
+
+func clear_flame_field() -> void:
+    if field_volume:field_volume.visible=false

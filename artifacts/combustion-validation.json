@@ -1,0 +1,6 @@
+{
+  "reference": "Cantera 3.2.0; same NASA7 species subset; liquid-ethanol enthalpy offset",
+  "cases": 20,
+  "max_temperature_error_k": 6.216782821866218e-07,
+  "max_species_error_mol": 3.4710775920210324e-10
+}

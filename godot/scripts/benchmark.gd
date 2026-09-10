@@ -101,6 +101,7 @@ func run() -> void:
     lab.select_vessel(1)
     lab.target_id = 3
     lab.rate.value = 10
+    await wait_seconds(2)
     begin("chemistry_twelve_vessels_and_pour")
     lab.pour_button.button_down.emit()
     await wait_seconds(maxf(8,phase_seconds))
@@ -124,6 +125,7 @@ func run() -> void:
     await idle()
     var batch: Dictionary = lab.core.batch_snapshot()
     check(batch.solid_remaining_mmol>0.045 and batch.solid_remaining_mmol<0.05,"Packaged Barite equilibrium")
+    await wait_seconds(2)
     begin("precipitation")
     await wait_seconds(phase_seconds)
     segment = ""
@@ -155,6 +157,28 @@ func run() -> void:
         await wait_seconds(maxf(3,phase_seconds/2))
         segment = ""
         check(abs(lab.core.bench_snapshot().energy_residual_j)<1e-7,"Heater energy during source switches")
+    lab.switch_beginner()
+    lab.beginner.select_guide(0)
+    await wait_seconds(4)
+    begin("beginner_twelve_vessels")
+    await wait_seconds(phase_seconds)
+    segment=""
+    lab.beginner.select_guide(2)
+    lab.beginner.heat_toggle("heat_enabled")
+    lab.beginner.heat_toggle("stir_enabled")
+    await wait_seconds(1)
+    begin("beginner_heater_field_off")
+    await wait_seconds(phase_seconds)
+    segment=""
+    lab.beginner.toggle_flame(true)
+    await wait_seconds(2)
+    begin("beginner_heater_field_on")
+    await wait_seconds(phase_seconds)
+    segment=""
+    check(lab.core.flame_snapshot().get("enabled",false),"3D combustion switch enables actual field")
+    check(abs(lab.core.flame_snapshot().get("energy_residual_j",1.0))<0.001,"3D combustion field energy balance")
+    lab.beginner.toggle_flame(false)
+    lab.switch_experiment(false)
     # Bounded repeated lifecycle exercise: chemistry -> save/load -> physical model.
     var stress_start := Time.get_ticks_msec()
     var cycle := 0
@@ -227,6 +251,7 @@ func finish() -> void:
             s.minimum_complete_second_fps = min_frames if min_frames!=100000 else null
             s.meets_30fps_p99 = s.p99_ms<=33.334 and min_frames>=30
         check(s.count>=100,"Insufficient rendered frame callbacks: "+key)
+        check(s.get("meets_30fps_p99",false),"30 FPS frame-time criterion: "+key)
         frame_stats[key] = s
     var receipt := {"schema":1,"engine":Engine.get_version_info().string,"editor_binary":OS.has_feature("editor"),"phase_seconds":phase_seconds,
         "viewport_size":[render_size.x,render_size.y],"smoke_only":smoke_only,

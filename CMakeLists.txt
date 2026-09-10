@@ -19,7 +19,7 @@ set_property(SOURCE "${IPHREEQC_ROOT}/src/phreeqcpp/transport.cpp"
 add_executable(iphreeqc_probe tests/iphreeqc_probe.cpp)
 target_link_libraries(iphreeqc_probe PRIVATE IPhreeqc)
 target_compile_options(iphreeqc_probe PRIVATE -Wall -Wextra -Wpedantic)
-add_library(chemlab_science STATIC src/science/chemistry.cpp src/science/mechanics.cpp src/science/physics_models.cpp src/science/session.cpp)
+add_library(chemlab_science STATIC src/science/chemistry.cpp src/science/mechanics.cpp src/science/physics_models.cpp src/science/combustion.cpp src/science/flame_field.cpp src/science/session.cpp)
 target_include_directories(chemlab_science PUBLIC src)
 target_link_libraries(chemlab_science PUBLIC IPhreeqc)
 target_compile_options(chemlab_science PRIVATE -Wall -Wextra -Wpedantic)
@@ -50,6 +50,14 @@ add_test(NAME barite COMMAND barite_test "${IPHREEQC_ROOT}/database/phreeqc.dat"
 add_executable(physics_models_test tests/physics_models_test.cpp)
 target_link_libraries(physics_models_test PRIVATE chemlab_science)
 add_test(NAME physics_models COMMAND physics_models_test)
+
+add_executable(combustion_test tests/combustion_test.cpp)
+target_link_libraries(combustion_test PRIVATE chemlab_science)
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+add_test(NAME combustion_reference COMMAND ${Python3_EXECUTABLE} "${CMAKE_SOURCE_DIR}/scripts/check_combustion_reference.py" $<TARGET_FILE:combustion_test>)
+add_executable(flame_field_test tests/flame_field_test.cpp)
+target_link_libraries(flame_field_test PRIVATE chemlab_science)
+add_test(NAME flame_field COMMAND flame_field_test)
 
 option(CHEMLAB_BUILD_GODOT "Build the native Godot extension" OFF)
 if(CHEMLAB_BUILD_GODOT)

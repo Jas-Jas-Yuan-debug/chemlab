@@ -8,7 +8,7 @@
 namespace godot {
 namespace {
 const char* database_hash="59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10";
-const char* session_model="aqueous-0.2+batch-0.1+barite-0.1+physics-0.2";
+const char* session_model="aqueous-0.2+batch-0.1+barite-0.1+physics-0.3+combustion-0.1";
 chemlab::Scalars scalars(const Dictionary&d){
     if(d.size()>32)throw std::runtime_error("记录参数过多");
     chemlab::Scalars r;Array keys=d.keys();
@@ -30,6 +30,9 @@ std::vector<chemlab::Scalars> heater_controls(const Array& input){
 }
 
 void LabCore::_bind_methods(){
+    ClassDB::bind_method(D_METHOD("set_flame_enabled","enabled"),&LabCore::set_flame_enabled);
+    ClassDB::bind_method(D_METHOD("advance_flame","elapsed_s","wind_m_s"),&LabCore::advance_flame);
+    ClassDB::bind_method(D_METHOD("flame_snapshot"),&LabCore::flame_snapshot);
     ClassDB::bind_method(D_METHOD("preview_bench","kind","parameters","elapsed_s","running","heater_controls"),&LabCore::preview_bench,DEFVAL(false),DEFVAL(Array()));
     ClassDB::bind_method(D_METHOD("preview_fall","height_m","gravity_m_s2","elapsed_s"),&LabCore::preview_fall);
     ClassDB::bind_method(D_METHOD("save_session"),&LabCore::save_session);
@@ -78,12 +81,27 @@ Dictionary LabCore::advance_fall(double elapsed){
 String LabCore::configure_bench(const String&kind,const Dictionary&p){
     chemlab::Scalars values;Array keys=p.keys();
     for(int i=0;i<keys.size();++i){String key=keys[i];values[key.utf8().get_data()]=double(p[key]);}
-    try{bench_.configure(kind.utf8().get_data(),values);return "";}catch(const std::exception&e){return String::utf8(e.what());}
+    try{bench_.configure(kind.utf8().get_data(),values);flame_.reset();return "";}catch(const std::exception&e){return String::utf8(e.what());}
+}
+String LabCore::set_flame_enabled(bool enabled){
+    if(!enabled){flame_.reset();return "";}
+    if(bench_.kind()!="heater"||bench_.reading().at("source")==0)return String::utf8("请先选择燃烧器材");
+    try{if(!flame_){chemlab::FlameField f;f.reset(int(bench_.reading().at("source")));flame_=std::move(f);}return "";}catch(const std::exception&e){return String::utf8(e.what());}
+}
+Dictionary LabCore::flame_snapshot()const{
+    Dictionary r;r["enabled"]=bool(flame_);if(!flame_)return r;
+    r["time_s"]=flame_->time();r["peak_temperature_k"]=flame_->peak_temperature();r["burned_mol"]=flame_->burned_mol();r["fuel_residual_kg"]=flame_->fuel_balance_error();r["energy_residual_j"]=flame_->energy_balance_error();r["max_speed_m_s"]=flame_->max_speed();r["source"]=flame_->source();
+    const auto bytes=flame_->atlas();PackedByteArray atlas;atlas.resize(bytes.size());std::copy(bytes.begin(),bytes.end(),atlas.ptrw());r["atlas"]=atlas;return r;
+}
+Dictionary LabCore::advance_flame(double elapsed,double wind){
+    if(!flame_)return flame_snapshot();
+    try{if(bench_.kind()!="heater"){flame_.reset();return flame_snapshot();}auto r=bench_.reading();int source=int(r.at("source"));if(source==0){flame_.reset();return flame_snapshot();}if(source!=flame_->source())flame_->reset(source);if(r.at("running")>0)flame_->advance(elapsed,r.at("fuel_flow_mol_s"),wind);return flame_snapshot();}
+    catch(const std::exception&e){Dictionary d=flame_snapshot();d["error"]=String::utf8(e.what());return d;}
 }
 void LabCore::start_bench(){bench_.start();}
-String LabCore::control_heater(const Dictionary&p){try{bench_.control_heater(scalars(p));return "";}catch(const std::exception&e){return String::utf8(e.what());}}
+String LabCore::control_heater(const Dictionary&p){try{bench_.control_heater(scalars(p));if(flame_){const int source=int(bench_.reading().at("source"));if(source==0)flame_.reset();else if(source!=flame_->source())flame_->reset(source);}return "";}catch(const std::exception&e){return String::utf8(e.what());}}
 void LabCore::pause_bench(){bench_.pause();}
-void LabCore::reset_bench(){bench_.reset();}
+void LabCore::reset_bench(){bench_.reset();flame_.reset();}
 Dictionary LabCore::bench_snapshot()const{
     Dictionary d;for(auto[key,value]:bench_.reading())d[String(key.c_str())]=value;
     d["kind"]=String(bench_.kind().c_str());
@@ -161,7 +179,8 @@ Dictionary LabCore::save_session()const{
     for(const auto&e:session_.events){Dictionary item;item["operation"]=String(e.operation.c_str());item["from"]=e.from;item["to"]=e.to;item["transferred_ml"]=e.transferred_ml;item["readings"]=dictionary(e.readings);events.push_back(item);}
     d["commands"]=commands;d["events"]=events;d["fall"]=fall_snapshot();Dictionary bench=bench_snapshot();
     if(bench_.kind()=="heater"){Array controls;for(const auto& c:bench_.heater_controls())controls.push_back(dictionary(c));bench["heater_controls"]=controls;}
-    d["bench"]=bench;return d;
+    d["bench"]=bench;
+    Array field;if(flame_)for(double v:flame_->save())field.push_back(v);d["flame_field"]=field;return d;
 }
 String LabCore::load_session(const Dictionary&d){
     if(is_busy())return String::utf8("请等待当前操作完成后再加载");
@@ -186,10 +205,13 @@ String LabCore::load_session(const Dictionary&d){
             const auto controls=heater_controls(b["heater_controls"]);bench.restore_heater_controls(controls);
             if(controls.back().at("time_s")>double(b["time_s"])+1e-8)throw std::runtime_error("加热控制记录超过实验时间");
         }
-        bool started=start([commands,fall,bench](chemlab::Chemistry&solver,Result&r){
+        std::optional<chemlab::FlameField> flame;
+        if(d.has("flame_field")){if(d["flame_field"].get_type()!=Variant::ARRAY)throw std::runtime_error("三维场记录无效");Array values=d["flame_field"];if(values.size()>60000)throw std::runtime_error("三维场记录过大");
+            if(values.size()){std::vector<double> saved;for(int i=0;i<values.size();++i){if(values[i].get_type()!=Variant::FLOAT&&values[i].get_type()!=Variant::INT)throw std::runtime_error("三维场数值无效");saved.push_back(double(values[i]));}chemlab::FlameField field;field.load(saved);if(kind!="heater"||field.source()!=int(bench.reading().at("source")))throw std::runtime_error("三维场与燃烧源不匹配");flame=std::move(field);}}
+        bool started=start([commands,fall,bench,flame](chemlab::Chemistry&solver,Result&r){
             r.operation="load";chemlab::LabSession restored;restored.reset(solver);
             for(const auto&c:commands)restored.apply(solver,c);
-            r.session=std::move(restored);r.restored_fall=fall;r.restored_bench=bench;
+            r.session=std::move(restored);r.restored_fall=fall;r.restored_bench=bench;r.restored_flame=flame;
         });
         if(!started)throw std::runtime_error("无法开始加载");
         return "";
@@ -215,6 +237,12 @@ Dictionary LabCore::snapshot()const{
         Dictionary d;d["id"]=id;d["capacity_ml"]=v.capacity_l*1000;
         const auto&s=v.solution;
         d["volume_ml"]=s.volume_l*1000;d["ph"]=s.empty()?Variant():Variant(s.ph);
+        // Atomic masses are those of the pinned PHREEQC database, retaining
+        // solvent H/O and every supported solute element in the balance reading.
+        double mass=s.hydrogen_mol*1.008+s.oxygen_mol*16.0;
+        const std::map<std::string,double> weights={{"Na",22.9898},{"Cl",35.453},{"K",39.102},{"Ca",40.08},{"Mg",24.312},{"C",12.0111},{"S",32.064},{"N",14.0067},{"Ba",137.34},{"Fe",55.847},{"Cu",63.546}};
+        for(const auto&[element,n]:s.elements)mass+=n*weights.at(element);
+        d["sample_mass_g"]=mass;
         d["water_kg"]=s.water_kg;d["hydrogen_mol"]=s.hydrogen_mol;d["oxygen_mol"]=s.oxygen_mol;
         d["temperature_c"]=25.0;d["charge_eq"]=s.charge_eq;
         Dictionary elements;for(const auto&[e,n]:s.elements)elements[String(e.c_str())]=n;
@@ -231,7 +259,7 @@ Dictionary LabCore::poll(){
     auto completed=pending_.get();
     if(completed.generation==generation_){
         result["ready"]=true;result["error"]=String::utf8(completed.error.c_str());
-        if(completed.error.empty()){session_=std::move(completed.session);if(completed.restored_fall)fall_=*completed.restored_fall;if(completed.restored_bench)bench_=*completed.restored_bench;++revision_;}
+        if(completed.error.empty()){session_=std::move(completed.session);if(completed.restored_fall)fall_=*completed.restored_fall;if(completed.restored_bench)bench_=*completed.restored_bench;if(completed.operation=="load")flame_=std::move(completed.restored_flame);++revision_;}
         result["state"]=snapshot();result["operation"]=String(completed.operation.c_str());
         result["from"]=completed.from;result["to"]=completed.to;
         result["transferred_ml"]=completed.transferred_ml;result["compute_ms"]=completed.compute_ms;

@@ -1,4 +1,5 @@
 #include "physics_models.hpp"
+#include "combustion.hpp"
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
@@ -13,7 +14,7 @@ const std::map<std::string,std::vector<Field>> schema={
  {"heat",{{"mass1_kg",0.05,1,0.1},{"mass2_kg",0.05,1,0.1},{"temperature1_c",5,90,70},{"temperature2_c",5,90,20},{"conductance_w_k",0.1,20,10}}},
  {"circuit",{{"voltage_v",0,12,6},{"resistance1_ohm",1,1000,100},{"resistance2_ohm",1,1000,200},{"parallel",0,1,0}}},
  {"lens",{{"focal_m",-0.5,0.5,0.2},{"object_m",0.1,1,0.5},{"object_height_m",0.01,0.1,0.05}}},
- {"heater",{{"mass_kg",0.05,0.25,0.1},{"initial_temperature_c",5,90,20},{"target_c",25,95,60},{"power_w",50,1000,250},{"stir_rpm",0,600,300},{"source",0,5,0}}}
+ {"heater",{{"mass_kg",0.05,0.25,0.1},{"initial_temperature_c",5,90,20},{"target_c",25,95,60},{"power_w",50,1000,250},{"stir_rpm",0,600,300},{"source",0,5,0},{"fuel_mass_g",1,1000,50}}}
 };
 void validate_control(const Scalars& c){
  const std::vector<Field> fields={{"time_s",0,86400,0},{"target_c",25,95,60},{"power_w",50,1000,250},{"stir_rpm",0,600,300},{"heat_enabled",0,1,0},{"stir_enabled",0,1,0},{"source",0,5,0}};
@@ -21,8 +22,8 @@ void validate_control(const Scalars& c){
  for(const auto& f:fields){auto it=c.find(f.key);if(it==c.end()||!std::isfinite(it->second)||it->second<f.lower||it->second>f.upper)throw std::invalid_argument("加热控制参数超出范围");}
  for(const auto* key:{"heat_enabled","stir_enabled","source"})if(c.at(key)!=std::floor(c.at(key)))throw std::invalid_argument("加热器材或开关值无效");
 }
-// Lumped liquid-water model with ideal temperature feedback. The specified
-// power is heat delivered to the water, not an inferred fuel combustion rate.
+// Lumped water plus a finite fuel inventory. Feedback requests delivered heat;
+// chemical feed is computed from NASA7 heating values and a stated capture fraction.
 struct HeatedWater { double temperature, input=0, loss=0, turns=0, power=0; };
 void heat_segment(HeatedWater& s,const Scalars& c,double seconds,double capacity){
  constexpr double ambient=20,conductance=0.6;
@@ -136,11 +137,33 @@ Scalars PhysicsExperiment::reading()const{
   if(!infinite){const double v=f*u/(u-f);r["image_m"]=v;r["magnification"]=-v/u;r["image_height_m"]=-v/u*p("object_height_m");r["virtual"]=v<0?1:0;}
  }else if(kind_=="heater"){
   const double capacity=4186*p("mass_kg");HeatedWater s{p("initial_temperature_c")};
+  static const std::array<CombustionResult,5> fuels={combustion_equilibrium(1),combustion_equilibrium(2),combustion_equilibrium(3),combustion_equilibrium(4),combustion_equilibrium(5)};
+  constexpr double capture=0.35;
+  std::array<double,5> consumed{};
+  double chemical_energy=0,flame_water=0,oxygen_used=0,co2=0,water=0;
   size_t active=0;
   for(size_t i=0;i<heater_controls_.size();++i){
    const auto& c=heater_controls_[i];if(c.at("time_s")>t+1e-10)break;
    const double end=i+1<heater_controls_.size()?std::min(t,heater_controls_[i+1].at("time_s")):t;
-   heat_segment(s,c,std::max(0.0,end-c.at("time_s")),capacity);active=i;
+   const double duration=std::max(0.0,end-c.at("time_s"));
+   const int source=int(c.at("source"));
+   if(source==0)heat_segment(s,c,duration,capacity);
+   else {
+    const auto& f=fuels[source-1];
+    const double remaining=std::max(0.0,p("fuel_mass_g")/f.fuel_molar_mass_g-consumed[source-1]);
+    const double available=remaining*f.lhv_j_mol*capture;
+    const auto before=s;auto trial=s;heat_segment(trial,c,duration,capacity);
+    if(trial.input-before.input>available){
+     double lo=0,hi=duration;for(int k=0;k<48;++k){double mid=(lo+hi)/2;auto test=before;heat_segment(test,c,mid,capacity);if(test.input-before.input<available)lo=mid;else hi=mid;}
+     heat_segment(s,c,(lo+hi)/2,capacity);auto off=c;off["heat_enabled"]=0;heat_segment(s,off,duration-(lo+hi)/2,capacity);
+    }else s=trial;
+    const double added=s.input-before.input,n=added/(capture*f.lhv_j_mol);
+    consumed[source-1]+=n;chemical_energy+=n*f.lhv_j_mol;flame_water+=added;oxygen_used+=n*f.oxygen_mol;
+    // Cold complete-combustion totals; hot equilibrium species are reported separately.
+    co2+=n*(source==3?0:source==2?1:2);water+=n*(source==3||source==4?1:source==2?2:3);
+    if(remaining<=1e-12)s.power=0;
+   }
+   active=i;
   }
   const auto& c=heater_controls_[active];
   r["temperature_c"]=s.temperature;r["target_c"]=c.at("target_c");r["power_limit_w"]=c.at("power_w");
@@ -149,7 +172,17 @@ Scalars PhysicsExperiment::reading()const{
   r["stir_rpm"]=running_&&c.at("stir_enabled")==1?c.at("stir_rpm"):0;
   r["stir_setpoint_rpm"]=c.at("stir_rpm");r["stir_turns"]=s.turns;
   r["heat_enabled"]=c.at("heat_enabled");r["stir_enabled"]=c.at("stir_enabled");r["source"]=c.at("source");
-  r["at_target"]=std::abs(s.temperature-c.at("target_c"))<1e-8?1:0;r["heater_control_count"]=active+1;
+  const int source=int(c.at("source"));
+  r["chemical_energy_j"]=chemical_energy;r["exhaust_energy_j"]=chemical_energy-flame_water;
+  r["combustion_energy_residual_j"]=chemical_energy-flame_water-r["exhaust_energy_j"];
+  r["oxygen_consumed_mol"]=oxygen_used;r["cooled_co2_mol"]=co2;r["cooled_water_mol"]=water;
+  r["capture_fraction"]=capture;r["fuel_remaining_g"]=source?std::max(0.0,p("fuel_mass_g")-consumed[source-1]*fuels[source-1].fuel_molar_mass_g):0;
+  r["fuel_consumed_mol"]=source?consumed[source-1]:0;
+  r["flame_adiabatic_k"]=source?fuels[source-1].temperature_k:298.15;
+  r["fuel_flow_mol_s"]=source?r["power_w"]/(capture*fuels[source-1].lhv_j_mol):0;
+  if(source){const auto&f=fuels[source-1];r["fuel_molar_mass_g"]=f.fuel_molar_mass_g;r["fuel_lhv_j_mol"]=f.lhv_j_mol;r["oxygen_per_fuel_mol"]=f.oxygen_mol;r["nitrogen_per_fuel_mol"]=f.nitrogen_mol;
+   for(int i=0;i<16;++i)r[std::string("hot_")+combustion_species_name(i)+"_mol_per_fuel_mol"]=f.products[i];}
+  r["at_target"]= std::abs(s.temperature-c.at("target_c"))<1e-8?1:0;r["heater_control_count"]=active+1;
  }
  return r;
 }

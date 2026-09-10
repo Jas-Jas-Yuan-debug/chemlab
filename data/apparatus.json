@@ -1,0 +1,2768 @@
+{
+  "schema": 1,
+  "items": [
+    {
+      "id": "eq001",
+      "name": "酒精灯",
+      "category": "加热",
+      "model": "lamp",
+      "action": "heater",
+      "source": 1,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq002",
+      "name": "火柴",
+      "category": "取用",
+      "model": "match",
+      "action": "ignite",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq003",
+      "name": "胶头滴管",
+      "category": "容器",
+      "model": "dropper",
+      "action": "vessel",
+      "capacity_ml": 5,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq004",
+      "name": "长胶头滴管",
+      "category": "容器",
+      "model": "dropper",
+      "action": "vessel",
+      "capacity_ml": 5,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq005",
+      "name": "镊子",
+      "category": "取用",
+      "model": "tongs",
+      "action": "hold",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq006",
+      "name": "坩埚钳",
+      "category": "取用",
+      "model": "tongs",
+      "action": "hold",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq007",
+      "name": "陶土网",
+      "category": "支撑",
+      "model": "mesh",
+      "action": "support",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq008",
+      "name": "酒精灯罩",
+      "category": "支撑",
+      "model": "mesh",
+      "action": "support",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq009",
+      "name": "带铁夹的铁架台",
+      "category": "支撑",
+      "model": "stand",
+      "action": "support",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq010",
+      "name": "带铁圈的铁架台",
+      "category": "支撑",
+      "model": "stand",
+      "action": "support",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq011",
+      "name": "铁架台",
+      "category": "支撑",
+      "model": "stand",
+      "action": "support",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq012",
+      "name": "铁夹侧视",
+      "category": "支撑",
+      "model": "clamp",
+      "action": "support",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq013",
+      "name": "铁夹",
+      "category": "支撑",
+      "model": "clamp",
+      "action": "support",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq014",
+      "name": "滴定管夹",
+      "category": "支撑",
+      "model": "clamp",
+      "action": "support",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq015",
+      "name": "试管夹",
+      "category": "支撑",
+      "model": "clamp",
+      "action": "support",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq016",
+      "name": "药匙",
+      "category": "取用",
+      "model": "spoon",
+      "action": "scoop",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq017",
+      "name": "燃烧匙",
+      "category": "取用",
+      "model": "spoon",
+      "action": "scoop",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq018",
+      "name": "带孔燃烧匙",
+      "category": "取用",
+      "model": "spoon",
+      "action": "scoop",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq019",
+      "name": "九十度玻璃导管",
+      "category": "连接",
+      "model": "tube90",
+      "action": "connect",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq020",
+      "name": "九十度导管（不可拆分）",
+      "category": "连接",
+      "model": "tube90",
+      "action": "connect",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq021",
+      "name": "九十度玻璃管",
+      "category": "连接",
+      "model": "tube90",
+      "action": "connect",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq022",
+      "name": "可弯曲导管",
+      "category": "连接",
+      "model": "bent",
+      "action": "connect",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq023",
+      "name": "六十度弯管",
+      "category": "连接",
+      "model": "bent",
+      "action": "connect",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq024",
+      "name": "尖嘴金属管",
+      "category": "连接",
+      "model": "bent",
+      "action": "connect",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq025",
+      "name": "弯嘴金属管",
+      "category": "连接",
+      "model": "bent",
+      "action": "connect",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq026",
+      "name": "牛角管",
+      "category": "连接",
+      "model": "bent",
+      "action": "connect",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq027",
+      "name": "直导管",
+      "category": "连接",
+      "model": "tube",
+      "action": "connect",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq028",
+      "name": "针头",
+      "category": "连接",
+      "model": "tube",
+      "action": "connect",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq029",
+      "name": "橡胶管",
+      "category": "连接",
+      "model": "hose",
+      "action": "connect",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq030",
+      "name": "止水夹",
+      "category": "连接",
+      "model": "valve",
+      "action": "valve",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq031",
+      "name": "橡胶塞",
+      "category": "连接",
+      "model": "stopper",
+      "action": "seal",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq032",
+      "name": "橡胶塞（带导管）",
+      "category": "连接",
+      "model": "stoppertube",
+      "action": "connect",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq033",
+      "name": "玻璃棒",
+      "category": "取用",
+      "model": "rod",
+      "action": "stir",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq034",
+      "name": "环形玻璃搅拌棒",
+      "category": "取用",
+      "model": "rod",
+      "action": "stir",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq035",
+      "name": "泥三角",
+      "category": "支撑",
+      "model": "triangle",
+      "action": "support",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq036",
+      "name": "剪刀",
+      "category": "取用",
+      "model": "scissors",
+      "action": "cut",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq037",
+      "name": "小刀",
+      "category": "取用",
+      "model": "scissors",
+      "action": "cut",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq038",
+      "name": "玻璃片",
+      "category": "支撑",
+      "model": "sheet",
+      "action": "cover",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq039",
+      "name": "木盖",
+      "category": "支撑",
+      "model": "sheet",
+      "action": "cover",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq040",
+      "name": "塑料隔板",
+      "category": "支撑",
+      "model": "sheet",
+      "action": "cover",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq041",
+      "name": "试管刷",
+      "category": "取用",
+      "model": "brush",
+      "action": "clean",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq042",
+      "name": "温度计",
+      "category": "测量",
+      "model": "thermometer",
+      "action": "temperature",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq043",
+      "name": "高温温度计",
+      "category": "测量",
+      "model": "thermometer",
+      "action": "temperature",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq044",
+      "name": "秒表",
+      "category": "测量",
+      "model": "timer",
+      "action": "timer",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq045",
+      "name": "T形玻璃导管",
+      "category": "连接",
+      "model": "tee",
+      "action": "connect",
+      "ports": 3,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq046",
+      "name": "Y形玻璃导管",
+      "category": "连接",
+      "model": "wye",
+      "action": "connect",
+      "ports": 3,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq047",
+      "name": "镁条",
+      "category": "耗材",
+      "model": "wire",
+      "action": "material",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq048",
+      "name": "铂丝",
+      "category": "耗材",
+      "model": "wire",
+      "action": "material",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq049",
+      "name": "铜丝",
+      "category": "耗材",
+      "model": "wire",
+      "action": "material",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq050",
+      "name": "铁丝",
+      "category": "耗材",
+      "model": "wire",
+      "action": "material",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq051",
+      "name": "带木条的铁丝",
+      "category": "耗材",
+      "model": "wire",
+      "action": "material",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq052",
+      "name": "砂纸",
+      "category": "取用",
+      "model": "sheet",
+      "action": "polish",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq053",
+      "name": "pH试纸",
+      "category": "测量",
+      "model": "paper",
+      "action": "ph",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq054",
+      "name": "红色石蕊试纸",
+      "category": "测量",
+      "model": "paper",
+      "action": "ph",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq055",
+      "name": "蓝色石蕊试纸",
+      "category": "测量",
+      "model": "paper",
+      "action": "ph",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq056",
+      "name": "酚酞试纸",
+      "category": "测量",
+      "model": "paper",
+      "action": "ph",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq057",
+      "name": "淀粉碘化钾试纸",
+      "category": "测量",
+      "model": "paper",
+      "action": "iodine",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq058",
+      "name": "直形冷凝管装置",
+      "category": "组合装置",
+      "model": "condenserstand",
+      "action": "condenser",
+      "ports": 4,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq059",
+      "name": "球形冷凝管装置",
+      "category": "组合装置",
+      "model": "condenserstand",
+      "action": "condenser",
+      "ports": 4,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq060",
+      "name": "球形冷凝管",
+      "category": "连接",
+      "model": "condenser",
+      "action": "condenser",
+      "ports": 4,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq061",
+      "name": "电子天平",
+      "category": "测量",
+      "model": "balance",
+      "action": "weigh",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq062",
+      "name": "天平和砝码",
+      "category": "测量",
+      "model": "balance",
+      "action": "weigh",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq063",
+      "name": "称量纸",
+      "category": "取用",
+      "model": "sheet",
+      "action": "weigh",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq064",
+      "name": "铁圈",
+      "category": "支撑",
+      "model": "ring",
+      "action": "support",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq065",
+      "name": "木块",
+      "category": "支撑",
+      "model": "block",
+      "action": "support",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq066",
+      "name": "试管架",
+      "category": "支撑",
+      "model": "rack",
+      "action": "support",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq067",
+      "name": "三脚架",
+      "category": "支撑",
+      "model": "tripod",
+      "action": "support",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq068",
+      "name": "阶梯铁片",
+      "category": "支撑",
+      "model": "stairs",
+      "action": "support",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq069",
+      "name": "升降台",
+      "category": "支撑",
+      "model": "lift",
+      "action": "lift",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq070",
+      "name": "黄铜片",
+      "category": "耗材",
+      "model": "sheet",
+      "action": "material",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq071",
+      "name": "霍夫曼电解器",
+      "category": "组合装置",
+      "model": "electrolyzer",
+      "action": "electrolysis",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq072",
+      "name": "电热套",
+      "category": "加热",
+      "model": "mantle",
+      "action": "heater",
+      "source": 0,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq073",
+      "name": "冰水浴",
+      "category": "加热",
+      "model": "bath",
+      "action": "bath",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq074",
+      "name": "水浴锅",
+      "category": "加热",
+      "model": "bath",
+      "action": "bath",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq075",
+      "name": "水槽",
+      "category": "容器",
+      "model": "tank",
+      "action": "vessel",
+      "capacity_ml": 1000,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq076",
+      "name": "纸槽",
+      "category": "取用",
+      "model": "sheet",
+      "action": "scoop",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq077",
+      "name": "塑料注射器",
+      "category": "容器",
+      "model": "syringe",
+      "action": "vessel",
+      "capacity_ml": 10,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq078",
+      "name": "大塑料注射器",
+      "category": "容器",
+      "model": "syringe",
+      "action": "vessel",
+      "capacity_ml": 100,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq079",
+      "name": "塑料注射器50ml",
+      "category": "容器",
+      "model": "syringe",
+      "action": "vessel",
+      "capacity_ml": 50,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq080",
+      "name": "二氧化氮平衡球",
+      "category": "组合装置",
+      "model": "doublebulb",
+      "action": "no2",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq081",
+      "name": "气球",
+      "category": "容器",
+      "model": "balloon",
+      "action": "gas",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq082",
+      "name": "石蕊纸花",
+      "category": "测量",
+      "model": "paperflower",
+      "action": "ph",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq083",
+      "name": "定性滤纸",
+      "category": "取用",
+      "model": "paper",
+      "action": "filter",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq084",
+      "name": "球形干燥管",
+      "category": "连接",
+      "model": "dryingtube",
+      "action": "dry",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq085",
+      "name": "碱石灰干燥管",
+      "category": "连接",
+      "model": "dryingtube",
+      "action": "dry",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq086",
+      "name": "五氧化二磷干燥管",
+      "category": "连接",
+      "model": "dryingtube",
+      "action": "dry",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq087",
+      "name": "本生灯",
+      "category": "加热",
+      "model": "bunsen",
+      "action": "heater",
+      "source": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq088",
+      "name": "棉花",
+      "category": "耗材",
+      "model": "cotton",
+      "action": "material",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq089",
+      "name": "热毛巾",
+      "category": "耗材",
+      "model": "cotton",
+      "action": "material",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq090",
+      "name": "布条",
+      "category": "耗材",
+      "model": "cotton",
+      "action": "material",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq091",
+      "name": "馒头",
+      "category": "耗材",
+      "model": "cotton",
+      "action": "material",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq092",
+      "name": "小木条",
+      "category": "耗材",
+      "model": "cotton",
+      "action": "material",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq093",
+      "name": "抽纸盒",
+      "category": "耗材",
+      "model": "cotton",
+      "action": "material",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq094",
+      "name": "放大镜",
+      "category": "测量",
+      "model": "lens",
+      "action": "optics",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq095",
+      "name": "蓝色钴玻璃",
+      "category": "测量",
+      "model": "lens",
+      "action": "optics",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq096",
+      "name": "激光笔",
+      "category": "测量",
+      "model": "lens",
+      "action": "optics",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq097",
+      "name": "蜡烛",
+      "category": "加热",
+      "model": "candle",
+      "action": "material",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq098",
+      "name": "烟花",
+      "category": "耗材",
+      "model": "firework",
+      "action": "material",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq099",
+      "name": "pH计",
+      "category": "测量",
+      "model": "meter",
+      "action": "ph",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq100",
+      "name": "酒精喷灯",
+      "category": "加热",
+      "model": "torch",
+      "action": "heater",
+      "source": 5,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq101",
+      "name": "酒精喷壶",
+      "category": "容器",
+      "model": "spray",
+      "action": "material",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq102",
+      "name": "充有二氧化氮的50ml注射器",
+      "category": "容器",
+      "model": "syringe",
+      "action": "no2",
+      "capacity_ml": 50,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq103",
+      "name": "酸性气体干燥装置",
+      "category": "组合装置",
+      "model": "washbottle",
+      "action": "dry",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq104",
+      "name": "碱性气体干燥装置",
+      "category": "组合装置",
+      "model": "washbottle",
+      "action": "dry",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq105",
+      "name": "向下排空气法",
+      "category": "组合装置",
+      "model": "gasjar",
+      "action": "gas",
+      "ports": 1,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq106",
+      "name": "向上排空气法",
+      "category": "组合装置",
+      "model": "gasjar",
+      "action": "gas",
+      "ports": 1,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq107",
+      "name": "排水集气法",
+      "category": "组合装置",
+      "model": "collection",
+      "action": "gas",
+      "ports": 1,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq108",
+      "name": "电导率测定装置",
+      "category": "组合装置",
+      "model": "conductivity",
+      "action": "conductivity",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq109",
+      "name": "溶液导电性",
+      "category": "组合装置",
+      "model": "conductivity",
+      "action": "conductivity",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq110",
+      "name": "尾气处理装置",
+      "category": "组合装置",
+      "model": "washbottle",
+      "action": "scrub",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq111",
+      "name": "洗气装置",
+      "category": "组合装置",
+      "model": "washbottle",
+      "action": "scrub",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq112",
+      "name": "固液加热制气装置",
+      "category": "组合装置",
+      "model": "generator",
+      "action": "gasreaction",
+      "ports": 1,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq113",
+      "name": "固固加热制气装置",
+      "category": "组合装置",
+      "model": "generator",
+      "action": "gasreaction",
+      "ports": 1,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq114",
+      "name": "固液不加热制气装置",
+      "category": "组合装置",
+      "model": "generator",
+      "action": "gasreaction",
+      "ports": 1,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq115",
+      "name": "多功能瓶",
+      "category": "容器",
+      "model": "washbottle",
+      "action": "vessel",
+      "capacity_ml": 250,
+      "ports": 3,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq116",
+      "name": "氢原子能级",
+      "category": "测量",
+      "model": "spectrum",
+      "action": "spectrum",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq117",
+      "name": "光谱管组",
+      "category": "测量",
+      "model": "spectrum",
+      "action": "spectrum",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq118",
+      "name": "圆底烧瓶",
+      "category": "容器",
+      "model": "flask",
+      "action": "vessel",
+      "capacity_ml": 250,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq119",
+      "name": "平底烧瓶",
+      "category": "容器",
+      "model": "flask",
+      "action": "vessel",
+      "capacity_ml": 250,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq120",
+      "name": "球形分液漏斗",
+      "category": "容器",
+      "model": "separatory",
+      "action": "vessel",
+      "capacity_ml": 100,
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq121",
+      "name": "梨形分液漏斗",
+      "category": "容器",
+      "model": "separatory",
+      "action": "vessel",
+      "capacity_ml": 100,
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq122",
+      "name": "平衡气压的球形分液漏斗",
+      "category": "容器",
+      "model": "separatory",
+      "action": "vessel",
+      "capacity_ml": 100,
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq123",
+      "name": "直形分液漏斗",
+      "category": "容器",
+      "model": "separatory",
+      "action": "vessel",
+      "capacity_ml": 100,
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq124",
+      "name": "滴液漏斗",
+      "category": "容器",
+      "model": "separatory",
+      "action": "vessel",
+      "capacity_ml": 100,
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq125",
+      "name": "恒压滴液漏斗",
+      "category": "容器",
+      "model": "separatory",
+      "action": "vessel",
+      "capacity_ml": 100,
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq126",
+      "name": "集气瓶",
+      "category": "容器",
+      "model": "gasjar",
+      "action": "vessel",
+      "capacity_ml": 250,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq127",
+      "name": "五等分集气瓶",
+      "category": "容器",
+      "model": "gasjar",
+      "action": "vessel",
+      "capacity_ml": 250,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq128",
+      "name": "小试管",
+      "category": "容器",
+      "model": "testtube",
+      "action": "vessel",
+      "capacity_ml": 10,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq129",
+      "name": "大试管",
+      "category": "容器",
+      "model": "testtube",
+      "action": "vessel",
+      "capacity_ml": 50,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq130",
+      "name": "具支试管",
+      "category": "容器",
+      "model": "testtube",
+      "action": "vessel",
+      "capacity_ml": 50,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq131",
+      "name": "烧杯100mL",
+      "category": "容器",
+      "model": "beaker",
+      "action": "vessel",
+      "capacity_ml": 100,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq132",
+      "name": "烧杯250mL",
+      "category": "容器",
+      "model": "beaker",
+      "action": "vessel",
+      "capacity_ml": 250,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq133",
+      "name": "烧杯1000mL",
+      "category": "容器",
+      "model": "beaker",
+      "action": "vessel",
+      "capacity_ml": 1000,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq134",
+      "name": "三颈烧瓶",
+      "category": "容器",
+      "model": "flask3",
+      "action": "vessel",
+      "capacity_ml": 250,
+      "ports": 3,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq135",
+      "name": "长颈漏斗",
+      "category": "容器",
+      "model": "funnel",
+      "action": "vessel",
+      "capacity_ml": 50,
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq136",
+      "name": "小号三角漏斗",
+      "category": "容器",
+      "model": "funnel",
+      "action": "vessel",
+      "capacity_ml": 50,
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq137",
+      "name": "三角漏斗",
+      "category": "容器",
+      "model": "funnel",
+      "action": "vessel",
+      "capacity_ml": 50,
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq138",
+      "name": "洗瓶250mL",
+      "category": "容器",
+      "model": "washbottle",
+      "action": "vessel",
+      "capacity_ml": 250,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq139",
+      "name": "蒸馏烧瓶",
+      "category": "容器",
+      "model": "flaskside",
+      "action": "vessel",
+      "capacity_ml": 250,
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq140",
+      "name": "细口瓶",
+      "category": "容器",
+      "model": "bottle",
+      "action": "vessel",
+      "capacity_ml": 250,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq141",
+      "name": "广口瓶",
+      "category": "容器",
+      "model": "bottle",
+      "action": "vessel",
+      "capacity_ml": 250,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq142",
+      "name": "启普发生器",
+      "category": "组合装置",
+      "model": "kipp",
+      "action": "gasreaction",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq143",
+      "name": "具支U型管",
+      "category": "容器",
+      "model": "utube",
+      "action": "vessel",
+      "capacity_ml": 50,
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq144",
+      "name": "U型管",
+      "category": "容器",
+      "model": "utube",
+      "action": "vessel",
+      "capacity_ml": 50,
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq145",
+      "name": "测定气体体积U型管",
+      "category": "容器",
+      "model": "utube",
+      "action": "vessel",
+      "capacity_ml": 50,
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq146",
+      "name": "硫酸铜U型管",
+      "category": "容器",
+      "model": "utube",
+      "action": "material",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq147",
+      "name": "碱石灰U型管",
+      "category": "容器",
+      "model": "utube",
+      "action": "material",
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq148",
+      "name": "坩埚",
+      "category": "容器",
+      "model": "crucible",
+      "action": "vessel",
+      "capacity_ml": 50,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq149",
+      "name": "小蒸发皿",
+      "category": "容器",
+      "model": "dish",
+      "action": "vessel",
+      "capacity_ml": 50,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq150",
+      "name": "大蒸发皿",
+      "category": "容器",
+      "model": "dish",
+      "action": "vessel",
+      "capacity_ml": 100,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq151",
+      "name": "表面皿",
+      "category": "容器",
+      "model": "dish",
+      "action": "vessel",
+      "capacity_ml": 100,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq152",
+      "name": "点滴板",
+      "category": "容器",
+      "model": "spotplate",
+      "action": "vessel",
+      "capacity_ml": 5,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq153",
+      "name": "研钵和研杵棒",
+      "category": "取用",
+      "model": "mortar",
+      "action": "grind",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq154",
+      "name": "量筒10mL",
+      "category": "容器",
+      "model": "cylinder",
+      "action": "vessel",
+      "capacity_ml": 10,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq155",
+      "name": "量筒50mL",
+      "category": "容器",
+      "model": "cylinder",
+      "action": "vessel",
+      "capacity_ml": 50,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq156",
+      "name": "量筒100mL",
+      "category": "容器",
+      "model": "cylinder",
+      "action": "vessel",
+      "capacity_ml": 100,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq157",
+      "name": "容量瓶250mL",
+      "category": "容器",
+      "model": "volumetric",
+      "action": "vessel",
+      "capacity_ml": 250,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq158",
+      "name": "硬质玻璃管",
+      "category": "容器",
+      "model": "hardtube",
+      "action": "vessel",
+      "capacity_ml": 50,
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq159",
+      "name": "大硬质玻璃管",
+      "category": "容器",
+      "model": "hardtube",
+      "action": "vessel",
+      "capacity_ml": 100,
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq160",
+      "name": "酸式滴定管",
+      "category": "容器",
+      "model": "burette",
+      "action": "vessel",
+      "capacity_ml": 50,
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq161",
+      "name": "碱式滴定管",
+      "category": "容器",
+      "model": "burette",
+      "action": "vessel",
+      "capacity_ml": 50,
+      "ports": 2,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove",
+        "connect"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq162",
+      "name": "浓硫酸干燥瓶",
+      "category": "容器",
+      "model": "bottle",
+      "action": "material",
+      "capacity_ml": 250,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq163",
+      "name": "二氧化碳瓶",
+      "category": "容器",
+      "model": "bottle",
+      "action": "material",
+      "capacity_ml": 250,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq164",
+      "name": "消毒液",
+      "category": "容器",
+      "model": "bottle",
+      "action": "material",
+      "capacity_ml": 250,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq165",
+      "name": "洁厕灵",
+      "category": "容器",
+      "model": "bottle",
+      "action": "material",
+      "capacity_ml": 250,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq166",
+      "name": "保温烧杯",
+      "category": "容器",
+      "model": "insulated",
+      "action": "vessel",
+      "capacity_ml": 250,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq167",
+      "name": "保温烧杯组合",
+      "category": "组合装置",
+      "model": "calorimeter",
+      "action": "calorimeter",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq168",
+      "name": "废液缸",
+      "category": "容器",
+      "model": "waste",
+      "action": "vessel",
+      "capacity_ml": 1000,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq169",
+      "name": "污物杯",
+      "category": "容器",
+      "model": "waste",
+      "action": "vessel",
+      "capacity_ml": 1000,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq170",
+      "name": "氢氧焰",
+      "category": "加热",
+      "model": "torch",
+      "action": "heater",
+      "source": 3,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq171",
+      "name": "乙炔氧焰",
+      "category": "加热",
+      "model": "torch",
+      "action": "heater",
+      "source": 4,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq172",
+      "name": "电热板",
+      "category": "加热",
+      "model": "hotplate",
+      "action": "heater",
+      "source": 0,
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    },
+    {
+      "id": "eq173",
+      "name": "电动搅拌器",
+      "category": "取用",
+      "model": "stirrer",
+      "action": "stir",
+      "capabilities": [
+        "place",
+        "select",
+        "move",
+        "rotate",
+        "remove"
+      ],
+      "origin": "用户器材参考；原创参数化模型"
+    }
+  ]
+}

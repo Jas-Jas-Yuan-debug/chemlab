@@ -25,15 +25,18 @@ func build(id: int, vessel_kind: String, capacity: float) -> void:
     vessel_id = id
     kind = vessel_kind
     capacity_ml = capacity
-    if kind == "量筒":
+    if "量筒" in kind:
         radius = 0.020
         height = 0.18
-    elif kind == "滴管":
+    elif "滴管" in kind:
         radius = 0.008
         height = 0.10
     elif kind == "试剂瓶":
         radius = 0.032
         height = 0.15
+    var volume_scale := pow(capacity/(100.0 if "量筒" in kind else 5.0 if "滴管" in kind else 250.0),1.0/3.0)
+    radius*=volume_scale
+    height*=volume_scale
     add_child(visual)
     var glass := ShaderMaterial.new()
     glass.shader = preload("res://shaders/glass.gdshader")

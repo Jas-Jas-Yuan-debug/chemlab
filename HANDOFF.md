@@ -1,41 +1,34 @@
 # ChemLab handoff
 
-Updated 2026-09-09. Follow `docs/GOAL_OBJECTIVE.md` plus the user's approved changes. Phase 0–9 delivery is verified within the documented scientific scope. Unsupported raw entries remain explicit; they are not counted as completed materials.
+Updated 2026-09-10 for version 0.2. Follow `docs/GOAL_OBJECTIVE.md` and the user's approved Godot / AGPL changes. User explicitly requested commit, push, and README updates. Public repository: https://github.com/Jas-Jas-Yuan-debug/chemlab, branch main.
 
-## Authorization
+## Current implementation
 
-- User explicitly chose Godot instead of Unreal, retaining AGPL-3.0. Public GitHub repo `Jas-Jas-Yuan-debug/chemlab`, Git main, commit and push are authorized. Live metadata verified PUBLIC / AGPL-3.0.
-- Earlier ten-minute testing pause was honored. The user confirmed manually closing previous windows. They subsequently said **"now you can run the tests"**; window testing is authorized again. Preserve any newer steering.
-- User added adjustable target temperature, stirring, alcohol lamp, Bunsen burner, oxyhydrogen flame, oxyacetylene flame and alcohol blowtorch. These are now implemented in the dedicated water heating/stirring experiment. No paid/global/Unreal installations.
+- Godot 4.7.2, C++17 and IPhreeqc 3.8.6; Apple Silicon native build. Pinned original PHREEQC database remains unchanged. The original 17/30 reagent support matrix is unchanged; unsupported chemistry stays explicit.
+- Beginner front-view workspace alongside the professional 3D room: search, categories, large cards, matching apparatus shapes, finite dry-material transfer, weighing, liquid preparation/pouring, indicators, connection graph, attachments, timer, heating, reports, save/load.
+- 173 apparatus entries (81 original procedural geometry families and generated thumbnails), 143 solid packages (142 from the 15 chemical screenshots plus existing gypsum), and the original 30 reagent entries. All 35 reference screenshots are represented in the catalogs; repeated screenshots/packages are de-duplicated while physical forms remain distinct.
+- Catalog availability is not full chemical/physical behavior. Gas-network flow, dedicated drying/scrubbing/condensation, NO2 equilibrium, conductivity, spectra and arbitrary solid reactions remain unsupported. See `docs/expansion/SCIENTIFIC_MODELS.md`; don't describe all 143 packages as reactive chemicals.
+- Independent bulk combustion for liquid ethanol, methane, hydrogen/oxygen and acetylene/oxygen: Gibbs element-potential equilibrium, 16 NASA7 species from one Cantera 3.2.0 data source, liquid-ethanol vaporization offset, finite per-source fuel, oxygen/products and energy budgets. Water capture fraction is a declared fixed 35%, not a measured device efficiency.
+- Optional 16 x 28 x 16 reactive flow at 1/120 s: premixed inlet, conservative scalar fluxes, approximate incompressible velocity, empirical mixing-limited one-step reaction and local temperature volume rendering. Not detailed kinetics, calibrated burner CFD, soot, explosion or real radiation spectra. One-way diagnostic field; switching it off retains bulk heating history.
+- Model version `aqueous-0.2+batch-0.1+barite-0.1+physics-0.3+combustion-0.1`; old model-version sessions reject explicitly. Save/load preserves beginner objects, connections, dry inventories and optional full field, loading paused. Professional model switching must not restore a stale beginner heater view (covered by beginner_flow regression).
 
-## Current verified state
+## Evidence and delivery
 
-- Portable Godot 4.7.2 official, godot-cpp API 4.5 commit, IPhreeqc 3.8.6-17100, original phreeqc.dat. Fixed downloads and hashes. Apple M4 16 GiB, macOS 26.6.2, Apple Clang 21, CMake/Ninja, native arm64.
-- Chinese 3D room, glass containers, orbit/zoom/focus, select/drag/collision boundaries, equipment addition, search/category, source/receiver selection, controlled pouring with true conserved aliquots. Hollow glass and gravity-level clipped liquid surfaces independently checked against canonical volume; visual approximation documented.
-- **17/30 raw reagents**: water/prepared aqueous IDs 1–9,11,14,15,16,25; dedicated CO2 10, Calcite 18, Gypsum 19. Three additional indicator maps do not count. Dedicated Barite precipitation supported. Ordinary chemistry only verified whitelists; final 25°C equilibrium, no arbitrary redox/combustion/kinetics.
-- Seven physics categories: free fall, spring, small-angle pendulum, two-water heat exchange, series/parallel DC, thin lens, water heating/stirring. Fixed 1/120 s model clocks, native equations, geometry/readings/curves from same state.
-- Heater: target water 25–95°C, prescribed effective power 50–1000 W, independent 0–600 rpm overhead stirrer, six source appearances. Live controls preserve water temperature/energy/turns; ideal feedback holds temperature, lowering target passively cools. No combustion/fuel/actual flame-temperature or fluid-field solver. Chemistry remains 25°C.
-- JSON white-listed replay, geometry/indicator/camera/history restoration, paused load, CSV, invalid-file/error state preservation. Heater control history included in physics-0.2; old physics-0.1 files reject as incompatible.
-- Latest full `scripts/verify.py` passed **7 CTest cases + Godot import + 2 headless flows + 8 rendered flows**, including heater controls, all six apparatus appearances, native thermostat/cooling/energy/turn checks and byte-identical CSV restoration. No errors/leak warnings.
-- `dist/ChemLab.app` rebuilt at **2026-09-09 13:20:06 UTC**, source fingerprint `566d35a030e704e9c2b5a128d2f71ba594fd9ade55522da8b9841d94c40a798f`. Official arm64 release executable, PCK, native dylib, database, notices; ad-hoc signed and strict codesign verification passed. Not notarized. Headless launch from `/tmp` passed chemistry/Barite/heat/heater/control history/save-load checks. Do not count headless timings as FPS.
-- Final editor benchmark completed 16 scene segments plus repeated-cycle timing, all passing the 30 FPS criterion. Final receipts replace preliminary or interrupted runs.
+The user explicitly said "stop running the same test everytime". Do not repeat suites or performance runs without a concrete need and new authorization. Prior full expansion suite and focused beginner save regression passed. Latest suite stopped at physics_flow without PASS; editor benchmark ended -15; initial packaged performance failed in chemistry/vessel scenes. Final full-suite and all-scene 30 FPS are NOT claimed. See `artifacts/expansion-validation.json` and `docs/PERFORMANCE.md`. Continue commit/documentation work; do not disguise partial receipts as passes.
 
-## Final delivery evidence
-
-- `artifacts/verification.json`: all 12 groups passed (7 CTest cases, import, 2 native headless flows, 8 rendered flows). Includes controlled heating, stirring, six heat-source appearances, CSV identity and hidden fixed-vessel pick regression.
-- `artifacts/performance-editor-run.json` and `performance-packaged.json`: identical source/build fingerprint, actual 1920×1080 image, every scene passes the documented 30 FPS P99/minimum-complete-second criterion. Editor stayed alive minimized; packaged runtime is the official release template.
-- Packaged run: 742.9 seconds total, including approximately 600 seconds / **193 repeated reset-neutralize-save-load-model cycles**; no failed checks, script errors or leak warnings. RSS peak 512.9 MiB. First/last six-cycle means 511.4/512.6 MiB; intervening samples rise and fall, without obvious sustained growth. Release internal static/orphan counters returned zero, so they are treated as unavailable evidence, not as proof of zero allocations/leaks.
-- Both sources show engine render callback timing near 120/s; this is not an external display refresh measurement. See `docs/PERFORMANCE.md` for P99, maximum frames, RSS and response distributions and finite-duration limits.
-- Current exported app also passed headless chemistry, Barite, thermal/heater/control history and paused session restoration from `/tmp`. Headless timings are not FPS.
-- App: `dist/ChemLab.app`, arm64, ad-hoc signed and verified, not notarized. Public source repo is `https://github.com/Jas-Jas-Yuan-debug/chemlab`. Final Git commits contain source, documentation and measured receipts; build/download caches and the local app remain ignored.
-
-Future extensions require new approved scientific scope/data, especially the 13 unsupported raw entries, real combustion/fluid models or physical optical calibration. These limitations are explicitly allowed/disclosed in the original objective and are not silently counted as implemented.
+- `artifacts/verification.json`: latest incomplete verification attempt, 9 CTest cases, Godot import and 11 runtime flows (2 headless, 9 rendered). Native combustion compares all 20 independently generated Cantera reference cases. Field tests check fuel/energy conservation, source changes, cooling, frame partition consistency and snapshot replay.
+- `artifacts/combustion-validation.json`: 20 cases, maximum numerical temperature difference about 6.22e-7 K and species difference 3.48e-10 mol/mol fuel. This compares implementations using the same thermochemical data, not experimental flame accuracy.
+- `artifacts/build-receipt.json`: source fingerprint, exported files, native arm64 architecture and strict ad-hoc signature verification. Local `dist/ChemLab.app` is ignored, not notarized and not a GitHub Release asset.
+- `artifacts/performance-editor-run.json`, `artifacts/performance-packaged.json`, `docs/PERFORMANCE.md`: current actual 1920x1080 frame callbacks, external RSS and lifecycle results. Do not reuse the old fae1e5b 193-cycle/600-second result as evidence for 0.2. A short extension run does not establish a ten-minute endurance result.
+- Initial extension performance attempt exposed a stale heater-view load error; fixed and regression-tested. Benchmark now explicitly fails if any scene misses the documented P99/minimum-complete-second 30 FPS criterion, in addition to checking sample count and lifecycle conservation. Source and packaged receipts must match.
 
 ## Build and run
 
 ```sh
 python3 scripts/bootstrap.py --with-godot
 python3 scripts/build_catalog.py
+python3 scripts/build_apparatus_catalog.py
+python3 scripts/build_material_catalog.py
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 -DCHEMLAB_BUILD_GODOT=ON
 cmake --build build --parallel 4
 python3 scripts/verify.py
@@ -43,7 +36,9 @@ python3 scripts/build_macos.py
 open dist/ChemLab.app
 ```
 
-Actual app executable comes from Info.plist: `ChemLab · 观物实验室`. Exported runtime disables path overrides; use opt-in bundled `--chemlab-benchmark=ABSOLUTE_JSON` plus `--chemlab-smoke-only` for its headless checks, not `--main-pack` or an external `--script`.
+Cantera is only an optional development reference generator, not a runtime dependency. `tools/combustion-venv` holds the local pinned validation environment. Generated data, reference values and original thumbnails are committed. Use `scripts/generate_combustion_data.py` only when intentionally regenerating the pinned data, and rerun independent checks after any change.
+
+Actual exported executable name is in Info.plist. Its opt-in bundled benchmark supports `--chemlab-benchmark=ABSOLUTE_JSON`, `--chemlab-phase-seconds=6`, `--chemlab-stress-seconds=30`, or `--chemlab-smoke-only`; normal launch performs no benchmark file activity. Do not run builds/tests concurrently with performance measurement.
 
 ## Preserve these technical decisions
 

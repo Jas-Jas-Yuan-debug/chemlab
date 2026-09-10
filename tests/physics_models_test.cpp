@@ -35,6 +35,18 @@ int main(){try{
  for(const std::string kind:{"spring","pendulum","heat","circuit","heater"}){
   Scalars baseline;for(int fps:{30,60,144}){p.configure(kind,{});if(kind=="heater")p.control_heater({{"heat_enabled",1},{"stir_enabled",1}});p.start();for(int i=0;i<fps*2;++i)p.advance(1.0/fps);r=p.reading();if(baseline.empty())baseline=r;else for(auto[key,value]:r)near(value,baseline.at(key),1e-9,"render-step independence");}
  }
+ // Finite fuel must stop delivered heat, while all chemical and water budgets close.
+ for(int source=1;source<=5;++source){
+  p.configure("heater",{{"source",double(source)},{"fuel_mass_g",1},{"target_c",95},{"power_w",1000}});p.control_heater({{"heat_enabled",1},{"stir_enabled",1}});p.start();
+  for(int i=0;i<120;++i)p.advance(60);
+  r=p.reading();near(r.at("fuel_remaining_g"),0,1e-8,"finite burner inventory exhausted");near(r.at("power_w"),0,1e-8,"empty burner stops heating");
+  near(r.at("fuel_consumed_mol")*r.at("fuel_molar_mass_g"),1,1e-8,"fuel mass accounting");
+  near(r.at("chemical_energy_j"),r.at("fuel_consumed_mol")*r.at("fuel_lhv_j_mol"),1e-6,"fuel enthalpy accounting");
+  near(r.at("chemical_energy_j")*0.35,r.at("input_energy_j"),1e-6,"stated water heat capture");
+  near(r.at("energy_residual_j"),0,1e-6,"finite-fuel water energy");
+  near(r.at("combustion_energy_residual_j"),0,1e-6,"combustion energy balance");
+  if(r.at("stir_turns")<=0)throw std::runtime_error("fuel exhaustion must not stop stirring");
+ }
  bool control_rejected=false;try{p.control_heater({{"target_c",100}});}catch(...){control_rejected=true;}if(!control_rejected)throw std::runtime_error("unsupported heating temperature accepted");
  bool rejected=false;try{p.configure("spring",{{"mass_kg",std::numeric_limits<double>::quiet_NaN()}});}catch(...){rejected=true;}if(!rejected)throw std::runtime_error("NaN accepted");
  std::cout<<"PASS: spring/pendulum energy and periods, calorimetry, circuits, lens, controlled heating/cooling/stirring and energy budgets, control replay, pause/reset and frame-step independence\n";return 0;

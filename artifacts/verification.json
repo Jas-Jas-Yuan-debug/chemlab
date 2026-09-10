@@ -1,24 +1,25 @@
 {
-  "started_utc": "2026-09-09T13:19:16Z",
+  "source_sha256": "f51a3c8e125475b6ec7c8e878bb23ee7386b32d80b4e878d975dc74be4a44fd4",
+  "started_utc": "2026-09-10T09:46:16Z",
   "checks": [
     {
       "name": "native",
       "passed": true,
-      "duration_s": 0.75,
+      "duration_s": 5.154,
       "evidence": [
-        "100% tests passed, 0 tests failed out of 7"
+        "100% tests passed, 0 tests failed out of 9"
       ]
     },
     {
       "name": "import",
       "passed": true,
-      "duration_s": 1.603,
+      "duration_s": 1.333,
       "evidence": []
     },
     {
       "name": "native_smoke",
       "passed": true,
-      "duration_s": 0.25,
+      "duration_s": 0.243,
       "evidence": [
         "PASS: Godot native extension, prepare, pour, pH, conservation, stale-result reset"
       ]
@@ -26,7 +27,7 @@
     {
       "name": "session_native",
       "passed": true,
-      "duration_s": 0.254,
+      "duration_s": 0.242,
       "evidence": [
         "PASS: JSON session replay restores solution/solid inventories, operation events and paused physics; incompatible and failed replay preserve valid state"
       ]
@@ -34,7 +35,7 @@
     {
       "name": "visual_flow",
       "passed": true,
-      "duration_s": 2.245,
+      "duration_s": 2.484,
       "evidence": [
         "PASS: rendered UI prepare/reset defaults, aliquot buttons, acid/base neutralization, readout, search, screenshot",
         "PASS: all 14 aqueous reagent forms prepared, transferred and measured through UI handlers"
@@ -43,7 +44,7 @@
     {
       "name": "fall_flow",
       "passed": true,
-      "duration_s": 1.982,
+      "duration_s": 2.121,
       "evidence": [
         "PASS: rendered free-fall flow, configure/release/pause/resume/impact/repeat, curves, chemistry preservation"
       ]
@@ -51,7 +52,7 @@
     {
       "name": "batch_flow",
       "passed": true,
-      "duration_s": 1.367,
+      "duration_s": 2.103,
       "evidence": [
         "PASS: rendered calcite closed/open, gypsum finite solid, CO2 headspace, liquid separation and aliquot transfer, readout/curve/reset flows"
       ]
@@ -59,43 +60,20 @@
     {
       "name": "barite_flow",
       "passed": true,
-      "duration_s": 0.955,
+      "duration_s": 1.407,
       "evidence": [
         "PASS: rendered Barite precipitation/undersaturation/excess, phase amount, liquid extraction and aliquot transfer"
       ]
     },
     {
       "name": "physics_flow",
-      "passed": true,
-      "duration_s": 3.364,
-      "evidence": [
-        "PASS: all five rendered physics controls, native readings, body transforms, curves, pause/repeat, parallel circuit, real/virtual/infinite lens and invalid-parameter preservation"
-      ]
-    },
-    {
-      "name": "session_flow",
-      "passed": true,
-      "duration_s": 1.218,
-      "evidence": [
-        "PASS: session file picker wiring, atomic JSON save/load, equipment/indicator/camera/curve restoration, CSV identity, corrupt file rejection, paused physics resume"
-      ]
-    },
-    {
-      "name": "pouring_flow",
-      "passed": true,
-      "duration_s": 4.739,
-      "evidence": [
-        "PASS: actual held-button transfer, horizontal bounded liquid mesh, verified rendered-volume approximation, empty stop, release stop, chloride conservation and indicator boundaries"
-      ]
-    },
-    {
-      "name": "heater_flow",
-      "passed": true,
-      "duration_s": 2.072,
-      "evidence": [
-        "PASS: six rendered heat sources, live target/power/RPM controls, independent switches, thermostat/energy/cooling, rotor motion, paused save/load and identical CSV, invalid control preservation"
-      ]
+      "passed": false,
+      "duration_s": 3.283,
+      "evidence": []
     }
   ],
-  "database_sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10"
+  "database_sha256": "59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10",
+  "completed": false,
+  "status": "incomplete",
+  "note": "Latest full-suite attempt stopped at physics_flow without its PASS marker. Prior expansion suite passed; the final full suite is not claimed to have passed. No rerun after the user requested stopping repeated tests."
 }

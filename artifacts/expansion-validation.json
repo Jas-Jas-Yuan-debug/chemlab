@@ -1,0 +1,29 @@
+{
+  "prior_complete_run": {
+    "source_sha256": "5d4419b13f898cb8a982ec4d97be888476b2ccb38e1386388ed658b7258dbb57",
+    "started_utc": "2026-09-10T09:33:36Z",
+    "passed_groups": [
+      "native (9 CTest cases)",
+      "import",
+      "native_smoke",
+      "session_native",
+      "visual_flow",
+      "fall_flow",
+      "batch_flow",
+      "barite_flow",
+      "physics_flow",
+      "session_flow",
+      "pouring_flow",
+      "heater_flow",
+      "beginner_flow"
+    ],
+    "provenance": "Summary of the complete verification receipt read before the latest rerun replaced it. This is prior-source evidence, not a final-source full-suite pass."
+  },
+  "focused_beginner_regression": {
+    "passed": true,
+    "output": "Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org\nMetal 4.0 - Forward Mobile - Using Device #0: Apple - Apple M4 (Apple9)\n\nLOAD: true 正在恢复实验与操作记录…\nPASS: beginner catalog/search, native transfer, indicator, real flask geometry, dry mass conservation, interface connection, save/load, combustion + switchable field, return to advanced\n",
+    "coverage": "Beginner catalog, transfer, connection, conservation, combustion toggle and save/load; added regression prevents stale heater mode after professional spring save/load. Ran before the last benchmark-only changes."
+  },
+  "final_suite": "See verification.json: incomplete; no full-suite pass claim.",
+  "performance": "Initial packaged measurement failed; editor rerun interrupted. See docs/PERFORMANCE.md."
+}

@@ -6,6 +6,8 @@ const VesselView = preload("res://scripts/vessel.gd")
 const Plot = preload("res://scripts/ph_plot.gd")
 const Indicators = preload("res://scripts/indicators.gd")
 const FallExperiment = preload("res://scripts/fall_experiment.gd")
+var main_ui: Control
+var beginner: Node
 var core: LabCore
 var camera := Camera3D.new()
 var views: Dictionary = {}
@@ -103,6 +105,9 @@ func _ready() -> void:
     bench_experiment.lab = self
     bench_experiment.ui_theme = ui_theme
     add_child(bench_experiment)
+    beginner=preload("res://scripts/beginner_mode.gd").new()
+    beginner.lab=self
+    add_child(beginner)
     set_status("正在准备实验台…")
     for argument in OS.get_cmdline_user_args():
         if argument.begins_with("--chemlab-benchmark="):
@@ -195,6 +200,7 @@ func build_ui() -> void:
     theme.set_stylebox("disabled","Button",style(Color("202927")))
     theme.set_color("font_color","Button",Color("e8eee6"))
     theme.set_color("font_disabled_color","Button",Color("697c75"))
+    main_ui=ui
     ui.theme = theme
     ui_theme = theme
     var header := panel(ui,Vector2(24,20),Vector2(1552,70))
@@ -202,6 +208,7 @@ func build_ui() -> void:
     header.add_child(row)
     var name_text := label(row,"观物实验室  /  CHEMLAB",24,Color("f5e6c9"))
     name_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    button(row,"新手模式","BeginnerMode",switch_beginner)
     button(row,"化学实验","ChemistryTab",func(): switch_experiment(false))
     button(row,"自由落体","FreeFallTab",func(): switch_experiment(true))
     button(row,"溶解与气液","BatchTab",func(): switch_batch(false))
@@ -296,7 +303,7 @@ func build_ui() -> void:
     button(record_row,"导出 CSV","ExportCSV",func(): open_session_dialog("csv"))
     var about := AcceptDialog.new()
     about.title = "关于 ChemLab · 观物实验室"
-    about.dialog_text = "化学与物理虚拟实验室 · 0.1\n\n当前验证 17 / 30 项原料，3 种指示剂。\n化学采用 25°C 稀水溶液最终平衡；各实验说明给出适用范围。\n液面、颜色和粒子采用视觉近似，不表示空间浓度或反应速率。\n\n原创代码：AGPL-3.0-only\n第三方引擎、计算库与数据保留原许可。\n源代码、模型说明、数据来源及第三方声明可在仓库查看。"
+    about.dialog_text = "化学与物理虚拟实验室 · 0.2\n\n当前验证 17 / 30 项原料，3 种指示剂。\n化学采用 25°C 稀水溶液最终平衡；各实验说明给出适用范围。\n液面、颜色和粒子采用视觉近似，不表示空间浓度或反应速率。\n\n原创代码：AGPL-3.0-only\n第三方引擎、计算库与数据保留原许可。\n源代码、模型说明、数据来源及第三方声明可在仓库查看。"
     about.add_button("源代码与说明",true,"source")
     about.custom_action.connect(func(action):
         if action=="source":
@@ -350,7 +357,15 @@ func set_status(text: String) -> void:
     if status:
         status.text = text
 
+func switch_beginner() -> void:
+    switch_experiment(false)
+    for p in chemistry_panels:p.visible=false
+    main_ui.visible=false
+    beginner.set_active(true)
+
 func switch_experiment(physics: bool) -> void:
+    if beginner:beginner.set_active(false)
+    if main_ui:main_ui.visible=true
     bench_mode = false
     if bench_experiment:
         bench_experiment.set_active(false)
@@ -402,7 +417,7 @@ func update_camera() -> void:
     camera.position = focus+Vector3(sin(orbit.x)*cos(orbit.y),sin(orbit.y),cos(orbit.x)*cos(orbit.y))*distance
     camera.look_at(focus,Vector3.UP)
 
-func add_vessel(kind: String) -> void:
+func add_vessel(kind: String,capacity_override: float = 0.0) -> void:
     if core.is_busy():
         set_status("请等待当前操作完成。")
         return
@@ -414,6 +429,7 @@ func add_vessel(kind: String) -> void:
         id+=1
     next_kind = kind
     var cap := 5.0 if kind=="滴管" else 100.0 if kind=="量筒" else 250.0
+    if capacity_override>0:cap=capacity_override
     pending_context = {"kind":kind,"id":id}
     core.add_empty(id,cap)
 
@@ -647,6 +663,7 @@ func _input(event: InputEvent) -> void:
         drag_to(event.position)
 
 func _unhandled_input(event: InputEvent) -> void:
+    if beginner and beginner.active:return
     if event is InputEventMouseButton:
         if event.button_index==MOUSE_BUTTON_WHEEL_UP:
             distance = max(0.25,distance*0.9)

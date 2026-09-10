@@ -2,6 +2,7 @@
 #include "science/session.hpp"
 #include "science/mechanics.hpp"
 #include "science/physics_models.hpp"
+#include "science/flame_field.hpp"
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
 #include <godot_cpp/variant/array.hpp>
@@ -22,6 +23,7 @@ class LabCore : public RefCounted {
         uint64_t generation=0;
         std::optional<chemlab::FreeFall> restored_fall;
         std::optional<chemlab::PhysicsExperiment> restored_bench;
+        std::optional<chemlab::FlameField> restored_flame;
     };
     std::string database_;
     chemlab::LabSession session_;
@@ -32,6 +34,7 @@ class LabCore : public RefCounted {
     bool reset_queued_=false;
     chemlab::FreeFall fall_;
     chemlab::PhysicsExperiment bench_;
+    std::optional<chemlab::FlameField> flame_;
     bool submit(const chemlab::Command& command);
     bool start(const std::function<void(chemlab::Chemistry&,Result&)>& job);
 protected:
@@ -54,6 +57,9 @@ public:
     bool extract_batch(int vessel_id);
     Dictionary batch_snapshot() const;
     String configure_bench(const String& kind,const Dictionary& parameters);
+    String set_flame_enabled(bool enabled);
+    Dictionary advance_flame(double elapsed_s,double wind_m_s);
+    Dictionary flame_snapshot() const;
     String control_heater(const Dictionary& control);
     void start_bench();
     void pause_bench();

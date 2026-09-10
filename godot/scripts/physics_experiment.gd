@@ -11,7 +11,7 @@ const FIELDS = [
     [["mass1_kg","水 1 / kg",0.05,1,0.05,0.1],["mass2_kg","水 2 / kg",0.05,1,0.05,0.1],["temperature1_c","初温 1 / °C",5,90,1,70],["temperature2_c","初温 2 / °C",5,90,1,20],["conductance_w_k","热导 / W·K⁻¹",0.1,20,0.1,10]],
     [["voltage_v","电压 / V",0,12,0.1,6],["resistance1_ohm","电阻 1 / Ω",1,1000,1,100],["resistance2_ohm","电阻 2 / Ω",1,1000,1,200]],
     [["focal_m","焦距 / m",-0.5,0.5,0.01,0.2],["object_m","物距 / m",0.1,1,0.01,0.5],["object_height_m","物高 / m",0.01,0.1,0.01,0.05]],
-    [["mass_kg","水质量 / kg",0.05,0.25,0.01,0.1],["initial_temperature_c","水初温 / °C",5,90,1,20],["target_c","目标水温 / °C",25,95,1,60],["power_w","有效热功率 / W",50,1000,10,250],["stir_rpm","搅拌 / rpm",0,600,10,300]]
+    [["mass_kg","水质量 / kg",0.05,0.25,0.01,0.1],["initial_temperature_c","水初温 / °C",5,90,1,20],["target_c","目标水温 / °C",25,95,1,60],["power_w","有效热功率 / W",50,1000,10,250],["stir_rpm","搅拌 / rpm",0,600,10,300],["fuel_mass_g","每种燃料储量 / g",1,1000,1,50]]
 ]
 const NOTES = [
     "水平弹簧，质量集中于滑块。\n无摩擦、无阻尼，弹簧无质量。\nx 从平衡点向右为正。\nω = √(k/m)，x = A cos(ωt)。\n弹簧线圈形状是视觉近似。",
@@ -19,7 +19,7 @@ const NOTES = [
     "两个内部温度均匀的液态水体，\n外界绝热，热导固定。\n比热近似为 4186 J/(kg·K)，\n忽略容器热容、蒸发和相变。\n颜色表示温度；容器为示意。\n热量来自独立能量收支。",
     "理想直流电源与两个欧姆电阻，\n导线电阻、电源内阻忽略。\n可切换串联与并联。\n断开时电流为零，累计耗能保留。\n不模拟电阻升温后的阻值变化。",
     "空气中的薄透镜、近轴光线。\n正焦距会聚，负焦距发散。\n|f| 限 0.05–0.5 m；物距为正。\n1/f = 1/u + 1/v；放大率 = −v/u。\n虚像用反向延长线表示。\n曲线记录每次应用参数的成像结果。",
-    "水温设定 25–95°C，探头理想控温。\n有效功率指传入水的热量；\n不求解燃烧或真实火焰温度。\n水体均温，比热取 4186 J/(kg·K)。\n环境 20°C，散热热导 0.6 W/K。\n忽略杯体热容、蒸发与搅拌生热。\n转速为驱动设定，不求解流场。\n独立水实验；化学保持 25°C。"
+    "水温设定 25–95°C，探头理想控温。\n有效功率指传入水的热量；\n火焰：燃料守恒与高温平衡产物。\n空气 / 氧气供给系数 1.2，常压。\n水捕获燃烧可用热量的 35%。\n水体均温，比热取 4186 J/(kg·K)。\n环境 20°C，散热热导 0.6 W/K。\n忽略杯体热容、蒸发与搅拌生热。\n转速为驱动设定，不求解流场。\n独立水实验；化学保持 25°C。"
 ]
 var lab: Node3D
 var core: LabCore
@@ -34,6 +34,9 @@ var heater_controls: VBoxContainer
 var heat_source: OptionButton
 var heater_switch: Button
 var stir_switch: Button
+var flame_switch: CheckButton
+var wind: SpinBox
+var field_readout: Label
 var heater_view: Node3D
 var speed: SpinBox
 var notes: Label
@@ -95,6 +98,19 @@ func _ready() -> void:
     heater_controls.add_child(switches)
     heater_switch = lab.button(switches,"开启加热","ToggleHeater",func(): toggle_heater("heat_enabled"))
     stir_switch = lab.button(switches,"开启搅拌","ToggleStirrer",func(): toggle_heater("stir_enabled"))
+    flame_switch=CheckButton.new()
+    flame_switch.name="Flame3D"
+    flame_switch.text="三维简化燃烧模拟"
+    flame_switch.toggled.connect(func(enabled):
+        var error: String=core.set_flame_enabled(enabled)
+        if not error.is_empty():
+            flame_switch.set_pressed_no_signal(false)
+            status.text=error)
+    heater_controls.add_child(flame_switch)
+    lab.button(heater_controls,"燃烧产物与能量","CombustionReport",show_combustion_report)
+    wind=lab.number(heater_controls,"侧向气流 / m·s⁻¹",-0.12,0.12,0.01,0,"FlameWind")
+    field_readout=lab.label(heater_controls,"关闭空间场可减少计算量；整体燃烧继续。",12)
+    field_readout.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
     speed = lab.number(left,"时间倍率",1,20,1,1,"PhysicsSpeed")
     lab.button(left,"应用参数并重置","ConfigureBench",configure)
     lab.button(left,"开始 / 接通","StartBench",start)
@@ -465,6 +481,16 @@ func update_reading(r: Dictionary,record: bool) -> void:
     second_plot.queue_redraw()
 
 func _process(delta: float) -> void:
+    if active and kind_index==5 and heater_view:
+        var field: Dictionary=core.advance_flame(minf(delta,0.1),wind.value)
+        flame_switch.set_pressed_no_signal(field.get("enabled",false))
+        speed.editable=not field.get("enabled",false)
+        if field.get("enabled",false):speed.value=1
+        if field.get("enabled",false):
+            heater_view.update_flame_field(field)
+            field_readout.text="空间场最高 %.0f °C · 流速 %.2f m/s\n混合受限反应；不预测爆燃、烟炱或细致火焰速度。"%[field.peak_temperature_k-273.15,field.max_speed_m_s]
+            if field.has("error"):status.text=field.error;core.pause_bench()
+        else:heater_view.clear_flame_field()
     if active:
         var r := core.advance_bench(delta*speed.value)
         if r.has("error"):
@@ -497,3 +523,20 @@ func restore_view(reading: Dictionary,history: Array) -> void:
         heat_source.selected = int(reading.source)
     update_reading(reading,false)
     status.text = "已恢复，实验处于暂停状态。"
+
+func show_combustion_report() -> void:
+    var r: Dictionary=core.bench_snapshot()
+    if r.kind!="heater":return
+    var dialog := AcceptDialog.new()
+    dialog.title="燃烧产物与能量"
+    var text := "电热板不消耗燃料。"
+    if r.source>0:
+        text="常压 · 25°C 进料 · 供氧系数 1.2\n乙醇使用液态进料，已扣除汽化耗热。\n\n绝热平衡温度 %.0f °C（不等于实测火焰温度）\n燃料剩余 %.3f g · 消耗 %.6f mol\n已释放可用热 %.3f kJ · 排气 / 未捕获 %.3f kJ\n供氧累计 %.6f mol\n\n每摩尔燃料的热平衡产物：\n"%[r.flame_adiabatic_k-273.15,r.fuel_remaining_g,r.fuel_consumed_mol,r.chemical_energy_j/1000,r.exhaust_energy_j/1000,r.oxygen_consumed_mol]
+        for species in ["CO2","H2O","CO","H2","O2","N2","H","O","OH","NO"]:
+            var amount: float=r.get("hot_"+species+"_mol_per_fuel_mol",0.0)
+            if amount>0.000001:text+="%s    %.6f mol\n"%[species,amount]
+        text+="\n整体模型：理想气体平衡与独立水能量收支。\n空间模型：粗网格、预混进料、简化反应 / 传热。\n不预测真实点火延迟、爆燃、烟炱、壁面和细致火焰速度。"
+    dialog.dialog_text=text
+    lab.add_child(dialog)
+    dialog.popup_centered(Vector2i(820,650))
+    dialog.visibility_changed.connect(func():if not dialog.visible:dialog.queue_free())

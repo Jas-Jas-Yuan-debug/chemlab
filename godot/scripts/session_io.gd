@@ -1,12 +1,19 @@
 extends RefCounted
 const FORMAT = "ChemLab"
-const KIND_CAPACITY = {"烧杯":250.0,"试剂瓶":250.0,"量筒":100.0,"滴管":5.0}
-const KIND_RADIUS = {"烧杯":0.033,"试剂瓶":0.032,"量筒":0.020,"滴管":0.008}
+static var KIND_CAPACITY = {"烧杯":250.0,"试剂瓶":250.0,"量筒":100.0,"滴管":5.0}
+static var KIND_RADIUS = {"烧杯":0.033,"试剂瓶":0.032,"量筒":0.020,"滴管":0.008}
 
 static func finite(value: Variant) -> bool:
     return typeof(value) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(value))
 
+static func catalog_kinds() -> void:
+    for d in JSON.parse_string(FileAccess.get_file_as_string("res://data/apparatus.json")).items:
+        if d.action=="vessel":
+            KIND_CAPACITY[d.name]=float(d.capacity_ml)
+            KIND_RADIUS[d.name]=(0.020 if "量筒" in d.name else 0.008 if "滴管" in d.name else 0.033)*pow(float(d.capacity_ml)/(100.0 if "量筒" in d.name else 5.0 if "滴管" in d.name else 250.0),1.0/3.0)
+
 static func make_document(lab: Node3D) -> Dictionary:
+    lab.beginner.sync_vessels()
     var equipment := []
     for id in lab.views:
         var v = lab.views[id]
@@ -20,16 +27,20 @@ static func make_document(lab: Node3D) -> Dictionary:
         if sample.kind=="heater":
             item.heater_control_count = sample.heater_control_count
         bench_history.append(item)
-    var mode := "bench" if lab.bench_mode else "fall" if lab.physics_mode else "barite" if lab.batch_mode and lab.batch_experiment.barite_mode else "batch" if lab.batch_mode else "chemistry"
+    var mode := "beginner" if lab.beginner.active else "bench" if lab.bench_mode else "fall" if lab.physics_mode else "barite" if lab.batch_mode and lab.batch_experiment.barite_mode else "batch" if lab.batch_mode else "chemistry"
     return {"format":FORMAT,"view_schema":1,"science":lab.core.save_session(),"view":{
-        "equipment":equipment,"selected_id":lab.selected_id,"target_id":lab.target_id,"mode":mode,
+        "beginner":lab.beginner.save_view(),"equipment":equipment,"selected_id":lab.selected_id,"target_id":lab.target_id,"mode":mode,
         "elapsed_s":lab.elapsed,"operation_times":lab.operation_times.duplicate(),
         "focus":[lab.focus.x,lab.focus.y,lab.focus.z],"orbit":[lab.orbit.x,lab.orbit.y],"distance":lab.distance,
         "fall_times":fall_times,"bench_history":bench_history}}
 
 static func validate(document: Variant,lab: Node3D) -> Dictionary:
+    catalog_kinds()
     if not document is Dictionary or document.get("format")!=FORMAT or document.get("view_schema")!=1 or not document.get("science") is Dictionary or not document.get("view") is Dictionary:
         return {"error":"不是兼容的 ChemLab 实验文件。"}
+    if document.view.has("beginner"):
+        var beginner_error: String=lab.beginner.validate_view(document.view.beginner)
+        if not beginner_error.is_empty():return {"error":beginner_error}
     var science: Dictionary = document.science
     var v: Dictionary = document.view
     if not science.get("commands") is Array or not science.get("fall") is Dictionary or not science.get("bench") is Dictionary:
@@ -72,10 +83,16 @@ static func validate(document: Variant,lab: Node3D) -> Dictionary:
         return {"error":"器材选择编号无效。"}
     if positions.size()!=expected.size() or not positions.has(int(v.selected_id)) or not positions.has(int(v.target_id)):
         return {"error":"器材选择或清单不完整。"}
-    if v.get("mode") not in ["chemistry","fall","batch","barite","bench"] or not finite(v.get("elapsed_s")) or v.elapsed_s<0 or v.elapsed_s>86400:
+    if v.get("mode") not in ["chemistry","fall","batch","barite","bench","beginner"] or not finite(v.get("elapsed_s")) or v.elapsed_s<0 or v.elapsed_s>86400:
         return {"error":"实验模式或时间无效。"}
     if not v.get("operation_times") is Array or v.operation_times.size()!=science.commands.size():
         return {"error":"操作时间记录不完整。"}
+    if v.has("beginner"):
+        for key in v.beginner.objects:
+            var item: Dictionary=v.beginner.objects[key]
+            if item.vessel_id>0:
+                var d: Dictionary=lab.beginner.definitions[item.definition]
+                if not expected.has(int(item.vessel_id)) or d.get("action")!="vessel" or d.get("capacity_ml")!=expected[int(item.vessel_id)]:return {"error":"新手器材与科学容器状态不匹配。"}
     var last_time := 0.0
     for t in v.operation_times:
         if not finite(t) or t<last_time or t>v.elapsed_s+0.01:
@@ -188,6 +205,8 @@ static func restore(lab: Node3D,validated: Dictionary,state: Dictionary) -> void
     lab.select_vessel(lab.selected_id)
     lab.update_targets()
     lab.apply_indicators()
+    if v.has("beginner"):lab.beginner.restore_view(v.beginner)
+    if v.mode=="beginner":lab.switch_beginner()
 
 static func save(lab: Node3D,path: String) -> String:
     var text := JSON.stringify(make_document(lab),"\t",true,true)

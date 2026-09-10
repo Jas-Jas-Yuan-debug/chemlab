@@ -1,9 +1,8 @@
 {
-  "all_scene_fps_pass": true,
-  "cycles": 193,
-  "rss_first_six_mib": 511.42733333333337,
-  "rss_last_six_mib": 512.5858333333333,
-  "rss_change_mib": 1.1584999999999468,
-  "static_change_mib": null,
-  "source_sha256": "566d35a030e704e9c2b5a128d2f71ba594fd9ade55522da8b9841d94c40a798f"
+  "status": "not_validated_for_final_source",
+  "all_scene_fps_pass": false,
+  "source_sha256": "f51a3c8e125475b6ec7c8e878bb23ee7386b32d80b4e878d975dc74be4a44fd4",
+  "packaged": "Prior extension attempt failed frame sample/30 FPS criteria in chemistry and beginner vessel scenes.",
+  "editor": "Interrupted before final measurement receipt.",
+  "rerun": "Stopped per user request; baseline results remain in Git history."
 }

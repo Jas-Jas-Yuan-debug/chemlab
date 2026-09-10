@@ -30,3 +30,19 @@ Godot runtime license and component notices are copied from its own Engine API:
 [C++ bindings license](third_party/licenses/GODOT-CPP-LICENSE.txt).
 
 No external models, textures, or fonts have been added at this stage.
+
+## Combustion thermochemical data
+
+The 16 NASA7 species coefficient sets in `data/combustion-thermo.json` and the
+corresponding generated C++ include are derived from Cantera v3.2.0
+`data/nasa_gas.yaml` (NASA TM-4513, McBride, Gordon and Reno, 1993). The Cantera
+BSD-3-Clause notice is retained in `third_party/licenses/Cantera-LICENSE.txt`.
+The runtime Gibbs solver, field solver, geometry and rendered apparatus thumbnails
+are original ChemLab code/assets under AGPL-3.0-only. Cantera is used only as an
+independent validation dependency, not bundled as a runtime library.
+
+The liquid-ethanol enthalpy offset uses the Majer and Svoboda (1985) vaporization
+enthalpy correlation reported by NIST Chemistry WebBook SRD 69. The specific
+correlation and source link are documented in `docs/expansion/SCIENTIFIC_MODELS.md`.
+No NIST website code or artwork is redistributed. No artwork from the user-supplied
+NOBOOK screenshots is embedded in the application.
