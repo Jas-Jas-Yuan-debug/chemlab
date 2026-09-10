@@ -350,9 +350,15 @@
           ]
         },
         "missing_species": [],
-        "candidate_phases": {}
+        "candidate_phases": {},
+        "high_concentration": {
+          "database": "pitzer.dat",
+          "sha256": "06ab2debc0cdb333598118df953165499c2f762a79de5f2df55dec6b78b02589",
+          "minimum_exclusive_mol_L": 0.01,
+          "maximum_mol_L": 1.0
+        }
       },
-      "applicability": "稀水溶液；强酸与 NaOH/KOH 中和，禁止浓盐酸挥发模型",
+      "applicability": "稀水溶液；强酸与 NaOH/KOH 中和，禁止浓盐酸挥发模型；0.01–1 mol/L 采用独立 Pitzer 求解，仅限 HCl/NaOH/KOH/NaCl/KCl/水混合。",
       "sources": [
         "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
         "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
@@ -367,10 +373,11 @@
           "godot/tests/visual_flow.gd",
           "tests/batch_test.cpp",
           "godot/tests/batch_flow.gd",
-          "tests/aqueous_expansion_test.cpp"
+          "tests/aqueous_expansion_test.cpp",
+          "tests/reaction_dynamics_test.cpp"
         ],
         "plan": "稀水溶液；强酸与 NaOH/KOH 中和，禁止浓盐酸挥发模型；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
-        "verified_on": "2026-09-09",
+        "verified_on": "2026-09-10",
         "range": {
           "temperature_K": 298.15,
           "volume_ml": [
@@ -379,7 +386,7 @@
           ],
           "concentration_mol_L": [
             1e-05,
-            0.01
+            1.0
           ]
         },
         "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
@@ -441,9 +448,15 @@
         "missing_species": [],
         "candidate_phases": {
           "NaOH": null
+        },
+        "high_concentration": {
+          "database": "pitzer.dat",
+          "sha256": "06ab2debc0cdb333598118df953165499c2f762a79de5f2df55dec6b78b02589",
+          "minimum_exclusive_mol_L": 0.01,
+          "maximum_mol_L": 1.0
         }
       },
-      "applicability": "预配稀溶液；固体溶解度与溶解热另行验证",
+      "applicability": "预配稀溶液；固体溶解度与溶解热另行验证；0.01–1 mol/L 采用独立 Pitzer 求解，仅限 HCl/NaOH/KOH/NaCl/KCl/水混合。",
       "sources": [
         "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
         "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
@@ -458,10 +471,11 @@
           "godot/tests/visual_flow.gd",
           "tests/batch_test.cpp",
           "godot/tests/batch_flow.gd",
-          "tests/aqueous_expansion_test.cpp"
+          "tests/aqueous_expansion_test.cpp",
+          "tests/reaction_dynamics_test.cpp"
         ],
         "plan": "预配稀溶液；固体溶解度与溶解热另行验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
-        "verified_on": "2026-09-09",
+        "verified_on": "2026-09-10",
         "range": {
           "temperature_K": 298.15,
           "volume_ml": [
@@ -470,7 +484,7 @@
           ],
           "concentration_mol_L": [
             1e-05,
-            0.01
+            1.0
           ]
         },
         "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
@@ -563,9 +577,15 @@
             "reaction": "NaCl = Cl- + Na+",
             "has_log_k": true
           }
+        },
+        "high_concentration": {
+          "database": "pitzer.dat",
+          "sha256": "06ab2debc0cdb333598118df953165499c2f762a79de5f2df55dec6b78b02589",
+          "minimum_exclusive_mol_L": 0.01,
+          "maximum_mol_L": 1.0
         }
       },
-      "applicability": "稀溶液配制与稀释；接近饱和时需检查活度模型",
+      "applicability": "稀溶液配制与稀释；接近饱和时需检查活度模型；0.01–1 mol/L 采用独立 Pitzer 求解，仅限 HCl/NaOH/KOH/NaCl/KCl/水混合。",
       "sources": [
         "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
         "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
@@ -580,10 +600,11 @@
           "godot/tests/visual_flow.gd",
           "tests/batch_test.cpp",
           "godot/tests/batch_flow.gd",
-          "tests/aqueous_expansion_test.cpp"
+          "tests/aqueous_expansion_test.cpp",
+          "tests/reaction_dynamics_test.cpp"
         ],
         "plan": "稀溶液配制与稀释；接近饱和时需检查活度模型；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
-        "verified_on": "2026-09-09",
+        "verified_on": "2026-09-10",
         "range": {
           "temperature_K": 298.15,
           "volume_ml": [
@@ -592,7 +613,7 @@
           ],
           "concentration_mol_L": [
             1e-05,
-            0.01
+            1.0
           ]
         },
         "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
@@ -653,9 +674,15 @@
         "missing_species": [],
         "candidate_phases": {
           "KOH": null
+        },
+        "high_concentration": {
+          "database": "pitzer.dat",
+          "sha256": "06ab2debc0cdb333598118df953165499c2f762a79de5f2df55dec6b78b02589",
+          "minimum_exclusive_mol_L": 0.01,
+          "maximum_mol_L": 1.0
         }
       },
-      "applicability": "预配稀溶液；固体溶解和热效应未验证",
+      "applicability": "预配稀溶液；固体溶解和热效应未验证；0.01–1 mol/L 采用独立 Pitzer 求解，仅限 HCl/NaOH/KOH/NaCl/KCl/水混合。",
       "sources": [
         "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
         "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
@@ -670,10 +697,11 @@
           "godot/tests/visual_flow.gd",
           "tests/batch_test.cpp",
           "godot/tests/batch_flow.gd",
-          "tests/aqueous_expansion_test.cpp"
+          "tests/aqueous_expansion_test.cpp",
+          "tests/reaction_dynamics_test.cpp"
         ],
         "plan": "预配稀溶液；固体溶解和热效应未验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
-        "verified_on": "2026-09-09",
+        "verified_on": "2026-09-10",
         "range": {
           "temperature_K": 298.15,
           "volume_ml": [
@@ -682,7 +710,7 @@
           ],
           "concentration_mol_L": [
             1e-05,
-            0.01
+            1.0
           ]
         },
         "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
@@ -774,9 +802,15 @@
             "reaction": "KCl = K+ + Cl-",
             "has_log_k": true
           }
+        },
+        "high_concentration": {
+          "database": "pitzer.dat",
+          "sha256": "06ab2debc0cdb333598118df953165499c2f762a79de5f2df55dec6b78b02589",
+          "minimum_exclusive_mol_L": 0.01,
+          "maximum_mol_L": 1.0
         }
       },
-      "applicability": "稀溶液配制与稀释；饱和实验独立验证",
+      "applicability": "稀溶液配制与稀释；饱和实验独立验证；0.01–1 mol/L 采用独立 Pitzer 求解，仅限 HCl/NaOH/KOH/NaCl/KCl/水混合。",
       "sources": [
         "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
         "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
@@ -791,10 +825,11 @@
           "godot/tests/visual_flow.gd",
           "tests/batch_test.cpp",
           "godot/tests/batch_flow.gd",
-          "tests/aqueous_expansion_test.cpp"
+          "tests/aqueous_expansion_test.cpp",
+          "tests/reaction_dynamics_test.cpp"
         ],
         "plan": "稀溶液配制与稀释；饱和实验独立验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
-        "verified_on": "2026-09-09",
+        "verified_on": "2026-09-10",
         "range": {
           "temperature_K": 298.15,
           "volume_ml": [
@@ -803,7 +838,7 @@
           ],
           "concentration_mol_L": [
             1e-05,
-            0.01
+            1.0
           ]
         },
         "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."

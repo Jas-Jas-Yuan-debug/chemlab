@@ -24,10 +24,10 @@ std::string selected() {
     std::string s = "SELECTED_OUTPUT 1\n-reset false\n-high_precision true\nUSER_PUNCH 1\n-headings ph volume water charge h o";
     for (const auto& name : element_names) s += " " + name;
     for(const auto&name:valence_names)s+=" "+name;
-    s += "\n-start\n10 PUNCH -LA(\"H+\"), SOLN_VOL, TOT(\"water\"), CHARGE_BALANCE, TOTMOLE(\"H\"), TOTMOLE(\"O\")\n20 PUNCH ";
+    s += " h_molality oh_molality h_activity ionic_strength\n-start\n10 PUNCH -LA(\"H+\"), SOLN_VOL, TOT(\"water\"), CHARGE_BALANCE, TOTMOLE(\"H\"), TOTMOLE(\"O\")\n20 PUNCH ";
     for (size_t i=0; i<element_names.size(); ++i) s += (i ? ", " : "") + std::string("TOTMOLE(\"") + element_names[i] + "\")";
     for(const auto&name:valence_names)s+=", TOTMOLE(\""+name+"\")";
-    return s + "\n-end\n";
+    return s + ", MOL(\"H+\"), MOL(\"OH-\"), ACT(\"H+\"), MU\n-end\n";
 }
 double value(int id, int row, int col) {
     VAR v; VarInit(&v);
@@ -68,44 +68,60 @@ Solution scaled(const Solution& original,double fraction){
 
 }
 
-Chemistry::Chemistry(const std::string& database,bool database_is_text) : id_(CreateIPhreeqc()) {
+Chemistry::Chemistry(const std::string& database,bool database_is_text, const std::string& pitzer_database) : id_(CreateIPhreeqc()) {
     check(id_ >= 0, "无法创建化学求解器");
     if ((database_is_text?LoadDatabaseString(id_,database.c_str()):LoadDatabase(id_,database.c_str())) != 0) {
         const std::string error = GetErrorString(id_); DestroyIPhreeqc(id_); id_ = -1;
         throw std::runtime_error("无法加载数据库："+error);
+    }
+    if(!pitzer_database.empty()){
+        pitzer_id_=CreateIPhreeqc();
+        if(pitzer_id_<0 || (database_is_text?LoadDatabaseString(pitzer_id_,pitzer_database.c_str()):LoadDatabase(pitzer_id_,pitzer_database.c_str()))!=0){
+            if(pitzer_id_>=0)DestroyIPhreeqc(pitzer_id_);
+            DestroyIPhreeqc(id_);id_=-1;pitzer_id_=-1;
+            throw std::runtime_error("无法加载独立 Pitzer 数据库");
+        }
+        SetDumpStringOn(pitzer_id_,1);SetDumpFileOn(pitzer_id_,0);SetSelectedOutputFileOn(pitzer_id_,0);SetOutputFileOn(pitzer_id_,0);
     }
     SetDumpStringOn(id_, 1);
     SetDumpFileOn(id_, 0);
     SetSelectedOutputFileOn(id_, 0);
     SetOutputFileOn(id_, 0);
 }
-Chemistry::~Chemistry() { if (id_ >= 0) DestroyIPhreeqc(id_); }
+Chemistry::~Chemistry() { if (id_ >= 0) DestroyIPhreeqc(id_); if(pitzer_id_>=0)DestroyIPhreeqc(pitzer_id_); }
 bool Chemistry::supported(int reagent) {
     return (reagent>=1&&reagent<=9)||reagent==11||(reagent>=14&&reagent<=16)||reagent==25;
 }
 
-Solution Chemistry::solve(const std::string& input) {
+Solution Chemistry::solve(const std::string& input,bool use_pitzer) {
+    const int engine=use_pitzer?pitzer_id_:id_;
+    check(engine>=0,"此浓度需要独立 Pitzer 数据库");
     const std::string script = "DELETE\n-all\nEND\nKNOBS\n-convergence_tolerance 1e-12\n\n" + selected() + input + "DUMP\n-solution 3\nEND\n";
-    const int errors = RunString(id_,script.c_str());
-    check(errors == 0, "化学求解失败："+std::string(GetErrorString(id_)));
-    check(GetWarningStringLineCount(id_) == 0, "化学求解警告："+std::string(GetWarningString(id_)));
-    SetCurrentSelectedOutputUserNumber(id_,1);
-    const int row = GetSelectedOutputRowCount(id_)-1;
-    check(row > 0 && GetSelectedOutputColumnCount(id_) == 6+int(element_names.size()+valence_names.size()), "化学读数不完整: row="+std::to_string(row)+", columns="+std::to_string(GetSelectedOutputColumnCount(id_)));
+    const int errors = RunString(engine,script.c_str());
+    check(errors == 0, "化学求解失败："+std::string(GetErrorString(engine)));
+    check(GetWarningStringLineCount(engine) == 0, "化学求解警告："+std::string(GetWarningString(engine)));
+    SetCurrentSelectedOutputUserNumber(engine,1);
+    const int row = GetSelectedOutputRowCount(engine)-1;
+    check(row > 0 && GetSelectedOutputColumnCount(engine) == 10+int(element_names.size()+valence_names.size()), "化学读数不完整: row="+std::to_string(row)+", columns="+std::to_string(GetSelectedOutputColumnCount(engine)));
     Solution s;
-    s.ph=value(id_,row,0); s.volume_l=value(id_,row,1); s.water_kg=value(id_,row,2);
-    s.charge_eq=value(id_,row,3); s.hydrogen_mol=value(id_,row,4); s.oxygen_mol=value(id_,row,5);
+    s.ph=value(engine,row,0); s.volume_l=value(engine,row,1); s.water_kg=value(engine,row,2);
+    s.charge_eq=value(engine,row,3); s.hydrogen_mol=value(engine,row,4); s.oxygen_mol=value(engine,row,5);
     for (size_t i=0; i<element_names.size(); ++i) {
-        s.elements[element_names[i]]=value(id_,row,int(i)+6);
+        s.elements[element_names[i]]=value(engine,row,int(i)+6);
         check(s.elements[element_names[i]] >= -1e-15, "出现负物质的量");
     }
-    for(size_t i=0;i<valence_names.size();++i)s.valence_mol[valence_names[i]]=value(id_,row,int(i+element_names.size())+6);
-    s.raw=GetDumpString(id_);
+    for(size_t i=0;i<valence_names.size();++i)s.valence_mol[valence_names[i]]=value(engine,row,int(i+element_names.size())+6);
+    const int kinetics_column=6+int(element_names.size()+valence_names.size());
+    s.h_molar=value(engine,row,kinetics_column)*s.water_kg/s.volume_l;
+    s.oh_molar=value(engine,row,kinetics_column+1)*s.water_kg/s.volume_l;
+    s.gamma_h=value(engine,row,kinetics_column+2)/std::max(s.h_molar,1e-30);
+    s.ionic_strength=value(engine,row,kinetics_column+3);s.pitzer=use_pitzer;
+    s.raw=GetDumpString(engine);
     const auto start=s.raw.find("SOLUTION_RAW");
     check(start != std::string::npos, "求解器未保存溶液状态");
     s.raw=s.raw.substr(start);
     s.composition_key=s.raw;
-    check(s.water_kg>0 && s.volume_l>0 && s.ph>=0 && s.ph<=14.5, "结果超出已验证的稀溶液范围");
+    check(s.water_kg>0 && s.volume_l>0 && s.ph>=-2 && s.ph<=16, "结果超出水溶液模型的数值范围");
     check(std::abs(s.charge_eq)<1e-9, "电荷收支未通过");
     return s;
 }
@@ -113,7 +129,9 @@ Solution Chemistry::solve(const std::string& input) {
 Solution Chemistry::prepare(int reagent, double concentration, double volume) {
     check(supported(reagent), "此原料尚未支持操作");
     check(std::isfinite(volume) && volume>=0.001 && volume<=0.250, "初始体积限 1–250 mL");
-    check(std::isfinite(concentration) && (reagent==1 ? concentration==0 : concentration>=1e-5 && concentration<=0.01), "浓度限 0.00001–0.01 mol/L；蒸馏水为 0");
+    const double maximum=(reagent>=2&&reagent<=6)?1.0:0.01;
+    check(std::isfinite(concentration) && (reagent==1 ? concentration==0 : concentration>=1e-5 && concentration<=maximum), "HCl/NaOH/KOH/NaCl/KCl 浓度限 0.00001–1 mol/L；其他原料限 0.01 mol/L，水为 0");
+    const bool high=concentration>0.01;
     const double moles=concentration*volume;
     double water=volume*0.9970474;
     Solution result;
@@ -137,7 +155,7 @@ Solution Chemistry::prepare(int reagent, double concentration, double volume) {
             case 16:add("Mg",1);add("S(6)",1);break;
             case 25:add("Ba",1);add("Cl",2);break;
         }
-        result=solve(body+"END\n");
+        result=solve(body+"END\n",high);
         if (std::abs(result.volume_l-volume)<1e-10) break;
         water+=(volume-result.volume_l)*0.9970474;
         check(water>0, "体积与溶剂质量换算失败");
@@ -149,6 +167,7 @@ Solution Chemistry::prepare(int reagent, double concentration, double volume) {
 
 BatchResult Chemistry::equilibrate(const Solution& base,const BatchConditions& c) {
     check(!base.empty(),"请先加入水溶液");
+    check(!base.pitzer,"该专用相平衡实验尚未验证浓溶液条件");
     for(auto [id,n]:base.ingredients_mol)
         check(n<=0||id==2||id==8||id==9,"此反应器仅验证水、稀盐酸和单独碳酸钠/碳酸氢钠底液");
     check(c.solid_reagent==0||c.solid_reagent==18||c.solid_reagent==19,"此固相尚未验证");
@@ -262,7 +281,10 @@ Solution Chemistry::mix(const Solution& a,double af,const Solution& b,double bf)
     input+="MIX 3\n";
     if (!a.empty()&&af>0) input+="1 "+num(af)+"\n";
     if (!b.empty()&&bf>0) input+="2 "+num(bf)+"\n";
-    Solution r=solve(input+"SAVE solution 3\nEND\n");
+    const bool high=a.pitzer||b.pitzer;
+    if(high)for(const auto* sample:{&a,&b})for(auto[id,n]:sample->ingredients_mol)
+        check(n<=0||id<=6,"浓溶液目前只支持 HCl/NaOH/KOH/NaCl/KCl 和水之间的混合");
+    Solution r=solve(input+"SAVE solution 3\nEND\n",high);
     r.isolated_batch_sample=a.isolated_batch_sample||b.isolated_batch_sample;
     for(auto [id,n]:a.ingredients_mol) if(n*af>0) r.ingredients_mol[id]+=n*af;
     for(auto [id,n]:b.ingredients_mol) if(n*bf>0) r.ingredients_mol[id]+=n*bf;

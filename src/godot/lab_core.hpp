@@ -1,5 +1,6 @@
 #pragma once
 #include "science/session.hpp"
+#include "science/reaction_kinetics.hpp"
 #include "science/mechanics.hpp"
 #include "science/physics_models.hpp"
 #include "science/flame_field.hpp"
@@ -24,8 +25,12 @@ class LabCore : public RefCounted {
         std::optional<chemlab::FreeFall> restored_fall;
         std::optional<chemlab::PhysicsExperiment> restored_bench;
         std::optional<chemlab::FlameField> restored_flame;
+        std::map<int,chemlab::NeutralizationKinetics> restored_kinetics;
     };
+    std::map<int,chemlab::NeutralizationKinetics> kinetics_;
+    void update_kinetics(const Result& result);
     std::string database_;
+    std::string pitzer_database_;
     chemlab::LabSession session_;
     std::string database_error_;
     std::future<Result> pending_;
@@ -49,6 +54,8 @@ public:
     bool is_busy() const;
     Dictionary poll();
     Dictionary snapshot() const;
+    Dictionary advance_kinetics(double seconds,double exchange_ml_s);
+    Dictionary kinetics_snapshot() const;
     Dictionary save_session() const;
     Dictionary preview_bench(const String& kind,const Dictionary& parameters,double elapsed_s,bool running=false,const Array& heater_controls=Array()) const;
     Dictionary preview_fall(double height_m,double gravity_m_s2,double elapsed_s) const;

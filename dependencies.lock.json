@@ -49,5 +49,11 @@
     "license_notice": "third_party/licenses/Cantera-LICENSE.txt",
     "ethanol_liquid_offset_source": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C64175&Mask=4&Plot=on&Type=HVAP-FORM1",
     "runtime": "Original C++ solver; no Python or Cantera runtime dependency"
+  },
+  "pitzer_database": {
+    "parent": "IPhreeqc 3.8.6-17100",
+    "source": "database/pitzer.dat from the pinned unmodified upstream distribution",
+    "sha256": "06ab2debc0cdb333598118df953165499c2f762a79de5f2df55dec6b78b02589",
+    "use": "Separate high-concentration strong electrolyte solver; no merged database"
   }
 }

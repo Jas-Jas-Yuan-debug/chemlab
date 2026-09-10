@@ -14,7 +14,7 @@ No endorsement by USGS is implied.
 - Embedded SUNDIALS notice: [SUNDIALS-NOTICE.txt](third_party/licenses/SUNDIALS-NOTICE.txt)
 - The downloaded source and database are unmodified. Version and hashes are in `dependencies.lock.json`.
 - Build adaptation by ChemLab, 2026-09-09: only `transport.cpp` is compiled with `token=chemlab_phreeqc_transport_token` to prevent collision with godot-cpp's C symbol `token`. No chemistry parameters or numerical code are changed; the original source distribution remains available above.
-- Database `phreeqc.dat` retains its original header, reaction parameters, literature references, and notice. Other bundled databases are not merged into it.
+- Databases `phreeqc.dat` and `pitzer.dat` retain their original headers, reaction parameters, literature references, and notices. They come from the same pinned distribution and are loaded in separate engine instances; their data are not merged. `pitzer.dat` SHA-256: `06ab2debc0cdb333598118df953165499c2f762a79de5f2df55dec6b78b02589`.
 - Parkhurst and Appelo (2013), USGS Techniques and Methods 6-A43: https://doi.org/10.3133/tm6A43
 - Charlton and Parkhurst (2011), Computers & Geosciences 37:1653–1663: https://doi.org/10.1016/j.cageo.2011.02.005
 

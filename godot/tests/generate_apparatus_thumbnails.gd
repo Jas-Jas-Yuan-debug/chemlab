@@ -25,8 +25,12 @@ func run() -> void:
     var directory := "res://assets/apparatus"
     DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(directory))
     var seen := {}
+    var only: PackedStringArray=[]
+    for argument in OS.get_cmdline_user_args():
+        if argument.begins_with("--models="):only=argument.trim_prefix("--models=").split(",")
     var catalog: Array=JSON.parse_string(FileAccess.get_file_as_string("res://data/apparatus.json")).items
     for d in catalog:
+        if not only.is_empty() and d.model not in only:continue
         if seen.has(d.model):continue
         seen[d.model]=true
         var model := Model.new()

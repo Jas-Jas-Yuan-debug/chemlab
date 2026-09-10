@@ -6,6 +6,8 @@
 namespace chemlab {
 struct Solution {
     bool isolated_batch_sample = false;
+    bool pitzer = false;
+    double h_molar = 0, oh_molar = 0, gamma_h = 1, ionic_strength = 0;
     double ph = 0;
     double volume_l = 0;
     double water_kg = 0;
@@ -48,7 +50,7 @@ struct BatchResult {
 // One owner thread per instance. No Godot types, graphics, or UI dependencies.
 class Chemistry {
 public:
-    explicit Chemistry(const std::string& database, bool database_is_text = false);
+    explicit Chemistry(const std::string& database, bool database_is_text = false, const std::string& pitzer_database = "");
     ~Chemistry();
     Chemistry(const Chemistry&) = delete;
     Chemistry& operator=(const Chemistry&) = delete;
@@ -60,7 +62,8 @@ public:
     static void validate_combination(const Solution& a, const Solution& b);
 private:
     int id_ = -1;
-    Solution solve(const std::string& input);
+    int pitzer_id_ = -1;
+    Solution solve(const std::string& input, bool use_pitzer = false);
 };
 
 struct Vessel {

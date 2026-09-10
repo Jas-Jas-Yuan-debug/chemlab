@@ -28,6 +28,7 @@ var help_text: Label
 var actions: VBoxContainer
 var target: OptionButton
 var dose: SpinBox
+var solution_concentration: SpinBox
 var temperature: SpinBox
 var rpm: SpinBox
 var flame_switch: CheckButton
@@ -183,6 +184,7 @@ func _ready() -> void:
     actions.add_child(target)
     dose = lab.number(actions,"取用量 / mL 或 g",0.05,250,0.05,5,"BeginnerDose")
     lab.button(actions,"取用 / 转移","BeginnerUse",use_selected)
+    solution_concentration=lab.number(actions,"溶液浓度 / mol·L⁻¹",0.00001,1,0.00001,0.001,"BeginnerConcentration")
     lab.button(actions,"用所选溶液重新配液","BeginnerPrepare",prepare_liquid)
     var connect_row := HBoxContainer.new()
     actions.add_child(connect_row)
@@ -309,10 +311,11 @@ func choose(id: String) -> void:
     var d: Dictionary=definitions[id]
     if d.action=="reagent":
         selected_reagent=d.reagent_id
+        solution_concentration.max_value=1.0 if selected_reagent in [2,3,4,5,6] else 0.01
         if selected_reagent in [10,18,19]:
             lab.choose_reagent(selected_reagent)
             return
-        tell("已选 %s。选中容器后点击“用所选溶液重新配液”，重新配制 %.2f mL、0.001 mol/L 溶液。%s"%[d.name,dose.value,"此条目尚未支持。" if not d.operational else ""])
+        tell("已选 %s。选中容器后点击“用所选溶液重新配液”，重新配制 %.2f mL、%.5f mol/L 溶液。%s"%[d.name,dose.value,solution_concentration.value,"此条目尚未支持。" if not d.operational else ""])
         return
     if d.action=="vessel":
         if lab.core.is_busy(): tell("请等待当前计算完成。");return
@@ -376,9 +379,9 @@ func sync_vessels() -> void:
         for reagent_id in s.ingredients_mol:
             if int(reagent_id)>0 and int(reagent_id)<=lab.catalog.size():substances.append(lab.catalog[int(reagent_id)-1].formula)
         o.model.caption.text="%s · %s\n%.1f mL"%[key," + ".join(substances) if not substances.is_empty() else "H₂O" if s.volume_ml>0 else "空容器",s.volume_ml]
-        var color := Color(0.46,0.76,0.89,0.48)
+        var color := Color(0.91,0.96,0.97,0.08)
         if s.ph!=null and lab.indicator_by_vessel.get(id,0)>0:
-            color=Indicators.color_for(lab.indicator_by_vessel[id],s.ph)
+            color=Indicators.color_for(lab.indicator_by_vessel[id],lab.kinetic_readings.get(id,{}).get("ph",s.ph))
         if o.last_volume!=s.volume_ml or o.last_ph!=s.ph or o.get("color",Color.BLACK)!=color:
             o.model.set_liquid(s.volume_ml,s.capacity_ml,color)
             o.last_volume=s.volume_ml;o.last_ph=s.ph;o.color=color
@@ -428,7 +431,12 @@ func update_detail() -> void:
     if state.vessel_id>0 and lab.states.has(int(state.vessel_id)):
         var s: Dictionary=lab.states[int(state.vessel_id)]
         lines.append("%.2f / %.0f mL    25.0 °C"%[s.volume_ml,s.capacity_ml])
-        lines.append("pH  "+("—" if s.ph==null else "%.2f"%s.ph))
+        var dynamic: Dictionary=lab.kinetic_readings.get(int(state.vessel_id),{})
+        var ph_value=dynamic.get("ph",s.ph)
+        lines.append("探头 pH  "+("—" if ph_value==null else "%.2f"%ph_value))
+        if dynamic.get("ph")!=null:lines.append("中和速率 %.3f µmol/s · 平衡参考 %.2f"%[dynamic.rate_mol_s*1e6,s.ph])
+        if s.get("activity_model")=="Pitzer":lines.append("Pitzer 活度模型")
+        if not dynamic.get("dilute_rate_constant",true):lines.append("浓溶液速率使用稀溶液常数外推，未标定。")
     if d.action=="solid":lines.append(d.formula+"    剩余 %.2f g"%state.mass_g)
     if not state.contents.is_empty():
         for id in state.contents: lines.append("%s  %.2f g（未求解反应）"%[definitions[id].name,state.contents[id]])
@@ -452,9 +460,9 @@ func prepare_liquid() -> void:
     if lab.core.is_busy():tell("请等待当前计算完成。");return
     var cap: float=lab.states[int(obj.vessel_id)].capacity_ml
     if dose.value<1 or dose.value>minf(250,cap):tell("配液体积需在 1 mL 与容器容量之间；每次最多 250 mL。");return
-    lab.chosen_reagent=selected_reagent
+    lab.choose_reagent(selected_reagent)
     lab.volume.value=dose.value
-    lab.concentration.value=0.001
+    lab.concentration.value=solution_concentration.value
     lab.prepare_selected()
     tell("正在重新配制 "+reagent.name+"；此操作定义该容器的新初始条件。",true)
 

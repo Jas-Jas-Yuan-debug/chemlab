@@ -17,7 +17,7 @@ var target_id := 3
 var chosen_reagent := 2
 var catalog: Array = []
 var orbit := Vector2(0.10,0.50)
-var distance := 0.92
+var distance := 0.78
 var focus := Vector3(0,0.94,0)
 var dragging := false
 var drag_offset := Vector3.ZERO
@@ -32,6 +32,13 @@ var stream: MeshInstance3D
 var last_transfer_ms := 0
 var total_added: Dictionary = {}
 var curves: Dictionary = {}
+var curve_sources: Dictionary = {}
+var kinetic_readings: Dictionary = {}
+var kinetic_history: Dictionary = {}
+var kinetics_clock := 0.0
+var plot_mode: OptionButton
+var plot_note: Label
+var mix_exchange: SpinBox
 var records: Array = []
 var operation_times: Array[float] = []
 var pending_session := {}
@@ -214,7 +221,7 @@ func build_ui() -> void:
     button(row,"溶解与气液","BatchTab",func(): switch_batch(false))
     button(row,"沉淀实验","PrecipitationTab",func(): switch_batch(true))
     button(row,"更多物理","PhysicsBenchTab",switch_bench)
-    status_badge = label(row,"水溶液平衡  ·  25 °C  ·  已验证 17 / 30 项原料",14,Color("9ecdb8"))
+    status_badge = label(row,"溶液与中和动力学  ·  25 °C  ·  17 / 30 项原料",14,Color("9ecdb8"))
     var left := panel(ui,Vector2(24,108),Vector2(274,822))
     chemistry_panels.append(left.get_parent())
     label(left,"实验材料",20,Color("f5e6c9"))
@@ -257,8 +264,14 @@ func build_ui() -> void:
     left.add_child(indicator_picker)
     var reset := button(left,"重新开始实验","ResetExperiment",reset_lab)
     reset.add_theme_color_override("font_color",Color("f1cea0"))
-    var right := panel(ui,Vector2(1244,108),Vector2(332,822))
-    chemistry_panels.append(right.get_parent())
+    var right_box := panel(ui,Vector2(1244,108),Vector2(332,822))
+    chemistry_panels.append(right_box.get_parent())
+    var right_scroll:=ScrollContainer.new()
+    right_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+    right_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
+    right_box.add_child(right_scroll)
+    var right:=VBoxContainer.new();right.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+    right.add_theme_constant_override("separation",8);right_scroll.add_child(right)
     selected_title = label(right,"烧杯 1",21,Color("f5e6c9"))
     readout = RichTextLabel.new()
     readout.bbcode_enabled = true
@@ -282,14 +295,22 @@ func build_ui() -> void:
     pour_button.button_up.connect(func(): pouring = false)
     pause_button = button(right,"暂停实验","PauseExperiment",toggle_pause)
     reagent_title = label(right,"配制：盐酸 HCl",16,Color("f5e6c9"))
-    concentration = number(right,"浓度 / mol·L⁻¹",0.00001,0.01,0.00001,0.001,"Concentration")
+    concentration = number(right,"浓度 / mol·L⁻¹",0.00001,1.0,0.00001,0.001,"Concentration")
     volume = number(right,"初始体积 / mL",1,250,1,50,"InitialVolume")
     button(right,"重新配制所选容器","PrepareSolution",prepare_selected)
-    plot_title = label(right,"pH — 累计加入体积",15,Color("f5e6c9"))
+    mix_exchange=number(right,"混合交换 / mL·s⁻¹",0,100,0.1,5,"MixingExchange")
+    mix_exchange.tooltip_text="两个等体积区域之间的双向交换流量；实验模型输入，未按实际搅拌器标定。"
+    plot_mode=OptionButton.new();plot_mode.name="ReactionPlotMode"
+    for text in ["pH 随时间","中和速率随时间","单一加液源 · 平衡滴定记录"]:plot_mode.add_item(text)
+    plot_mode.item_selected.connect(func(_index):update_readout());right.add_child(plot_mode)
+    plot_title = label(right,"pH — 时间",15,Color("f5e6c9"))
     plot = Plot.new()
     plot.custom_minimum_size = Vector2(298,132)
     right.add_child(plot)
-    label(right,"固定 25°C · 充分混合后的平衡\n不模拟反应速率；暂不交换空气",12,Color("96aaa1"))
+    plot_note=label(right,"25°C · 强酸碱速率与有限混合",12,Color("96aaa1"))
+    plot_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+    # Keep observations visible; the operations below remain scrollable.
+    for i in range(4):right.move_child([plot_mode,plot_title,plot,plot_note][i],3+i)
     var footer := panel(ui,Vector2(320,874),Vector2(902,94))
     status = label(footer,"",14,Color("e7e1d1"))
     status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -303,7 +324,7 @@ func build_ui() -> void:
     button(record_row,"导出 CSV","ExportCSV",func(): open_session_dialog("csv"))
     var about := AcceptDialog.new()
     about.title = "关于 ChemLab · 观物实验室"
-    about.dialog_text = "化学与物理虚拟实验室 · 0.2\n\n当前验证 17 / 30 项原料，3 种指示剂。\n化学采用 25°C 稀水溶液最终平衡；各实验说明给出适用范围。\n液面、颜色和粒子采用视觉近似，不表示空间浓度或反应速率。\n\n原创代码：AGPL-3.0-only\n第三方引擎、计算库与数据保留原许可。\n源代码、模型说明、数据来源及第三方声明可在仓库查看。"
+    about.dialog_text = "化学与物理虚拟实验室 · 0.2\n\n当前验证 17 / 30 项原料，3 种指示剂。\n化学固定 25°C；强酸碱中和计算两区混合与有限反应速率，其他体系显示最终平衡。\nHCl / NaOH / KOH / NaCl / KCl 可配至 1 mol/L。浓溶液使用 Pitzer 活度；速率常数外推尚未标定。\n玻璃与液面为体积核对的几何近似；两区模型不是三维反应流体模拟。\n\n原创代码：AGPL-3.0-only\n第三方引擎、计算库与数据保留原许可。\n源代码、模型说明、数据来源及第三方声明可在仓库查看。"
     about.add_button("源代码与说明",true,"source")
     about.custom_action.connect(func(action):
         if action=="source":
@@ -345,6 +366,7 @@ func choose_reagent(id: int) -> void:
     chosen_reagent = id
     var item: Dictionary = catalog[id-1]
     reagent_title.text = "配制："+item.name_zh+" "+item.formula
+    concentration.max_value=1.0 if id in [2,3,4,5,6] else 0.01
     concentration.editable = id!=1
     if id==1:
         set_status("蒸馏水预设：不含空气中的 CO₂，固定 25°C。")
@@ -384,7 +406,7 @@ func switch_experiment(physics: bool) -> void:
     orbit = Vector2(0.1,0.18) if physics else Vector2(0.1,0.50)
     distance = 3.8 if physics else 0.92
     update_camera()
-    status_badge.text = "力学实验  ·  忽略空气阻力" if physics else "水溶液平衡  ·  25 °C  ·  已验证 17 / 30 项原料"
+    status_badge.text = "力学实验  ·  忽略空气阻力" if physics else "溶液与中和动力学  ·  25 °C  ·  17 / 30 项原料"
     set_status("设置高度与重力，应用参数后释放小球。" if physics else "选择原料与器材，继续水溶液实验。")
 
 func switch_batch(barite: bool = false) -> void:
@@ -464,14 +486,53 @@ func update_readout() -> void:
     if not states.has(selected_id):
         return
     var s: Dictionary = states[selected_id]
-    var ph_text := "—" if s.ph==null else "%.2f"%s.ph
+    var measured: Dictionary=kinetic_readings.get(selected_id,{})
+    var ph_value=measured.get("ph",s.ph)
+    var ph_text := "—" if ph_value==null else "%.2f"%ph_value
     readout.text = "[font_size=27][color=#cce8dc]%.2f mL[/color]   [color=#f0d39d]pH %s[/color][/font_size]\n[color=#a5b9ae]容量 %.0f mL    温度 25.0 °C[/color]"%[s.volume_ml,ph_text,s.capacity_ml]
-    if indicator_by_vessel.get(selected_id,0)==1 and s.ph!=null and (s.ph<2 or s.ph>11.5):
+    if measured.has("ph") and measured.ph!=null:
+        readout.text+="\n探头：下部区域 · 上部 pH %.2f\n中和速率 %.3f µmol/s · 平衡参考 %.2f"%[measured.upper_ph,measured.rate_mol_s*1e6,s.ph]
+    elif s.ph!=null:readout.text+="\n此体系显示平衡值，动力学尚未建立"
+    if s.get("activity_model")=="Pitzer":readout.text+="\nPitzer 活度模型"
+    if indicator_by_vessel.get(selected_id,0)==1 and ph_value!=null and (ph_value<2 or ph_value>11.5):
         readout.text += "\n[color=#f0b785]酚酞：此 pH 的颜色未支持[/color]"
-    var curve_id := selected_id if curves.has(selected_id) and not curves[selected_id].is_empty() else target_id
-    plot_title.text = "容器 %d：pH — 累计加入体积"%curve_id
-    plot.points.assign(curves.get(curve_id,[]))
+    var curve_id := selected_id
+    var history: Array=kinetic_history.get(curve_id,[])
+    plot.points.clear();plot.y_title="pH";plot.x_unit="s";plot.y_min=0;plot.y_max=14
+    if plot_mode.selected==2:
+        plot_title.text="容器 %d：pH — 本次加入体积"%curve_id
+        plot.points.assign(curves.get(curve_id,[]));plot.x_unit="mL"
+        plot_note.text="加液源：容器 %d；换源或重新配液开始新序列。点是加液后平衡值，非反应时间。"%int(curve_sources.get(curve_id,0))
+    else:
+        var rate_plot: bool=plot_mode.selected==1
+        plot_title.text="容器 %d：%s — 时间"%[curve_id,"中和速率" if rate_plot else "探头 pH"]
+        for sample in history:plot.points.append(Vector2(sample.time_s,sample.rate_mol_s*1e6 if rate_plot else sample.ph))
+        if rate_plot:plot.y_title="µmol/s";plot.y_min=0;plot.y_max=1e-10
+        plot_note.text="H⁺ + OH⁻ ⇌ H₂O · 两区有限混合\n交换流量为模型输入；不交换空气。"
+        if not kinetic_readings.has(curve_id):plot_note.text="此体系尚未建立动力学；可切换查看平衡加液记录。"
+        elif not kinetic_readings[curve_id].get("dilute_rate_constant",true):plot_note.text+="\n浓溶液速率使用稀溶液常数外推，未标定。"
+    for p in plot.points:
+        plot.y_min=minf(plot.y_min,p.y)
+        plot.y_max=maxf(plot.y_max,p.y*1.05 if plot_mode.selected==1 else ceil(p.y))
     plot.queue_redraw()
+
+func refresh_kinetics(delta: float) -> void:
+    if not paused and not physics_mode and not bench_mode and not batch_mode and not core.is_busy():
+        var step:=minf(delta,0.1)
+        kinetic_readings=core.advance_kinetics(step,mix_exchange.value)
+        if kinetic_readings.has("error"):
+            set_status(kinetic_readings.error);paused=true;return
+        kinetics_clock+=step
+        if kinetics_clock>=0.05:
+            kinetics_clock=0
+            for id in kinetic_readings:
+                var r: Dictionary=kinetic_readings[id]
+                if r.ph==null:continue
+                if not kinetic_history.has(id):kinetic_history[id]=[]
+                kinetic_history[id].append({"time_s":r.time_s,"ph":r.ph,"upper_ph":r.upper_ph,"rate_mol_s":r.rate_mol_s})
+                if kinetic_history[id].size()>1200:kinetic_history[id].pop_front()
+            apply_indicators()
+    elif kinetic_readings.is_empty():kinetic_readings=core.kinetics_snapshot()
 
 func update_targets() -> void:
     target_picker.clear()
@@ -546,7 +607,7 @@ func apply_result(result: Dictionary) -> void:
         for v in views.values():
             v.queue_free()
         views.clear()
-        curves.clear()
+        curves.clear();curve_sources.clear();kinetic_history.clear();kinetic_readings.clear()
         total_added.clear()
         records.clear()
         operation_times.clear()
@@ -554,6 +615,7 @@ func apply_result(result: Dictionary) -> void:
         selected_id = 1
         target_id = 3
         elapsed = 0
+    var prior_states:=states.duplicate(true)
     states.clear()
     for s in result.state.vessels:
         ensure_view(s)
@@ -564,18 +626,24 @@ func apply_result(result: Dictionary) -> void:
         if result.transferred_ml>0:
             last_transfer_ms = Time.get_ticks_msec()
             var id: int = result.to
+            if curve_sources.get(id,0)!=int(result.from):
+                curves[id]=[];total_added[id]=0.0;curve_sources[id]=int(result.from)
+                if prior_states.has(id) and prior_states[id].ph!=null:curves[id].append(Vector2(0,prior_states[id].ph))
             total_added[id] = total_added.get(id,0.0)+result.transferred_ml
             if not curves.has(id):
                 curves[id] = []
             if states[id].ph!=null:
                 curves[id].append(Vector2(total_added[id],states[id].ph))
             records.append({"time_s":elapsed,"operation":"pour","from":result.from,"to":result.to,"volume_ml":result.transferred_ml,"ph":states[id].ph})
-            set_status("已加入 %.2f mL → %s %d；接收液 pH %.2f"%[result.transferred_ml,views[id].kind,id,states[id].ph])
+            set_status("已加入 %.2f mL → %s %d；最终平衡参考 pH %.2f"%[result.transferred_ml,views[id].kind,id,states[id].ph])
         else:
             pouring = false
             set_status("源容器已空或接收容器已满，倾倒已停止。")
     elif result.operation=="prepare":
-        curves[result.to] = []
+        curves[result.to] = [];kinetic_history.erase(int(result.to))
+        for id in curve_sources.keys():
+            if id==int(result.to) or curve_sources[id]==int(result.to):
+                curves[id]=[];total_added[id]=0.0;curve_sources.erase(id)
         total_added[result.to] = 0.0
         records.append(pending_context.duplicate())
         set_status("已配制 %.2f mL。当前容器开始一组新的初始条件。"%states[result.to].volume_ml)
@@ -587,15 +655,28 @@ func apply_result(result: Dictionary) -> void:
     if result.operation=="extract_batch":
         for v in views.values():
             v.visible = not batch_mode
+    kinetic_readings=core.kinetics_snapshot()
     pending_context = {}
     select_vessel(selected_id)
     update_targets()
     apply_indicators()
+    if beginner and beginner.active:
+        beginner.sync_vessels()
+        beginner.update_detail()
+        beginner.tell(status.text)
 
 func apply_indicators() -> void:
     for id in states:
         if states[id].ph!=null:
-            views[id].set_indicator(Indicators.color_for(indicator_by_vessel.get(id,0),states[id].ph))
+            var reading: Dictionary=kinetic_readings.get(id,{})
+            var ph_value=reading.get("ph",states[id].ph)
+            if ph_value==null:continue
+            views[id].set_indicator(Indicators.color_for(indicator_by_vessel.get(id,0),ph_value))
+            var liquid_material: ShaderMaterial=views[id].liquid.material_override
+            liquid_material.set_shader_parameter("separate_zones",reading.has("upper_ph"))
+            if reading.has("upper_ph"):
+                liquid_material.set_shader_parameter("upper_tint",Indicators.color_for(indicator_by_vessel.get(id,0),reading.upper_ph))
+                liquid_material.set_shader_parameter("zone_height",views[id].level_for_volume(states[id].volume_ml*0.0000005))
     update_readout()
 
 func _process(delta: float) -> void:
@@ -606,6 +687,7 @@ func _process(delta: float) -> void:
         apply_result(result)
     if not paused:
         elapsed += delta
+    refresh_kinetics(delta)
     update_pour_pose(delta)
     if pouring and not paused and pour_ready:
         pour_clock += delta
@@ -616,7 +698,7 @@ func _process(delta: float) -> void:
     if stream.visible:
         var source = views[selected_id]
         var target = views[target_id]
-        var a: Vector3 = source.visual.to_global(Vector3(source.radius,source.height-0.003,0))
+        var a: Vector3 = source.visual.to_global(source.pour_lip())
         var b: Vector3 = target.global_position+Vector3(0,target.liquid_height+0.004,0)
         stream.position = (a+b)/2
         stream.scale.y = a.distance_to(b)
@@ -636,11 +718,12 @@ func update_pour_pose(delta: float) -> void:
             var basis := Basis(Vector3(0,0,1),angle)
             var target = views[target_id]
             var lip: Vector3 = target.position+Vector3(0,target.height+0.09,0)
-            offset = lip-v.position-basis*Vector3(v.radius,v.height-0.003,0)
+            offset = lip-v.position-basis*v.pour_lip()
             pour_ready = abs(v.visual.rotation.z-angle)<0.035 and v.visual.position.distance_to(offset)<0.008
+        v.set_open(pouring and id==selected_id)
         v.visual.rotation.z = move_toward(v.visual.rotation.z,angle,delta*2.5)
         v.visual.position = v.visual.position.move_toward(offset,delta*0.6)
-        v.name_label.position = v.visual.position+Vector3(0,v.height+0.018,0)
+        v.name_label.position = v.visual.position+Vector3(0,v.height+v.label_offset,0)
 
 func drag_to(screen_position: Vector2) -> void:
     var plane := Plane(Vector3.UP,0.89)

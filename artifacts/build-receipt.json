@@ -1,14 +1,14 @@
 {
-  "created_utc": "2026-09-10T09:48:06Z",
-  "source_sha256": "f51a3c8e125475b6ec7c8e878bb23ee7386b32d80b4e878d975dc74be4a44fd4",
+  "created_utc": "2026-09-10T10:41:07Z",
+  "source_sha256": "85dc533ecc241fd2f37452926c30e477f41c01bb2a344d2b93165d5c6bf437dd",
   "architecture": "arm64",
   "runtime": "official Godot 4.7.2 release template, thinned from universal",
   "signing": "ad-hoc, codesign --verify --deep --strict passed",
   "notarized": false,
   "files": {
     "Contents/Frameworks/libchemlab_native.dylib": {
-      "bytes": 2633984,
-      "sha256": "7aacee03397ee4dcc6e4bfe55e56c7b8c943cc1825bf3df2336ffe0822640ae3"
+      "bytes": 2652288,
+      "sha256": "23cefaac26f7a7e6bec4703577290e771f579366275a8390150a209993dfbe3c"
     },
     "Contents/Info.plist": {
       "bytes": 1873,
@@ -16,15 +16,15 @@
     },
     "Contents/MacOS/ChemLab \u00b7 \u89c2\u7269\u5b9e\u9a8c\u5ba4": {
       "bytes": 82439632,
-      "sha256": "e6ed0574c5e2385335385374f563ba592d07176be65e1fa61dc5c281b9476f84"
+      "sha256": "a4c0bdec8fa4678f3572401339b75a183fe4cad806d3375a59967a04938d58c2"
     },
     "Contents/PkgInfo": {
       "bytes": 9,
       "sha256": "7e50a30efad50208a173203ced60818d693bb61266b75aa10927d1a2adce80cb"
     },
     "Contents/Resources/ChemLab \u00b7 \u89c2\u7269\u5b9e\u9a8c\u5ba4.pck": {
-      "bytes": 5379328,
-      "sha256": "92308d075540198ac7e917d61421fc111eb4987768d59d74e5526a5ef335fc08"
+      "bytes": 5427236,
+      "sha256": "da5245244ceaf8a2cc04d69a882d0f7ddeb620e3ee3822c19363099ffbcf9791"
     },
     "Contents/Resources/Licenses/Cantera-LICENSE.txt": {
       "bytes": 1796,
@@ -51,8 +51,8 @@
       "sha256": "3293d864bbf61632b6062f00c245c3348ba5fcd3c8da54ff4cf107d80773fbd2"
     },
     "Contents/Resources/Licenses/THIRD_PARTY_NOTICES.md": {
-      "bytes": 3138,
-      "sha256": "afc8bf331b04cf7fc731e3537a32f3e0c0f51f55317ccbabc674e20467b79137"
+      "bytes": 3317,
+      "sha256": "01cb810d967ed7df1bbedb294b134970b6a65fb5f6690e4949f1c0aee6162d56"
     },
     "Contents/Resources/Licenses/USGS-PHREEQC-NOTICE.txt": {
       "bytes": 2706,
@@ -68,7 +68,7 @@
     },
     "Contents/_CodeSignature/CodeResources": {
       "bytes": 5298,
-      "sha256": "94e7e9d68d51e1f44dd34612a9b75912e3baae1cfa2022f6c6466aa535a9c110"
+      "sha256": "4eee4140e5f3f62da457d708ef4469f03a91dfa02afec7bc29c597be9c582b8f"
     }
   }
 }

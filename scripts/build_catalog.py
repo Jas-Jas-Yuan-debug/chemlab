@@ -108,10 +108,15 @@ for i,(name,formula,ascii_formula,phase,hydrate,atoms,aqueous,candidates,plan) i
     if i in REGISTRY['aqueous_prepared_reagent_ids']:
         entry['validation'].update({'status':'已验证（限定水溶液）','operational':True,
             'science_tests':REGISTRY['evidence'],'verified_on':REGISTRY['verified_on'],
-            'range':{'temperature_K':298.15,'volume_ml':[1,250],'concentration_mol_L':[0.00001,0.01]},
+            'range':{'temperature_K':298.15,'volume_ml':[1,250],'concentration_mol_L':[0.00001,1.0 if i in [2,3,4,5,6] else 0.01]},
             'limitations':REGISTRY['combinations']})
         for form in entry['forms']:
             form['operational'] = form['phase'] in ('aqueous','liquid')
+    if i in [2,3,4,5,6]:
+        entry['validation']['science_tests']=list(entry['validation']['science_tests'])+['tests/reaction_dynamics_test.cpp']
+        entry['validation']['verified_on']='2026-09-10'
+        entry['database_mapping']['high_concentration']={'database':'pitzer.dat','sha256':LOCK['pitzer_database']['sha256'],'minimum_exclusive_mol_L':0.01,'maximum_mol_L':1.0}
+        entry['applicability']+='；0.01–1 mol/L 采用独立 Pitzer 求解，仅限 HCl/NaOH/KOH/NaCl/KCl/水混合。'
     if i in REGISTRY['batch']['ids']:
         entry['validation'].update({'status':'已验证（气液固独立实验）','operational':True,
             'science_tests':REGISTRY['evidence'],'verified_on':REGISTRY['verified_on'],

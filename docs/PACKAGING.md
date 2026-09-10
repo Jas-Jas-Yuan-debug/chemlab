@@ -8,7 +8,7 @@
 
 导出使用 Xcode `codesign`、临时身份 `-`。加入第三方声明后重签并执行 `codesign --verify --deep --strict`。`artifacts/build-receipt.json` 记录源文件指纹、每个应用文件的大小与哈希、架构和签名方式。临时签名不是 Apple Developer ID 公证，未经公证的下载文件可能受 Gatekeeper 限制；没有在此项目中关闭系统安全设置。
 
-源码运行与发布应用共用主场景和数据库字节。`LabCore` 从 `res://data/phreeqc.dat` 读取、验证校验值，再加载 IPhreeqc，适用于源目录和 PCK，避免把编辑器路径当作发布文件路径。
+源码运行与发布应用共用主场景和数据库字节。`LabCore` 从 `res://data/phreeqc.dat` 与 `res://data/pitzer.dat` 分别读取原始字节、验证各自校验值，再加载两个独立 IPhreeqc 实例，适用于源目录和 PCK，避免把编辑器路径当作发布文件路径。
 
 性能脚本仅在显式命令参数启用时运行，普通启动不会读写测试文件或自动操作实验。项目内测试与下载缓存不进入应用。原料数据库和 JSON 注册表显式包含在导出清单中。
 

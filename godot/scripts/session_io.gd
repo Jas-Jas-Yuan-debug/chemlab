@@ -1,7 +1,7 @@
 extends RefCounted
 const FORMAT = "ChemLab"
 static var KIND_CAPACITY = {"烧杯":250.0,"试剂瓶":250.0,"量筒":100.0,"滴管":5.0}
-static var KIND_RADIUS = {"烧杯":0.033,"试剂瓶":0.032,"量筒":0.020,"滴管":0.008}
+static var KIND_RADIUS = {"烧杯":0.035,"试剂瓶":0.035,"量筒":0.019,"滴管":0.0075}
 
 static func finite(value: Variant) -> bool:
     return typeof(value) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(value))
@@ -10,7 +10,7 @@ static func catalog_kinds() -> void:
     for d in JSON.parse_string(FileAccess.get_file_as_string("res://data/apparatus.json")).items:
         if d.action=="vessel":
             KIND_CAPACITY[d.name]=float(d.capacity_ml)
-            KIND_RADIUS[d.name]=(0.020 if "量筒" in d.name else 0.008 if "滴管" in d.name else 0.033)*pow(float(d.capacity_ml)/(100.0 if "量筒" in d.name else 5.0 if "滴管" in d.name else 250.0),1.0/3.0)
+            KIND_RADIUS[d.name]=preload("res://scripts/glass_geometry.gd").shape(d.name,float(d.capacity_ml)).radius
 
 static func make_document(lab: Node3D) -> Dictionary:
     lab.beginner.sync_vessels()
@@ -30,6 +30,7 @@ static func make_document(lab: Node3D) -> Dictionary:
     var mode := "beginner" if lab.beginner.active else "bench" if lab.bench_mode else "fall" if lab.physics_mode else "barite" if lab.batch_mode and lab.batch_experiment.barite_mode else "batch" if lab.batch_mode else "chemistry"
     return {"format":FORMAT,"view_schema":1,"science":lab.core.save_session(),"view":{
         "beginner":lab.beginner.save_view(),"equipment":equipment,"selected_id":lab.selected_id,"target_id":lab.target_id,"mode":mode,
+        "kinetic_history":lab.kinetic_history.duplicate(true),"mix_exchange_ml_s":lab.mix_exchange.value,"plot_mode":lab.plot_mode.selected,
         "elapsed_s":lab.elapsed,"operation_times":lab.operation_times.duplicate(),
         "focus":[lab.focus.x,lab.focus.y,lab.focus.z],"orbit":[lab.orbit.x,lab.orbit.y],"distance":lab.distance,
         "fall_times":fall_times,"bench_history":bench_history}}
@@ -93,6 +94,17 @@ static func validate(document: Variant,lab: Node3D) -> Dictionary:
             if item.vessel_id>0:
                 var d: Dictionary=lab.beginner.definitions[item.definition]
                 if not expected.has(int(item.vessel_id)) or d.get("action")!="vessel" or d.get("capacity_ml")!=expected[int(item.vessel_id)]:return {"error":"新手器材与科学容器状态不匹配。"}
+    if not finite(v.get("mix_exchange_ml_s")) or v.mix_exchange_ml_s<0 or v.mix_exchange_ml_s>100 or not finite(v.get("plot_mode")) or v.plot_mode<0 or v.plot_mode>2 or v.plot_mode!=floor(v.plot_mode):return {"error":"动力学显示参数无效。"}
+    if not v.get("kinetic_history") is Dictionary or v.kinetic_history.size()>12:return {"error":"动力学曲线无效。"}
+    for key in v.kinetic_history:
+        if not str(key).is_valid_int() or not expected.has(int(key)) or not v.kinetic_history[key] is Array or v.kinetic_history[key].size()>1200:return {"error":"动力学曲线器材或数量无效。"}
+        var previous_time := -1.0
+        for point in v.kinetic_history[key]:
+            if not point is Dictionary:return {"error":"动力学曲线点无效。"}
+            for field in ["time_s","ph","upper_ph","rate_mol_s"]:
+                if not finite(point.get(field)):return {"error":"动力学曲线包含无效数值。"}
+            if point.time_s<previous_time or point.time_s>v.elapsed_s+0.01 or point.ph< -2 or point.ph>16 or point.upper_ph< -2 or point.upper_ph>16 or abs(point.rate_mol_s)>1:return {"error":"动力学曲线超出范围。"}
+            previous_time=point.time_s
     var last_time := 0.0
     for t in v.operation_times:
         if not finite(t) or t<last_time or t>v.elapsed_s+0.01:
@@ -161,25 +173,37 @@ static func restore(lab: Node3D,validated: Dictionary,state: Dictionary) -> void
     lab.pending_context = {}
     lab.elapsed = v.elapsed_s
     lab.operation_times.assign(v.operation_times)
-    lab.curves.clear()
+    lab.curves.clear();lab.curve_sources.clear();lab.kinetic_history.clear()
+    for key in v.kinetic_history:lab.kinetic_history[int(key)]=v.kinetic_history[key].duplicate(true)
+    lab.kinetic_readings=lab.core.kinetics_snapshot()
+    lab.mix_exchange.value=v.mix_exchange_ml_s;lab.plot_mode.selected=int(v.plot_mode)
     lab.total_added.clear()
     lab.records.clear()
     var native: Dictionary = lab.core.save_session()
     var batch_parameters := {}
+    var last_ph := {}
     var batch_history := []
     for i in native.events.size():
         var event: Dictionary = native.events[i]
         var parameters: Dictionary = native.commands[i].parameters
         if event.operation=="prepare":
             lab.curves[int(event.to)] = []
+            for id in lab.curve_sources.keys():
+                if id==int(event.to) or lab.curve_sources[id]==int(event.to):
+                    lab.curves[id]=[];lab.total_added[id]=0.0;lab.curve_sources.erase(id)
+            if event.readings.has("ph"):last_ph[int(event.to)]=event.readings.ph
             lab.total_added[int(event.to)] = 0.0
         elif event.operation=="pour":
             var id := int(event.to)
+            if lab.curve_sources.get(id,0)!=int(event.from):
+                lab.curves[id]=[];lab.total_added[id]=0.0;lab.curve_sources[id]=int(event.from)
+                if last_ph.has(id):lab.curves[id].append(Vector2(0,last_ph[id]))
             lab.total_added[id] = lab.total_added.get(id,0.0)+event.transferred_ml
             if not lab.curves.has(id):
                 lab.curves[id] = []
             if event.readings.has("ph"):
                 lab.curves[id].append(Vector2(lab.total_added[id],event.readings.ph))
+                last_ph[id]=event.readings.ph
         elif event.operation=="batch":
             batch_parameters = parameters
             batch_history.append({"parameters":parameters,"reading":event.readings})
@@ -242,6 +266,11 @@ static func export_csv(lab: Node3D,path: String) -> String:
         row.parameters_json = parameters_json(row.parameters)
         row.erase("parameters")
         rows.append(row)
+    for id in lab.kinetic_history:
+        for point in lab.kinetic_history[id]:
+            var row: Dictionary=point.duplicate(true)
+            row.section="neutralization_kinetics";row.to=id;row.temperature_c=25;row.probe_zone="lower";row.kinetic_model="two exchanging zones; k=1.4e11 L/mol/s at 25C"
+            rows.append(row)
     var headings: Array[String] = ["section","step","operation","from","to","time_s","transferred_ml","volume_ml","ph","temperature_c","parameters_json"]
     for row in rows:
         for key in row:
@@ -249,6 +278,7 @@ static func export_csv(lab: Node3D,path: String) -> String:
                 headings.append(key)
     headings.append("model_version")
     headings.append("database_sha256")
+    headings.append("pitzer_sha256")
     var temporary := path+".chemlab-tmp-%d"%Time.get_ticks_usec()
     var file := FileAccess.open(temporary,FileAccess.WRITE)
     if file==null:
@@ -257,6 +287,7 @@ static func export_csv(lab: Node3D,path: String) -> String:
     for row in rows:
         row.model_version = native.model_version
         row.database_sha256 = native.database_sha256
+        row.pitzer_sha256 = native.pitzer_sha256
         var values := PackedStringArray()
         for key in headings:
             var value = row.get(key,"")

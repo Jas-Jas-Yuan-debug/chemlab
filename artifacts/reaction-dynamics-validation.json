@@ -1,0 +1,77 @@
+{
+  "recorded_utc": "2026-09-10T10:39:06Z",
+  "base_commit": "4fa981dead16fc978c24e8854785268e210599c7",
+  "scope": "Targeted corrective checks only; not full-suite or performance validation",
+  "final_runtime_source_sha256": "85dc533ecc241fd2f37452926c30e477f41c01bb2a344d2b93165d5c6bf437dd",
+  "checks": [
+    {
+      "name": "reaction_dynamics_native",
+      "passed": true,
+      "scope": "Science: 20 preparations; analytic nanosecond kinetics; concentrated mixing/dilution; finite mixing; frame partition; snapshot/aliquot conservation",
+      "evidence": [
+        "PASS: physical neutralization timescale, finite mixing, conservation, high-concentration Pitzer prepare/mix/dilute and exact dynamic restore"
+      ],
+      "log_sha256": "eefd5364115ef885aaea436f0f29d38c5ec98538b2bf1b95979bc112974b37c8"
+    },
+    {
+      "name": "reaction_dynamics_flow",
+      "passed": true,
+      "scope": "Metal: differentiated vessels, cavity quadrature, actual concentration UI, finite-time response, titrant separation, dynamic save and CSV restore",
+      "evidence": [
+        "PASS: differentiated 3D glassware, independently integrated liquid volume, 1 M KOH, finite-rate time plots, source-isolated titration, dynamic save/CSV and beginner concentration"
+      ],
+      "log_sha256": "1a4e4d9662509acf5a7891a771dc9e23041203a8455a9693bf86e0125d06f3c4"
+    },
+    {
+      "name": "pouring_flow",
+      "passed": true,
+      "scope": "Affected Metal pouring regression and independent 2D liquid-volume quadrature",
+      "evidence": [
+        "PASS: actual held-button transfer, horizontal bounded liquid mesh, verified rendered-volume approximation, empty stop, release stop, chloride conservation and indicator boundaries"
+      ],
+      "log_sha256": "983c566d570523eec3939cbecd9a74a7148646ee46c12dba09e2550245edc9b6"
+    },
+    {
+      "name": "reaction_clock_flow",
+      "passed": true,
+      "scope": "Final clock/readout fixes: integrated time, busy wait, Pitzer identity rejection and immediate paused beginner refresh",
+      "evidence": [
+        "PASS: integrated reaction clock, no samples while busy, Pitzer save identity, and immediate paused beginner reprepare readout"
+      ],
+      "log_sha256": "ff8cdecb848cf517d2316b5a2fb4fe53448f93fc33f88922668520b45f7dfb3a"
+    },
+    {
+      "name": "empty_source_boundary",
+      "passed": true,
+      "scope": "Single headless boundary check after final review: empty source must not reset an evolving receiver",
+      "evidence": [
+        "PASS: empty-source transfer preserves non-equilibrium receiver inventory, clock and rate exactly"
+      ],
+      "log_sha256": "b3782acf1378176e2a177ab2d3ed9ea633ef4d12cc53aa689057a005a9114322"
+    }
+  ],
+  "final_file_sha256": {
+    "src/science/chemistry.cpp": "4275e6177ec28c42dad2a3b41bf0ec0df95bfc9a90bf2f1c381663e0f2cb391b",
+    "src/science/chemistry.hpp": "88ab26e2eaf3a79031200165e8f719fc655657eaece941d217adbe6fabdff068",
+    "src/science/reaction_kinetics.cpp": "492b5288f88113e80ef70a4d44eaa4c835a980997e4ea3a92620aed73e5b1e95",
+    "src/science/reaction_kinetics.hpp": "c1bc744bc99b018a0019609b18ed29d4471913947e225310b2202ae4d6f6feac",
+    "tests/reaction_dynamics_test.cpp": "cd358e3be8e0a8d8c88233afae26cfc1493950042310be1e94904e5f582dde9b",
+    "src/godot/lab_core.cpp": "3160c35797b10a2729517b10585670a335cc91a063f8092d0c95730b6299d08d",
+    "godot/scripts/vessel.gd": "7b719729d92b0c8e8da65735b99a1216830526036f1f3d2185ae755a571e5caf",
+    "godot/scripts/glass_geometry.gd": "09bea60fbd50cc1d8d5d834b2ba164ab9a7d4ead307a9827067a6396b1942ba2",
+    "godot/scripts/laboratory.gd": "3d4967add5d4d7c63b01dce3ca4ecff5dd7e64e60b91e8e9a54ce17355b0681b",
+    "godot/scripts/beginner_mode.gd": "880750f0ffe719ac5f29d729f13cdbea8fab0a8d3af08f5acd9d9eec87941a08",
+    "godot/tests/reaction_dynamics_flow.gd": "ec5e8ca2064617d3275f8079e7b0842f4fd0739419ae74599b3065aac14637e3",
+    "godot/tests/reaction_clock_flow.gd": "f745fdca245023074ff5c26985a8dbafd56787dba4a1bf686249d2518fff8ced",
+    "godot/tests/pouring_flow.gd": "9c79baffb5b29e4de3785aec5e3d76c62ece0b735823e52233d6387e6332cc50"
+  },
+  "notes": [
+    "No full-suite or benchmark rerun. Prior artifacts/verification.json and performance failures remain unchanged.",
+    "Initial Godot dynamics run exposed unsupported %g formatting; corrected and its affected flow rerun once.",
+    "Visual review prompted immediate beginner completion refresh and simulation-time plot correction; covered by the new reaction_clock_flow, without repeating the dynamics or pouring flow.",
+    "Following runtime checks, CSV gained a constant pitzer_sha256 provenance column; this metadata-only addition was reviewed without repeating the CSV workflow.",
+    "Three affected thumbnail families regenerated; screenshots are actual Godot renders.",
+    "Two-zone neutralization is a limited approximation. Dilute rate constant at high ionic strength is uncalibrated extrapolation. No full 3D reaction-fluid claim.",
+    "Final review fixed zero-volume pours reinitializing receiver kinetics. A single headless empty-source check passed; its regression is retained in reaction_clock_flow for future runs. No other workflow repeated."
+  ]
+}

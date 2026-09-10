@@ -8,28 +8,29 @@ func idle() -> void:
         await process_frame
     await process_frame
 func rendered_volume(v: Node3D) -> float:
-    var arrays: Array = v.liquid.mesh.surface_get_arrays(0)
-    var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-    var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
-    var total := 0.0
-    for i in range(0,points.size(),3):
-        if normals[i].y<0.5:
-            continue
-        var a := points[i]
-        var b := points[i+1]
-        var c := points[i+2]
-        var area := absf((b.x-a.x)*(c.z-a.z)-(b.z-a.z)*(c.x-a.x))/2
-        var sum := 0.0
-        for p in [a,b,c]:
-            sum += clampf(v.plane_center+v.liquid_slope.dot(Vector2(p.x,p.z)),0,v.height-0.006)
-        total += area*sum/3
+    # Independent rectangular quadrature of the cavity clipped by the rendered
+    # free-surface plane. Includes the base and shoulder rather than assuming a cylinder.
+    var total:=0.0
+    var dy: float=(v.cavity[-1].y-v.cavity[0].y)/512
+    for row in range(512):
+        var y: float=v.cavity[0].y+(row+0.5)*dy
+        var radius:=0.0
+        for i in range(v.cavity.size()-1):
+            var a: Vector2=v.cavity[i];var b: Vector2=v.cavity[i+1]
+            if y>=a.y and y<=b.y:
+                radius=a.x+(b.x-a.x)*(y-a.y)/(b.y-a.y);break
+        var dx:=2*radius/256
+        for column in range(256):
+            var x: float=-radius+(column+0.5)*dx
+            if y<=v.plane_center+v.liquid_slope.x*x:
+                total+=2*sqrt(maxf(0,radius*radius-x*x))*dx*dy
     return total*1000000
 func run() -> void:
     lab = load("res://scenes/laboratory.tscn").instantiate()
     root.add_child(lab)
     await idle()
     var v = lab.views[1]
-    # Independent triangle integration of the actual shader-deformed cap.
+    # Independent cavity integration of the actual clipped liquid.
     for amount in [5.0,50.0,200.0]:
         v.update_state({"volume_ml":amount,"ph":7})
         for angle in [0.0,0.5,1.0,1.4]:

@@ -2,7 +2,7 @@ extends RefCounted
 
 # Source ranges in docs/INDICATORS.md. RGB values are illustrative, not spectra.
 static func color_for(index: int, ph: float) -> Color:
-    var clear := Color(0.73,0.88,0.90,0.25)
+    var clear := Color(0.91,0.96,0.97,0.08)
     if index==1:
         if ph<2.0 or ph>11.5:
             return clear

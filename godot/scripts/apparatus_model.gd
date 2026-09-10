@@ -10,7 +10,7 @@ var body := Node3D.new()
 var nominal_height := 0.14
 var nominal_radius := 0.035
 var fill_profile: Array[Vector2] = []
-var liquid_color := Color(0.45,0.77,0.92,0.48)
+var liquid_color := Color(0.91,0.96,0.97,0.08)
 
 func mesh(mesh_value: Mesh, at: Vector3, color: Color, material: Material = null) -> MeshInstance3D:
     var node := MeshInstance3D.new()
@@ -109,19 +109,19 @@ func build(item: Dictionary) -> void:
     glass.shader = preload("res://shaders/glass.gdshader")
     var type: String = item.model
     match type:
-        "beaker","insulated","waste","gasjar","bottle","washbottle":
-            var scale_value := pow(float(item.get("capacity_ml",250))/250.0,1.0/3.0)
-            var r := 0.037*scale_value
-            var h := 0.1*scale_value
-            if type in ["bottle","gasjar","washbottle"]:
-                vessel([Vector2(r,0),Vector2(r,h*0.8),Vector2(r*0.7,h),Vector2(r*0.7,h*1.15)])
-            else:
-                vessel([Vector2(r,0),Vector2(r,h)],type in ["insulated","waste"])
+        "beaker","bottle","gasjar":
+            var geometry := preload("res://scripts/glass_geometry.gd").shape("试剂瓶" if type=="bottle" else "集气瓶" if type=="gasjar" else item.name,float(item.get("capacity_ml",250)))
+            fill_profile.assign(geometry.inner)
+            nominal_radius=geometry.radius;nominal_height=geometry.height
+            mesh(preload("res://scripts/glass_geometry.gd").shell_mesh(geometry.outer,geometry.inner,type=="beaker"),Vector3.ZERO,Color.WHITE,glass)
+            if type=="bottle":
+                rod(Vector3(0,nominal_height-0.004,0),Vector3(0,nominal_height+0.011,0),geometry.inner[-1].x*0.95,Color("cbd8d9"))
+                rod(Vector3(0,nominal_height+0.008,0),Vector3(0,nominal_height+0.018,0),geometry.inner[-1].x*1.3,Color("d8e2df"))
+        "insulated","waste","washbottle":
+            var r:=0.037;var h:=0.1
+            vessel([Vector2(r,0),Vector2(r,h)],true)
             if type=="washbottle":
                 tube([Vector3(-0.012,0.03,0),Vector3(-0.012,0.15,0),Vector3(-0.07,0.17,0)],0.003,metal,glass)
-                tube([Vector3(0.012,0.1,0),Vector3(0.012,0.16,0),Vector3(0.06,0.16,0)],0.003,metal,glass)
-            if type=="beaker":
-                rod(Vector3(r, h,0),Vector3(r+0.013,h+0.007,0),0.002)
         "flask","flask3","flaskside","volumetric":
             flask(3 if type=="flask3" else 1)
             if type=="flaskside":
@@ -253,7 +253,7 @@ func build(item: Dictionary) -> void:
     caption.modulate = Color("d7e0e3")
     add_child(caption)
 
-func set_liquid(volume_ml: float, capacity_ml: float, color: Color = Color(0.45,0.77,0.92,0.48)) -> void:
+func set_liquid(volume_ml: float, capacity_ml: float, color: Color = Color(0.91,0.96,0.97,0.08)) -> void:
     if content:
         body.remove_child(content)
         content.queue_free()
@@ -268,7 +268,7 @@ func set_liquid(volume_ml: float, capacity_ml: float, color: Color = Color(0.45,
         var b := fill_profile[i+1]
         total += PI*(b.y-a.y)*(a.x*a.x+a.x*b.x+b.x*b.x)/3
         volumes.append(total)
-    var wanted := total*clampf(volume_ml/capacity_ml,0,1)
+    var wanted := minf(total,volume_ml*0.000001) if definition.model in ["beaker","bottle","gasjar"] else total*clampf(volume_ml/capacity_ml,0,1)
     var p: Array[Vector2] = [Vector2(0,0.002),fill_profile[0]]
     var prior := 0.0
     for i in range(fill_profile.size()-1):

@@ -11,11 +11,11 @@
 | # | 原料 | 水溶液物种覆盖 | 候选固/气相与参数 | 适用条件 / 验证计划 |
 |---|---|---|---|---|
 | 1 | 水 H₂O | H2O L82；H+ L67；OH- L212 | 该条目无需原料纯固相；实验候选相另选 | 无 CO2 纯水；稀释与体积/溶剂质量换算 |
-| 2 | 盐酸 HCl | H+ L67；Cl- L138 | 该条目无需原料纯固相；实验候选相另选 | 稀水溶液；强酸与 NaOH/KOH 中和，禁止浓盐酸挥发模型 |
-| 3 | 氢氧化钠 NaOH | Na+ L90；OH- L212 | NaOH 缺失 | 预配稀溶液；固体溶解度与溶解热另行验证 |
-| 4 | 氯化钠 NaCl | Na+ L90；Cl- L138 | Halite L1191 (log K 有) | 稀溶液配制与稀释；接近饱和时需检查活度模型 |
-| 5 | 氢氧化钾 KOH | K+ L97；OH- L212 | KOH 缺失 | 预配稀溶液；固体溶解和热效应未验证 |
-| 6 | 氯化钾 KCl | K+ L97；Cl- L138 | Sylvite L1197 (log K 有) | 稀溶液配制与稀释；饱和实验独立验证 |
+| 2 | 盐酸 HCl | H+ L67；Cl- L138 | 该条目无需原料纯固相；实验候选相另选 | 稀水溶液；强酸与 NaOH/KOH 中和，禁止浓盐酸挥发模型；0.01–1 mol/L 采用独立 Pitzer 求解，仅限 HCl/NaOH/KOH/NaCl/KCl/水混合。 |
+| 3 | 氢氧化钠 NaOH | Na+ L90；OH- L212 | NaOH 缺失 | 预配稀溶液；固体溶解度与溶解热另行验证；0.01–1 mol/L 采用独立 Pitzer 求解，仅限 HCl/NaOH/KOH/NaCl/KCl/水混合。 |
+| 4 | 氯化钠 NaCl | Na+ L90；Cl- L138 | Halite L1191 (log K 有) | 稀溶液配制与稀释；接近饱和时需检查活度模型；0.01–1 mol/L 采用独立 Pitzer 求解，仅限 HCl/NaOH/KOH/NaCl/KCl/水混合。 |
+| 5 | 氢氧化钾 KOH | K+ L97；OH- L212 | KOH 缺失 | 预配稀溶液；固体溶解和热效应未验证；0.01–1 mol/L 采用独立 Pitzer 求解，仅限 HCl/NaOH/KOH/NaCl/KCl/水混合。 |
+| 6 | 氯化钾 KCl | K+ L97；Cl- L138 | Sylvite L1197 (log K 有) | 稀溶液配制与稀释；饱和实验独立验证；0.01–1 mol/L 采用独立 Pitzer 求解，仅限 HCl/NaOH/KOH/NaCl/KCl/水混合。 |
 | 7 | 氯化钙 CaCl₂ | Ca+2 L107；Cl- L138 | CaCl2 缺失 | 无水固体与溶液分开；碳酸盐组合需指定沉淀相 |
 | 8 | 碳酸氢钠 NaHCO₃ | Na+ L90；HCO3- L233；CO3-2 L144；CO2 L240 | Nahcolite 缺失 | 缓冲与稀释；酸加入和 CO2 逸出需开放/封闭收支 |
 | 9 | 碳酸钠 Na₂CO₃ | Na+ L90；CO3-2 L144；HCO3- L233 | Natron 缺失 | 无水式与十水碳酸钠固相不可混同；预配稀溶液可候选 |

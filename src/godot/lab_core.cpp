@@ -8,7 +8,8 @@
 namespace godot {
 namespace {
 const char* database_hash="59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10";
-const char* session_model="aqueous-0.2+batch-0.1+barite-0.1+physics-0.3+combustion-0.1";
+const char* pitzer_hash="06ab2debc0cdb333598118df953165499c2f762a79de5f2df55dec6b78b02589";
+const char* session_model="aqueous-0.3+kinetics-0.1+batch-0.1+barite-0.1+physics-0.3+combustion-0.1";
 chemlab::Scalars scalars(const Dictionary&d){
     if(d.size()>32)throw std::runtime_error("记录参数过多");
     chemlab::Scalars r;Array keys=d.keys();
@@ -30,6 +31,8 @@ std::vector<chemlab::Scalars> heater_controls(const Array& input){
 }
 
 void LabCore::_bind_methods(){
+    ClassDB::bind_method(D_METHOD("advance_kinetics","seconds","exchange_ml_s"),&LabCore::advance_kinetics);
+    ClassDB::bind_method(D_METHOD("kinetics_snapshot"),&LabCore::kinetics_snapshot);
     ClassDB::bind_method(D_METHOD("set_flame_enabled","enabled"),&LabCore::set_flame_enabled);
     ClassDB::bind_method(D_METHOD("advance_flame","elapsed_s","wind_m_s"),&LabCore::advance_flame);
     ClassDB::bind_method(D_METHOD("flame_snapshot"),&LabCore::flame_snapshot);
@@ -120,6 +123,10 @@ void LabCore::initialize(const String& database){
     const PackedByteArray bytes=FileAccess::get_file_as_bytes(database);
     if(bytes.is_empty())database_.clear();else database_.assign(reinterpret_cast<const char*>(bytes.ptr()),bytes.size());
     if(database_.empty())database_error_="无法读取化学数据库";
+    const String pitzer_path="res://data/pitzer.dat";
+    if(FileAccess::get_sha256(pitzer_path)!=pitzer_hash)database_error_="Pitzer 数据库校验失败";
+    const PackedByteArray pitzer_bytes=FileAccess::get_file_as_bytes(pitzer_path);
+    if(pitzer_bytes.is_empty())pitzer_database_.clear();else pitzer_database_.assign(reinterpret_cast<const char*>(pitzer_bytes.ptr()),pitzer_bytes.size());
     reset_lab();
 }
 bool LabCore::start(const std::function<void(chemlab::Chemistry&,Result&)>& job){
@@ -127,11 +134,12 @@ bool LabCore::start(const std::function<void(chemlab::Chemistry&,Result&)>& job)
     const auto previous=session_;
     const auto database_error=database_error_;
     const auto database=database_;
+    const auto pitzer_database=pitzer_database_;
     const auto gen=generation_;
-    pending_=std::async(std::launch::async,[previous,database_error,database,gen,job]{
+    pending_=std::async(std::launch::async,[previous,database_error,database,pitzer_database,gen,job]{
         Result result;result.session=previous;result.generation=gen;
         const auto begin=std::chrono::steady_clock::now();
-        try{if(!database_error.empty())throw std::runtime_error(database_error);chemlab::Chemistry solver(database,true);job(solver,result);}
+        try{if(!database_error.empty())throw std::runtime_error(database_error);chemlab::Chemistry solver(database,true,pitzer_database);job(solver,result);}
         catch(const std::exception&e){result.error=e.what();result.session=previous;}
         result.compute_ms=std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-begin).count();
         return result;
@@ -173,19 +181,20 @@ Dictionary LabCore::preview_fall(double height,double gravity,double elapsed)con
     catch(const std::exception&e){Dictionary r;r["error"]=String::utf8(e.what());return r;}
 }
 Dictionary LabCore::save_session()const{
-    Dictionary d;d["schema_version"]=1;d["model_version"]=session_model;d["database_sha256"]=database_hash;d["iphreeqc_version"]="3.8.6-17100";
+    Dictionary d;d["schema_version"]=1;d["model_version"]=session_model;d["database_sha256"]=database_hash;d["pitzer_sha256"]=pitzer_hash;d["iphreeqc_version"]="3.8.6-17100";
     Array commands,events;
     for(const auto&c:session_.journal){Dictionary item;item["operation"]=String(c.operation.c_str());item["parameters"]=dictionary(c.parameters);commands.push_back(item);}
     for(const auto&e:session_.events){Dictionary item;item["operation"]=String(e.operation.c_str());item["from"]=e.from;item["to"]=e.to;item["transferred_ml"]=e.transferred_ml;item["readings"]=dictionary(e.readings);events.push_back(item);}
     d["commands"]=commands;d["events"]=events;d["fall"]=fall_snapshot();Dictionary bench=bench_snapshot();
     if(bench_.kind()=="heater"){Array controls;for(const auto& c:bench_.heater_controls())controls.push_back(dictionary(c));bench["heater_controls"]=controls;}
     d["bench"]=bench;
+    Dictionary kinetic_states;for(const auto&[id,k]:kinetics_){Array values;for(double v:k.save())values.push_back(v);kinetic_states[id]=values;}d["kinetics"]=kinetic_states;
     Array field;if(flame_)for(double v:flame_->save())field.push_back(v);d["flame_field"]=field;return d;
 }
 String LabCore::load_session(const Dictionary&d){
     if(is_busy())return String::utf8("请等待当前操作完成后再加载");
     try{
-        if(int(d.get("schema_version",0))!=1||String(d.get("model_version",""))!=session_model||String(d.get("database_sha256",""))!=database_hash||String(d.get("iphreeqc_version",""))!="3.8.6-17100")throw std::runtime_error("保存文件的模型或数据库版本不兼容");
+        if(int(d.get("schema_version",0))!=1||String(d.get("model_version",""))!=session_model||String(d.get("database_sha256",""))!=database_hash||String(d.get("pitzer_sha256",""))!=pitzer_hash||String(d.get("iphreeqc_version",""))!="3.8.6-17100")throw std::runtime_error("保存文件的模型或数据库版本不兼容");
         if(!d.has("commands")||d["commands"].get_type()!=Variant::ARRAY||!d.has("fall")||d["fall"].get_type()!=Variant::DICTIONARY||!d.has("bench")||d["bench"].get_type()!=Variant::DICTIONARY)throw std::runtime_error("保存文件缺少必要状态");
         Array input=d["commands"];if(input.size()>5000)throw std::runtime_error("保存文件操作数量超出范围");
         std::vector<chemlab::Command> commands;
@@ -208,9 +217,30 @@ String LabCore::load_session(const Dictionary&d){
         std::optional<chemlab::FlameField> flame;
         if(d.has("flame_field")){if(d["flame_field"].get_type()!=Variant::ARRAY)throw std::runtime_error("三维场记录无效");Array values=d["flame_field"];if(values.size()>60000)throw std::runtime_error("三维场记录过大");
             if(values.size()){std::vector<double> saved;for(int i=0;i<values.size();++i){if(values[i].get_type()!=Variant::FLOAT&&values[i].get_type()!=Variant::INT)throw std::runtime_error("三维场数值无效");saved.push_back(double(values[i]));}chemlab::FlameField field;field.load(saved);if(kind!="heater"||field.source()!=int(bench.reading().at("source")))throw std::runtime_error("三维场与燃烧源不匹配");flame=std::move(field);}}
-        bool started=start([commands,fall,bench,flame](chemlab::Chemistry&solver,Result&r){
+        std::map<int,chemlab::NeutralizationKinetics> kinetics;
+        if(d.has("kinetics")){
+            if(d["kinetics"].get_type()!=Variant::DICTIONARY)throw std::runtime_error("动力学记录无效");
+            Dictionary states=d["kinetics"];if(states.size()>12)throw std::runtime_error("动力学器材过多");
+            Array ids=states.keys();for(int i=0;i<ids.size();++i){
+                String text_id=String(ids[i]);if(!text_id.is_valid_int())throw std::runtime_error("动力学编号无效");const int id=text_id.to_int();
+                if(id<1||id>12||states[ids[i]].get_type()!=Variant::ARRAY)throw std::runtime_error("动力学器材无效");
+                Array values=states[ids[i]];std::vector<double> saved;
+                for(int j=0;j<values.size();++j){if(values[j].get_type()!=Variant::FLOAT&&values[j].get_type()!=Variant::INT)throw std::runtime_error("动力学数值无效");saved.push_back(double(values[j]));}
+                chemlab::NeutralizationKinetics k;k.load(saved);kinetics[id]=k;
+            }
+        }
+        bool started=start([commands,fall,bench,flame,kinetics](chemlab::Chemistry&solver,Result&r){
             r.operation="load";chemlab::LabSession restored;restored.reset(solver);
             for(const auto&c:commands)restored.apply(solver,c);
+            for(const auto&[id,k]:kinetics){
+                if(!restored.vessels.count(id)||!chemlab::NeutralizationKinetics::supports(restored.vessels.at(id).solution))throw std::runtime_error("动力学与化学体系不匹配");
+                const auto&s=restored.vessels.at(id).solution;
+                chemlab::NeutralizationKinetics equilibrium;equilibrium.initialize(s);
+                if(std::abs(k.volume()-s.volume_l)>1e-9||std::abs(k.h_total()-k.oh_total()-equilibrium.h_total()+equilibrium.oh_total())>1e-9)throw std::runtime_error("动力学库存与化学记录不匹配");
+                if(!s.empty()&&(std::abs(k.save()[1]/equilibrium.save()[1]-1)>1e-7||std::abs(k.save()[2]/equilibrium.save()[2]-1)>1e-7))throw std::runtime_error("动力学活度参数与科学模型不匹配");
+            }
+            for(const auto&[id,v]:restored.vessels)if(chemlab::NeutralizationKinetics::supports(v.solution)&&!kinetics.count(id))throw std::runtime_error("缺少动力学容器状态");
+            r.restored_kinetics=kinetics;
             r.session=std::move(restored);r.restored_fall=fall;r.restored_bench=bench;r.restored_flame=flame;
         });
         if(!started)throw std::runtime_error("无法开始加载");
@@ -231,6 +261,41 @@ Dictionary LabCore::batch_snapshot()const{
     d["elements_mol"]=elements;return d;
 }
 
+void LabCore::update_kinetics(const Result&r){
+    using K=chemlab::NeutralizationKinetics;
+    if(r.operation=="load"){kinetics_=r.restored_kinetics;return;}
+    if(r.operation=="reset"){
+        kinetics_.clear();for(const auto&[id,v]:r.session.vessels)if(K::supports(v.solution))kinetics_[id].initialize(v.solution);return;
+    }
+    if(r.operation=="pour"&&r.transferred_ml>0){
+        const auto& target=r.session.vessels.at(r.to).solution;
+        if(kinetics_.count(r.from)){
+            const double f=r.transferred_ml/1000/session_.vessels.at(r.from).solution.volume_l;
+            auto aliquot=kinetics_.at(r.from).withdraw(std::clamp(f,0.,1.));
+            if(K::supports(target)&&kinetics_.count(r.to))kinetics_.at(r.to).add(aliquot,target);
+            else kinetics_.erase(r.to);
+        }else kinetics_.erase(r.to);
+    }else if(r.to&&r.operation!="pour"){
+        const auto&s=r.session.vessels.at(r.to).solution;
+        if(K::supports(s))kinetics_[r.to].initialize(s);else kinetics_.erase(r.to);
+    }
+}
+Dictionary LabCore::kinetics_snapshot()const{
+    Dictionary all;
+    for(const auto&[id,k]:kinetics_){
+        Dictionary r;r["volume_ml"]=k.volume()*1000;r["ph"]=k.volume()>1e-12?Variant(k.ph()):Variant();
+        r["upper_ph"]=k.volume()>1e-12?Variant(k.ph(0)):Variant();r["rate_mol_s"]=k.rate();r["reacted_mol"]=k.reacted();
+        r["time_s"]=k.time();r["equivalent_error_mol"]=k.equivalent_error();r["heterogeneity"]=k.mixing_fraction();
+        r["dilute_rate_constant"]=k.dilute_rate();r["k_l_mol_s"]=chemlab::NeutralizationKinetics::recombination_k;
+        all[id]=r;
+    }return all;
+}
+Dictionary LabCore::advance_kinetics(double elapsed,double exchange){
+    if(is_busy())return kinetics_snapshot();
+    try{for(auto&[id,k]:kinetics_)k.advance(elapsed,exchange);return kinetics_snapshot();}
+    catch(const std::exception&e){Dictionary d;d["error"]=String::utf8(e.what());return d;}
+}
+
 Dictionary LabCore::snapshot()const{
     Dictionary result;Array items;
     for(const auto&[id,v]:session_.vessels){
@@ -243,6 +308,8 @@ Dictionary LabCore::snapshot()const{
         const std::map<std::string,double> weights={{"Na",22.9898},{"Cl",35.453},{"K",39.102},{"Ca",40.08},{"Mg",24.312},{"C",12.0111},{"S",32.064},{"N",14.0067},{"Ba",137.34},{"Fe",55.847},{"Cu",63.546}};
         for(const auto&[element,n]:s.elements)mass+=n*weights.at(element);
         d["sample_mass_g"]=mass;
+        d["activity_model"]=s.pitzer?"Pitzer":"ion association";
+        d["h_molar"]=s.h_molar;d["oh_molar"]=s.oh_molar;d["gamma_h"]=s.gamma_h;d["ionic_strength"]=s.ionic_strength;
         d["water_kg"]=s.water_kg;d["hydrogen_mol"]=s.hydrogen_mol;d["oxygen_mol"]=s.oxygen_mol;
         d["temperature_c"]=25.0;d["charge_eq"]=s.charge_eq;
         Dictionary elements;for(const auto&[e,n]:s.elements)elements[String(e.c_str())]=n;
@@ -250,7 +317,7 @@ Dictionary LabCore::snapshot()const{
         d["elements_mol"]=elements;d["ingredients_mol"]=ingredients;items.push_back(d);
     }
     result["vessels"]=items;result["revision"]=static_cast<int64_t>(revision_);
-    result["model_version"]="aqueous-0.2+batch-0.1";result["temperature_c"]=25.0;
+    result["model_version"]=session_model;result["temperature_c"]=25.0;
     return result;
 }
 Dictionary LabCore::poll(){
@@ -259,7 +326,7 @@ Dictionary LabCore::poll(){
     auto completed=pending_.get();
     if(completed.generation==generation_){
         result["ready"]=true;result["error"]=String::utf8(completed.error.c_str());
-        if(completed.error.empty()){session_=std::move(completed.session);if(completed.restored_fall)fall_=*completed.restored_fall;if(completed.restored_bench)bench_=*completed.restored_bench;if(completed.operation=="load")flame_=std::move(completed.restored_flame);++revision_;}
+        if(completed.error.empty()){update_kinetics(completed);session_=std::move(completed.session);if(completed.restored_fall)fall_=*completed.restored_fall;if(completed.restored_bench)bench_=*completed.restored_bench;if(completed.operation=="load")flame_=std::move(completed.restored_flame);++revision_;}
         result["state"]=snapshot();result["operation"]=String(completed.operation.c_str());
         result["from"]=completed.from;result["to"]=completed.to;
         result["transferred_ml"]=completed.transferred_ml;result["compute_ms"]=completed.compute_ms;
