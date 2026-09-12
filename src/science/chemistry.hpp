@@ -7,6 +7,9 @@ namespace chemlab {
 struct Solution {
     bool isolated_batch_sample = false;
     bool pitzer = false;
+    // Empirical density / conserved stock inventory; no quantitative pH or rate.
+    bool empirical_stock = false;
+    double halite_si = -99.99, sylvite_si = -99.99;
     double h_molar = 0, oh_molar = 0, gamma_h = 1, ionic_strength = 0;
     double ph = 0;
     double volume_l = 0;
@@ -63,7 +66,7 @@ public:
 private:
     int id_ = -1;
     int pitzer_id_ = -1;
-    Solution solve(const std::string& input, bool use_pitzer = false);
+    Solution solve(const std::string& input, bool use_pitzer = false, bool inventory_only = false);
 };
 
 struct Vessel {

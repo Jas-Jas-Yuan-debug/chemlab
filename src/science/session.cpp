@@ -7,7 +7,8 @@ namespace {
 void require(bool ok,const char*msg){if(!ok)throw std::runtime_error(msg);}
 Scalars measurements(const Solution&s){
  Scalars r={{"volume_ml",s.volume_l*1000},{"temperature_c",25},{"water_kg",s.water_kg},{"hydrogen_mol",s.hydrogen_mol},{"oxygen_mol",s.oxygen_mol}};
- if(!s.empty())r["ph"]=s.ph;
+ r["empirical_stock"]=s.empirical_stock?1:0;
+ if(!s.empty()&&!s.empirical_stock)r["ph"]=s.ph;
  for(auto[e,n]:s.elements)r[e+"_mol"]=n;
  return r;
 }

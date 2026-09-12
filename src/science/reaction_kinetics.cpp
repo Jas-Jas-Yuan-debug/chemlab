@@ -9,7 +9,7 @@ double element(const Solution&s,const char* e){auto i=s.elements.find(e);return 
 double positive_root(double d,double kw){const double a=std::sqrt(d*d+4*kw);return d>=0?(a+d)/2:2*kw/(a-d);}
 }
 bool NeutralizationKinetics::supports(const Solution&s){
-    if(s.isolated_batch_sample)return false;
+    if(s.isolated_batch_sample||s.empirical_stock)return false;
     for(auto[id,n]:s.ingredients_mol)if(n>0&&(id<2||id>6))return false;
     return true;
 }

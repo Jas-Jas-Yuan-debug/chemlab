@@ -1,4 +1,5 @@
 #include "chemistry.hpp"
+#include "solution_limits.hpp"
 #include <IPhreeqc.h>
 #include <phrqtype.h>
 #include <Solution.h>
@@ -24,10 +25,10 @@ std::string selected() {
     std::string s = "SELECTED_OUTPUT 1\n-reset false\n-high_precision true\nUSER_PUNCH 1\n-headings ph volume water charge h o";
     for (const auto& name : element_names) s += " " + name;
     for(const auto&name:valence_names)s+=" "+name;
-    s += " h_molality oh_molality h_activity ionic_strength\n-start\n10 PUNCH -LA(\"H+\"), SOLN_VOL, TOT(\"water\"), CHARGE_BALANCE, TOTMOLE(\"H\"), TOTMOLE(\"O\")\n20 PUNCH ";
+    s += " h_molality oh_molality h_activity ionic_strength halite_si sylvite_si\n-start\n10 PUNCH -LA(\"H+\"), SOLN_VOL, TOT(\"water\"), CHARGE_BALANCE, TOTMOLE(\"H\"), TOTMOLE(\"O\")\n20 PUNCH ";
     for (size_t i=0; i<element_names.size(); ++i) s += (i ? ", " : "") + std::string("TOTMOLE(\"") + element_names[i] + "\")";
     for(const auto&name:valence_names)s+=", TOTMOLE(\""+name+"\")";
-    return s + ", MOL(\"H+\"), MOL(\"OH-\"), ACT(\"H+\"), MU\n-end\n";
+    return s + ", MOL(\"H+\"), MOL(\"OH-\"), ACT(\"H+\"), MU, SI(\"Halite\"), SI(\"Sylvite\")\n-end\n";
 }
 double value(int id, int row, int col) {
     VAR v; VarInit(&v);
@@ -40,6 +41,22 @@ double value(int id, int row, int col) {
 }
 void balance(double actual, double expected, double absolute, const std::string& name) {
     check(std::abs(actual-expected) <= absolute + std::abs(expected)*1e-9, name+"物质收支未通过，操作已取消");
+}
+// Only single-solute acid/base stocks have an empirical density model. The
+// PHREEQC RAW state remains an inventory carrier, never a displayed high-c pH.
+void stock_volume(Solution& s,int reagent) {
+    const auto* p=solution_limit(reagent);
+    const double n=s.ingredients_mol.at(reagent),solute_kg=n*p->molar_mass_g_mol/1000;
+    const double mass=solute_kg+s.water_kg,w=solute_kg/mass;
+    const double volume=mass/stock_density(reagent,w);
+    check(n/volume<=p->maximum_mol_l+1e-8,"稀释结果超过该物质的配制上限");
+    s.h_molar*=s.volume_l/volume;s.oh_molar*=s.volume_l/volume;
+    s.volume_l=volume;s.empirical_stock=true;
+    s.raw=std::regex_replace(s.raw,std::regex("(-soln_vol[ \\t]+)[^\\n]+"),"-soln_vol "+num(volume));
+    s.composition_key=s.raw;
+}
+void salt_saturation(const Solution& s) {
+    check(s.halite_si<=1e-7&&s.sylvite_si<=1e-7,"混合后将超过 NaCl/KCl 饱和度；盐结晶尚未实现，请先稀释，操作已取消");
 }
 Solution scaled(const Solution& original,double fraction){
     if(fraction<=0||original.empty())return {};
@@ -93,7 +110,7 @@ bool Chemistry::supported(int reagent) {
     return (reagent>=1&&reagent<=9)||reagent==11||(reagent>=14&&reagent<=16)||reagent==25;
 }
 
-Solution Chemistry::solve(const std::string& input,bool use_pitzer) {
+Solution Chemistry::solve(const std::string& input,bool use_pitzer,bool inventory_only) {
     const int engine=use_pitzer?pitzer_id_:id_;
     check(engine>=0,"此浓度需要独立 Pitzer 数据库");
     const std::string script = "DELETE\n-all\nEND\nKNOBS\n-convergence_tolerance 1e-12\n\n" + selected() + input + "DUMP\n-solution 3\nEND\n";
@@ -102,7 +119,7 @@ Solution Chemistry::solve(const std::string& input,bool use_pitzer) {
     check(GetWarningStringLineCount(engine) == 0, "化学求解警告："+std::string(GetWarningString(engine)));
     SetCurrentSelectedOutputUserNumber(engine,1);
     const int row = GetSelectedOutputRowCount(engine)-1;
-    check(row > 0 && GetSelectedOutputColumnCount(engine) == 10+int(element_names.size()+valence_names.size()), "化学读数不完整: row="+std::to_string(row)+", columns="+std::to_string(GetSelectedOutputColumnCount(engine)));
+    check(row > 0 && GetSelectedOutputColumnCount(engine) == 12+int(element_names.size()+valence_names.size()), "化学读数不完整: row="+std::to_string(row)+", columns="+std::to_string(GetSelectedOutputColumnCount(engine)));
     Solution s;
     s.ph=value(engine,row,0); s.volume_l=value(engine,row,1); s.water_kg=value(engine,row,2);
     s.charge_eq=value(engine,row,3); s.hydrogen_mol=value(engine,row,4); s.oxygen_mol=value(engine,row,5);
@@ -116,12 +133,13 @@ Solution Chemistry::solve(const std::string& input,bool use_pitzer) {
     s.oh_molar=value(engine,row,kinetics_column+1)*s.water_kg/s.volume_l;
     s.gamma_h=value(engine,row,kinetics_column+2)/std::max(s.h_molar,1e-30);
     s.ionic_strength=value(engine,row,kinetics_column+3);s.pitzer=use_pitzer;
+    s.halite_si=value(engine,row,kinetics_column+4);s.sylvite_si=value(engine,row,kinetics_column+5);
     s.raw=GetDumpString(engine);
     const auto start=s.raw.find("SOLUTION_RAW");
     check(start != std::string::npos, "求解器未保存溶液状态");
     s.raw=s.raw.substr(start);
     s.composition_key=s.raw;
-    check(s.water_kg>0 && s.volume_l>0 && s.ph>=-2 && s.ph<=16, "结果超出水溶液模型的数值范围");
+    check(s.water_kg>0 && s.volume_l>0 && (inventory_only||(s.ph>=-2 && s.ph<=16)), "结果超出水溶液模型的数值范围");
     check(std::abs(s.charge_eq)<1e-9, "电荷收支未通过");
     return s;
 }
@@ -129,13 +147,15 @@ Solution Chemistry::solve(const std::string& input,bool use_pitzer) {
 Solution Chemistry::prepare(int reagent, double concentration, double volume) {
     check(supported(reagent), "此原料尚未支持操作");
     check(std::isfinite(volume) && volume>=0.001 && volume<=0.250, "初始体积限 1–250 mL");
-    const double maximum=(reagent>=2&&reagent<=6)?1.0:0.01;
-    check(std::isfinite(concentration) && (reagent==1 ? concentration==0 : concentration>=1e-5 && concentration<=maximum), "HCl/NaOH/KOH/NaCl/KCl 浓度限 0.00001–1 mol/L；其他原料限 0.01 mol/L，水为 0");
+    const double maximum=maximum_concentration(reagent);
+    check(std::isfinite(concentration) && (reagent==1 ? concentration==0 : concentration>=1e-5 && concentration<=maximum), "浓度超出此原料在 25°C 的配制范围：上限 "+num(maximum)+" mol/L；非水最低 0.00001 mol/L");
     const bool high=concentration>0.01;
+    const bool stock=concentration>1&&(reagent==2||reagent==3||reagent==5);
     const double moles=concentration*volume;
     double water=volume*0.9970474;
+    if(stock){const double w=stock_mass_fraction(reagent,concentration);water=volume*stock_density(reagent,w)*(1-w);}
     Solution result;
-    for (int iteration=0; iteration<8; ++iteration) {
+    for (int iteration=0; iteration<48; ++iteration) {
         const double molality=moles/water;
         std::string body="SOLUTION 3\n-temp 25\n-pressure 1\n-units mol/kgw\n-water "+num(water)+"\npH 7 charge\n";
         const auto add=[&body,molality](const std::string& element,double ratio) { body+=element+" "+num(molality*ratio)+"\n"; };
@@ -155,13 +175,15 @@ Solution Chemistry::prepare(int reagent, double concentration, double volume) {
             case 16:add("Mg",1);add("S(6)",1);break;
             case 25:add("Ba",1);add("Cl",2);break;
         }
-        result=solve(body+"END\n",high);
+        result=solve(body+"END\n",high,stock);
+        if(stock){result.ingredients_mol[reagent]=moles;stock_volume(result,reagent);break;}
         if (std::abs(result.volume_l-volume)<1e-10) break;
         water+=(volume-result.volume_l)*0.9970474;
         check(water>0, "体积与溶剂质量换算失败");
     }
     check(std::abs(result.volume_l-volume)<1e-8, "配液体积未收敛");
     if (reagent != 1) result.ingredients_mol[reagent]=moles;
+    if(!stock)salt_saturation(result);
     return result;
 }
 
@@ -256,6 +278,12 @@ BatchResult Chemistry::precipitate_barite(const Solution&a,const Solution&b){
 void Chemistry::validate_combination(const Solution& a,const Solution& b) {
     if(a.empty()||b.empty())return;
     check(!a.isolated_batch_sample&&!b.isolated_batch_sample,"分离清液目前仅支持向空容器分装；再次混合或稀释尚未验证");
+    if(a.empirical_stock||b.empirical_stock){
+        int only=0;
+        for(const auto* s:{&a,&b})for(auto[id,n]:s->ingredients_mol)if(n>0){
+            check(only==0||only==id,"浓储液目前支持分装、自身混合和水稀释；异种反应请先分别稀释至 1 mol/L 以下");only=id;
+        }
+    }
     // Monovalent strong electrolytes can share the tested acid/base model.
     // Calcium and carbonate initially permit only self-mixing and water dilution.
     int special=0;
@@ -284,10 +312,21 @@ Solution Chemistry::mix(const Solution& a,double af,const Solution& b,double bf)
     const bool high=a.pitzer||b.pitzer;
     if(high)for(const auto* sample:{&a,&b})for(auto[id,n]:sample->ingredients_mol)
         check(n<=0||id<=6,"浓溶液目前只支持 HCl/NaOH/KOH/NaCl/KCl 和水之间的混合");
-    Solution r=solve(input+"SAVE solution 3\nEND\n",high);
+    const bool stock=a.empirical_stock||b.empirical_stock;
+    Solution r=solve(input+"SAVE solution 3\nEND\n",high,stock);
     r.isolated_batch_sample=a.isolated_batch_sample||b.isolated_batch_sample;
     for(auto [id,n]:a.ingredients_mol) if(n*af>0) r.ingredients_mol[id]+=n*af;
     for(auto [id,n]:b.ingredients_mol) if(n*bf>0) r.ingredients_mol[id]+=n*bf;
+    if(stock){
+        check(r.ingredients_mol.size()==1,"浓储液成分无效");
+        const auto [reagent,n]=*r.ingredients_mol.begin();
+        // Re-enter quantitative chemistry only after BOTH volume models put
+        // the diluted stock inside the previously checked <=1 M domain.
+        Solution physical=r;stock_volume(physical,reagent);
+        if(n/r.volume_l>1||n/physical.volume_l>1)r=physical;
+        else check(r.ph>=-2&&r.ph<=16,"稀释后的活度结果超出已验证范围");
+    }
+    if(!r.empirical_stock)salt_saturation(r);
     for (const auto& name:element_names) {
         auto get=[&name](const Solution& s){auto i=s.elements.find(name);return i==s.elements.end()?0:i->second;};
         balance(r.elements[name],get(a)*af+get(b)*bf,1e-11,name);

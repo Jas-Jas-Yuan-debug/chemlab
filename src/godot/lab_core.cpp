@@ -9,7 +9,7 @@ namespace godot {
 namespace {
 const char* database_hash="59373961d648dfbf68a40744060c1d64f57ecbec98f4f5fb89f3a1b4213ccd10";
 const char* pitzer_hash="06ab2debc0cdb333598118df953165499c2f762a79de5f2df55dec6b78b02589";
-const char* session_model="aqueous-0.3+kinetics-0.1+batch-0.1+barite-0.1+physics-0.3+combustion-0.1";
+const char* session_model="aqueous-0.4+kinetics-0.1+batch-0.1+barite-0.1+physics-0.3+combustion-0.1";
 chemlab::Scalars scalars(const Dictionary&d){
     if(d.size()>32)throw std::runtime_error("记录参数过多");
     chemlab::Scalars r;Array keys=d.keys();
@@ -273,8 +273,12 @@ void LabCore::update_kinetics(const Result&r){
             const double f=r.transferred_ml/1000/session_.vessels.at(r.from).solution.volume_l;
             auto aliquot=kinetics_.at(r.from).withdraw(std::clamp(f,0.,1.));
             if(K::supports(target)&&kinetics_.count(r.to))kinetics_.at(r.to).add(aliquot,target);
+            else if(K::supports(target))kinetics_[r.to].initialize(target);
             else kinetics_.erase(r.to);
-        }else kinetics_.erase(r.to);
+        }else if(K::supports(target))kinetics_[r.to].initialize(target);
+        else kinetics_.erase(r.to);
+        const auto& source=r.session.vessels.at(r.from).solution;
+        if(K::supports(source)&&!kinetics_.count(r.from))kinetics_[r.from].initialize(source);
     }else if(r.to&&r.operation!="pour"){
         const auto&s=r.session.vessels.at(r.to).solution;
         if(K::supports(s))kinetics_[r.to].initialize(s);else kinetics_.erase(r.to);
@@ -301,15 +305,17 @@ Dictionary LabCore::snapshot()const{
     for(const auto&[id,v]:session_.vessels){
         Dictionary d;d["id"]=id;d["capacity_ml"]=v.capacity_l*1000;
         const auto&s=v.solution;
-        d["volume_ml"]=s.volume_l*1000;d["ph"]=s.empty()?Variant():Variant(s.ph);
+        d["volume_ml"]=s.volume_l*1000;d["ph"]=(s.empty()||s.empirical_stock)?Variant():Variant(s.ph);
+        d["empirical_stock"]=s.empirical_stock;
         // Atomic masses are those of the pinned PHREEQC database, retaining
         // solvent H/O and every supported solute element in the balance reading.
         double mass=s.hydrogen_mol*1.008+s.oxygen_mol*16.0;
         const std::map<std::string,double> weights={{"Na",22.9898},{"Cl",35.453},{"K",39.102},{"Ca",40.08},{"Mg",24.312},{"C",12.0111},{"S",32.064},{"N",14.0067},{"Ba",137.34},{"Fe",55.847},{"Cu",63.546}};
         for(const auto&[element,n]:s.elements)mass+=n*weights.at(element);
         d["sample_mass_g"]=mass;
-        d["activity_model"]=s.pitzer?"Pitzer":"ion association";
-        d["h_molar"]=s.h_molar;d["oh_molar"]=s.oh_molar;d["gamma_h"]=s.gamma_h;d["ionic_strength"]=s.ionic_strength;
+        d["activity_model"]=s.empirical_stock?"empirical stock":s.pitzer?"Pitzer":"ion association";
+        d["h_molar"]=s.empirical_stock?Variant():Variant(s.h_molar);d["oh_molar"]=s.empirical_stock?Variant():Variant(s.oh_molar);
+        d["gamma_h"]=s.empirical_stock?Variant():Variant(s.gamma_h);d["ionic_strength"]=s.empirical_stock?Variant():Variant(s.ionic_strength);
         d["water_kg"]=s.water_kg;d["hydrogen_mol"]=s.hydrogen_mol;d["oxygen_mol"]=s.oxygen_mol;
         d["temperature_c"]=25.0;d["charge_eq"]=s.charge_eq;
         Dictionary elements;for(const auto&[e,n]:s.elements)elements[String(e.c_str())]=n;

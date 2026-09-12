@@ -182,15 +182,23 @@ static func restore(lab: Node3D,validated: Dictionary,state: Dictionary) -> void
     var native: Dictionary = lab.core.save_session()
     var batch_parameters := {}
     var last_ph := {}
+    var last_stock := {}
     var batch_history := []
     for i in native.events.size():
         var event: Dictionary = native.events[i]
         var parameters: Dictionary = native.commands[i].parameters
+        if event.to>0:
+            var id:=int(event.to)
+            var stock: bool=bool(event.readings.get("empirical_stock",0))
+            if stock or bool(last_stock.get(id,false))!=stock:
+                lab.curves[id]=[];lab.total_added[id]=0.0;lab.curve_sources.erase(id);last_ph.erase(id)
+            last_stock[id]=stock
         if event.operation=="prepare":
             lab.curves[int(event.to)] = []
             for id in lab.curve_sources.keys():
                 if id==int(event.to) or lab.curve_sources[id]==int(event.to):
                     lab.curves[id]=[];lab.total_added[id]=0.0;lab.curve_sources.erase(id)
+            last_ph.erase(int(event.to))
             if event.readings.has("ph"):last_ph[int(event.to)]=event.readings.ph
             lab.total_added[int(event.to)] = 0.0
         elif event.operation=="pour":
@@ -266,16 +274,21 @@ static func export_csv(lab: Node3D,path: String) -> String:
         row.parameters_json = parameters_json(row.parameters)
         row.erase("parameters")
         rows.append(row)
-    for id in lab.kinetic_history:
+    var history_ids: Array=lab.kinetic_history.keys()
+    history_ids.sort_custom(func(a,b):return int(a)<int(b))
+    for id in history_ids:
         for point in lab.kinetic_history[id]:
             var row: Dictionary=point.duplicate(true)
             row.section="neutralization_kinetics";row.to=id;row.temperature_c=25;row.probe_zone="lower";row.kinetic_model="two exchanging zones; k=1.4e11 L/mol/s at 25C"
             rows.append(row)
     var headings: Array[String] = ["section","step","operation","from","to","time_s","transferred_ml","volume_ml","ph","temperature_c","parameters_json"]
+    var extra_headings: Array[String]=[]
     for row in rows:
         for key in row:
-            if key not in headings:
-                headings.append(key)
+            if key not in headings and key not in extra_headings:
+                extra_headings.append(key)
+    extra_headings.sort()
+    headings.append_array(extra_headings)
     headings.append("model_version")
     headings.append("database_sha256")
     headings.append("pitzer_sha256")

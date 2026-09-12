@@ -58,6 +58,8 @@ var search: LineEdit
 var category: OptionButton
 var reagent_list: VBoxContainer
 var concentration: SpinBox
+var concentration_note: Label
+var concentration_max_button: Button
 var volume: SpinBox
 var amount: SpinBox
 var rate: SpinBox
@@ -296,6 +298,11 @@ func build_ui() -> void:
     pause_button = button(right,"暂停实验","PauseExperiment",toggle_pause)
     reagent_title = label(right,"配制：盐酸 HCl",16,Color("f5e6c9"))
     concentration = number(right,"浓度 / mol·L⁻¹",0.00001,1.0,0.00001,0.001,"Concentration")
+    concentration_note=label(right,"",12,Color("b9d2c5"))
+    concentration_note.name="ConcentrationLimitNote"
+    concentration_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+    concentration_max_button=button(right,"使用此物质上限","UseMaximumConcentration",func():concentration.value=concentration.max_value)
+    configure_concentration(concentration,concentration_note,chosen_reagent)
     volume = number(right,"初始体积 / mL",1,250,1,50,"InitialVolume")
     button(right,"重新配制所选容器","PrepareSolution",prepare_selected)
     mix_exchange=number(right,"混合交换 / mL·s⁻¹",0,100,0.1,5,"MixingExchange")
@@ -324,7 +331,7 @@ func build_ui() -> void:
     button(record_row,"导出 CSV","ExportCSV",func(): open_session_dialog("csv"))
     var about := AcceptDialog.new()
     about.title = "关于 ChemLab · 观物实验室"
-    about.dialog_text = "化学与物理虚拟实验室 · 0.2\n\n当前验证 17 / 30 项原料，3 种指示剂。\n化学固定 25°C；强酸碱中和计算两区混合与有限反应速率，其他体系显示最终平衡。\nHCl / NaOH / KOH / NaCl / KCl 可配至 1 mol/L。浓溶液使用 Pitzer 活度；速率常数外推尚未标定。\n玻璃与液面为体积核对的几何近似；两区模型不是三维反应流体模拟。\n\n原创代码：AGPL-3.0-only\n第三方引擎、计算库与数据保留原许可。\n源代码、模型说明、数据来源及第三方声明可在仓库查看。"
+    about.dialog_text = "化学与物理虚拟实验室 · 0.2\n\n当前验证 17 / 30 项原料，3 种指示剂。\n化学固定 25°C；强酸碱中和计算两区混合与有限反应速率，其他体系显示最终平衡。\n配液上限按各物质物性确定，详见配液区。超过 1 mol/L 的 HCl/NaOH/KOH 为物性浓储液：支持分装、自身混合和水稀释，pH/速率未校准。\n玻璃与液面为体积核对的几何近似；两区模型不是三维反应流体模拟。\n\n原创代码：AGPL-3.0-only\n第三方引擎、计算库与数据保留原许可。\n源代码、模型说明、数据来源及第三方声明可在仓库查看。"
     about.add_button("源代码与说明",true,"source")
     about.custom_action.connect(func(action):
         if action=="source":
@@ -355,6 +362,22 @@ func refresh_reagents() -> void:
         if b.disabled:
             b.text += "  · 未支持"
 
+func configure_concentration(input: SpinBox,note: Label,id: int) -> void:
+    var item: Dictionary=catalog[id-1]
+    var limits: Dictionary=item.get("preparation_limit",{})
+    input.min_value=0 if id==1 else 0.00001
+    input.max_value=float(limits.get("maximum_mol_l",0 if id==1 else 0.01))
+    input.editable=id!=1
+    input.tooltip_text=item.applicability
+    if id==1:
+        note.text="蒸馏水 · 不添加溶质"
+    elif not limits.is_empty():
+        note.text="上限约 %.2f mol/L\n%s"%[input.max_value,limits.basis_zh]
+        if limits.get("stock_only_above_mol_l")!=null:
+            note.text+="\n>1 mol/L：浓储液；pH / 速率未校准"
+    else:
+        note.text="当前模型上限 0.01 mol/L；该物质的饱和配液尚未建立"
+
 func choose_reagent(id: int) -> void:
     if id in [10,18,19]:
         switch_batch()
@@ -366,8 +389,8 @@ func choose_reagent(id: int) -> void:
     chosen_reagent = id
     var item: Dictionary = catalog[id-1]
     reagent_title.text = "配制："+item.name_zh+" "+item.formula
-    concentration.max_value=1.0 if id in [2,3,4,5,6] else 0.01
-    concentration.editable = id!=1
+    configure_concentration(concentration,concentration_note,id)
+    concentration_max_button.disabled=id==1
     if id==1:
         set_status("蒸馏水预设：不含空气中的 CO₂，固定 25°C。")
     elif id>=7 and id not in [11,14]:
@@ -493,6 +516,11 @@ func update_readout() -> void:
     if measured.has("ph") and measured.ph!=null:
         readout.text+="\n探头：下部区域 · 上部 pH %.2f\n中和速率 %.3f µmol/s · 平衡参考 %.2f"%[measured.upper_ph,measured.rate_mol_s*1e6,s.ph]
     elif s.ph!=null:readout.text+="\n此体系显示平衡值，动力学尚未建立"
+    if s.get("empirical_stock",false):readout.text+="\n浓储液 · 物性密度近似\npH / 反应速率未校准；可分装或加水稀释"
+    var ingredients: Dictionary=s.get("ingredients_mol",{})
+    if ingredients.size()==1 and s.volume_ml>0:
+        var reagent_id: int=int(ingredients.keys()[0])
+        readout.text+="\n%s  %.5f mol/L"%[catalog[reagent_id-1].formula,float(ingredients.values()[0])*1000/s.volume_ml]
     if s.get("activity_model")=="Pitzer":readout.text+="\nPitzer 活度模型"
     if indicator_by_vessel.get(selected_id,0)==1 and ph_value!=null and (ph_value<2 or ph_value>11.5):
         readout.text += "\n[color=#f0b785]酚酞：此 pH 的颜色未支持[/color]"
@@ -620,6 +648,10 @@ func apply_result(result: Dictionary) -> void:
     for s in result.state.vessels:
         ensure_view(s)
         states[int(s.id)] = s
+        if s.get("empirical_stock",false) or prior_states.get(int(s.id),{}).get("empirical_stock",false)!=s.get("empirical_stock",false):
+            kinetic_history.erase(int(s.id))
+            curves[int(s.id)]=[]
+            curve_sources.erase(int(s.id));total_added[int(s.id)]=0.0
         views[int(s.id)].update_state(s)
         views[int(s.id)].visible = not batch_mode and not physics_mode and not bench_mode
     if result.operation=="pour":
@@ -635,7 +667,7 @@ func apply_result(result: Dictionary) -> void:
             if states[id].ph!=null:
                 curves[id].append(Vector2(total_added[id],states[id].ph))
             records.append({"time_s":elapsed,"operation":"pour","from":result.from,"to":result.to,"volume_ml":result.transferred_ml,"ph":states[id].ph})
-            set_status("已加入 %.2f mL → %s %d；最终平衡参考 pH %.2f"%[result.transferred_ml,views[id].kind,id,states[id].ph])
+            set_status("已加入 %.2f mL → %s %d；%s"%[result.transferred_ml,views[id].kind,id,"浓储液，pH 未校准" if states[id].ph==null else "最终平衡参考 pH %.2f"%states[id].ph])
         else:
             pouring = false
             set_status("源容器已空或接收容器已满，倾倒已停止。")
@@ -667,6 +699,11 @@ func apply_result(result: Dictionary) -> void:
 
 func apply_indicators() -> void:
     for id in states:
+        if states[id].get("empirical_stock",false):
+            views[id].set_indicator(Indicators.color_for(0,7.0))
+            var stock_material: ShaderMaterial=views[id].liquid.material_override
+            stock_material.set_shader_parameter("separate_zones",false)
+            continue
         if states[id].ph!=null:
             var reading: Dictionary=kinetic_readings.get(id,{})
             var ph_value=reading.get("ph",states[id].ph)

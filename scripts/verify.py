@@ -15,9 +15,9 @@ godot = str(ROOT / 'tools/Godot.app/Contents/MacOS/Godot')
 checks = [('native', ['ctest','--test-dir','build','--output-on-failure'], '100% tests passed')]
 if not args.native_only:
     checks += [('import', [godot,'--headless','--editor','--path','godot','--import'], 'Godot Engine')]
-    for flow in ['native_smoke','session_native','visual_flow','fall_flow','batch_flow','barite_flow','physics_flow','session_flow','pouring_flow','heater_flow','beginner_flow','reaction_dynamics_flow','reaction_clock_flow']:
+    for flow in ['native_smoke','session_native','visual_flow','fall_flow','batch_flow','barite_flow','physics_flow','session_flow','pouring_flow','heater_flow','beginner_flow','reaction_dynamics_flow','reaction_clock_flow','concentration_limits_flow','concentration_boundary_native']:
         command = [godot]
-        if flow in ['native_smoke','session_native']: command += ['--headless']
+        if flow in ['native_smoke','session_native','concentration_boundary_native']: command += ['--headless']
         command += ['--path','godot','--script',f'tests/{flow}.gd','--quit-after','12000']
         checks.append((flow,command,'PASS:'))
 receipt = {'source_sha256':source_fingerprint(),'started_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'checks':[],

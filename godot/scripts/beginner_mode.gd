@@ -29,6 +29,7 @@ var actions: VBoxContainer
 var target: OptionButton
 var dose: SpinBox
 var solution_concentration: SpinBox
+var solution_limit_note: Label
 var temperature: SpinBox
 var rpm: SpinBox
 var flame_switch: CheckButton
@@ -185,6 +186,11 @@ func _ready() -> void:
     dose = lab.number(actions,"取用量 / mL 或 g",0.05,250,0.05,5,"BeginnerDose")
     lab.button(actions,"取用 / 转移","BeginnerUse",use_selected)
     solution_concentration=lab.number(actions,"溶液浓度 / mol·L⁻¹",0.00001,1,0.00001,0.001,"BeginnerConcentration")
+    solution_limit_note=lab.label(actions,"先选择溶液卡片，查看该物质的配制上限",12)
+    solution_limit_note.name="BeginnerConcentrationLimitNote"
+    solution_limit_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+    lab.button(actions,"使用此物质上限","BeginnerMaximumConcentration",func():
+        if selected_reagent>0:solution_concentration.value=solution_concentration.max_value)
     lab.button(actions,"用所选溶液重新配液","BeginnerPrepare",prepare_liquid)
     var connect_row := HBoxContainer.new()
     actions.add_child(connect_row)
@@ -311,7 +317,7 @@ func choose(id: String) -> void:
     var d: Dictionary=definitions[id]
     if d.action=="reagent":
         selected_reagent=d.reagent_id
-        solution_concentration.max_value=1.0 if selected_reagent in [2,3,4,5,6] else 0.01
+        lab.configure_concentration(solution_concentration,solution_limit_note,selected_reagent)
         if selected_reagent in [10,18,19]:
             lab.choose_reagent(selected_reagent)
             return
@@ -436,6 +442,10 @@ func update_detail() -> void:
         lines.append("探头 pH  "+("—" if ph_value==null else "%.2f"%ph_value))
         if dynamic.get("ph")!=null:lines.append("中和速率 %.3f µmol/s · 平衡参考 %.2f"%[dynamic.rate_mol_s*1e6,s.ph])
         if s.get("activity_model")=="Pitzer":lines.append("Pitzer 活度模型")
+        if s.get("empirical_stock",false):lines.append("浓储液 · pH / 速率未校准；可分装或加水稀释")
+        var ingredients: Dictionary=s.get("ingredients_mol",{})
+        if ingredients.size()==1 and s.volume_ml>0:
+            lines.append("%s  %.5f mol/L"%[lab.catalog[int(ingredients.keys()[0])-1].formula,float(ingredients.values()[0])*1000/s.volume_ml])
         if not dynamic.get("dilute_rate_constant",true):lines.append("浓溶液速率使用稀溶液常数外推，未标定。")
     if d.action=="solid":lines.append(d.formula+"    剩余 %.2f g"%state.mass_g)
     if not state.contents.is_empty():
@@ -551,7 +561,7 @@ func measure(action: String, receiver: Dictionary) -> void:
     elif vessel_id>0 and lab.states.has(vessel_id):
         var s: Dictionary=lab.states[vessel_id]
         if not receiver.contents.is_empty():tell("此样品含未求解的固体，无法给出新的 pH。");return
-        tell("读数：25.0 °C" if action=="temperature" else "pH —（空容器）" if s.ph==null else "pH %.2f"%s.ph,true)
+        tell("读数：25.0 °C" if action=="temperature" else "pH 未校准（浓储液）" if s.get("empirical_stock",false) else "pH —（空容器）" if s.ph==null else "pH %.2f"%s.ph,true)
     else:tell("先选择含液体的测量对象。")
 
 func connect_selected() -> void:

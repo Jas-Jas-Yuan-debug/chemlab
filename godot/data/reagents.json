@@ -201,8 +201,8 @@
             250
           ],
           "concentration_mol_L": [
-            1e-05,
-            0.01
+            0,
+            0
           ]
         },
         "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
@@ -355,16 +355,17 @@
           "database": "pitzer.dat",
           "sha256": "06ab2debc0cdb333598118df953165499c2f762a79de5f2df55dec6b78b02589",
           "minimum_exclusive_mol_L": 0.01,
-          "maximum_mol_L": 1.0
+          "maximum_quantitative_mol_L": 1.0
         }
       },
-      "applicability": "稀水溶液；强酸与 NaOH/KOH 中和，禁止浓盐酸挥发模型；0.01–1 mol/L 采用独立 Pitzer 求解，仅限 HCl/NaOH/KOH/NaCl/KCl/水混合。",
+      "applicability": "配液上限约 13.09 mol/L；25°C · 约 40% 质量分数；近常压浓盐酸参考上限，密闭保存，不模拟挥发。超过 1 mol/L 支持浓储液配制、分装、自身混合与水稀释；pH/速率未校准，异种反应须先稀释。",
       "sources": [
         "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
-        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz",
+        "https://www.oxychem.com/siteassets/documents/chlor-alkali/hydrochloric-acid-handbook.pdf"
       ],
       "validation": {
-        "status": "已验证（限定水溶液）",
+        "status": "限定配液与转移；参见浓度模型边界",
         "operational": true,
         "science_tests": [
           "tests/iphreeqc_probe.cpp",
@@ -374,10 +375,11 @@
           "tests/batch_test.cpp",
           "godot/tests/batch_flow.gd",
           "tests/aqueous_expansion_test.cpp",
-          "tests/reaction_dynamics_test.cpp"
+          "tests/reaction_dynamics_test.cpp",
+          "tests/concentration_limits_test.cpp"
         ],
         "plan": "稀水溶液；强酸与 NaOH/KOH 中和，禁止浓盐酸挥发模型；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
-        "verified_on": "2026-09-10",
+        "verified_on": "2026-09-12",
         "range": {
           "temperature_K": 298.15,
           "volume_ml": [
@@ -386,10 +388,69 @@
           ],
           "concentration_mol_L": [
             1e-05,
-            1.0
+            13.09
           ]
         },
         "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
+      },
+      "preparation_limit": {
+        "id": 2,
+        "formula": "HCl",
+        "molar_mass_g_mol": 36.461,
+        "maximum_mass_fraction": 0.4,
+        "density_kg_l": [
+          [
+            0,
+            0.9970474
+          ],
+          [
+            0.05,
+            1.022
+          ],
+          [
+            0.1,
+            1.047
+          ],
+          [
+            0.15,
+            1.072
+          ],
+          [
+            0.2,
+            1.097
+          ],
+          [
+            0.25,
+            1.122
+          ],
+          [
+            0.3,
+            1.147
+          ],
+          [
+            0.35,
+            1.171
+          ],
+          [
+            0.4,
+            1.194
+          ]
+        ],
+        "basis_zh": "25°C · 约 40% 质量分数；近常压浓盐酸参考上限，密闭保存，不模拟挥发",
+        "sources": [
+          {
+            "url": "https://www.oxychem.com/siteassets/documents/chlor-alkali/hydrochloric-acid-handbook.pdf",
+            "pages": [
+              36,
+              37,
+              38,
+              41
+            ],
+            "use": "Approximate ambient-pressure vapor/boiling boundary, rounded down to 40 wt%; density graph at 77 F. This is not an absolute maximum at other pressures."
+          }
+        ],
+        "stock_only_above_mol_l": 1.0,
+        "maximum_mol_l": 13.09
       }
     },
     {
@@ -453,16 +514,17 @@
           "database": "pitzer.dat",
           "sha256": "06ab2debc0cdb333598118df953165499c2f762a79de5f2df55dec6b78b02589",
           "minimum_exclusive_mol_L": 0.01,
-          "maximum_mol_L": 1.0
+          "maximum_quantitative_mol_L": 1.0
         }
       },
-      "applicability": "预配稀溶液；固体溶解度与溶解热另行验证；0.01–1 mol/L 采用独立 Pitzer 求解，仅限 HCl/NaOH/KOH/NaCl/KCl/水混合。",
+      "applicability": "配液上限约 20.46 mol/L；25°C · 约 53% 质量分数；按液相线图向下取整的近饱和上限。超过 1 mol/L 支持浓储液配制、分装、自身混合与水稀释；pH/速率未校准，异种反应须先稀释。",
       "sources": [
         "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
-        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz",
+        "https://www.oxychem.com/siteassets/documents/chlor-alkali/caustic-soda-handbook.pdf"
       ],
       "validation": {
-        "status": "已验证（限定水溶液）",
+        "status": "限定配液与转移；参见浓度模型边界",
         "operational": true,
         "science_tests": [
           "tests/iphreeqc_probe.cpp",
@@ -472,10 +534,11 @@
           "tests/batch_test.cpp",
           "godot/tests/batch_flow.gd",
           "tests/aqueous_expansion_test.cpp",
-          "tests/reaction_dynamics_test.cpp"
+          "tests/reaction_dynamics_test.cpp",
+          "tests/concentration_limits_test.cpp"
         ],
         "plan": "预配稀溶液；固体溶解度与溶解热另行验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
-        "verified_on": "2026-09-10",
+        "verified_on": "2026-09-12",
         "range": {
           "temperature_K": 298.15,
           "volume_ml": [
@@ -484,10 +547,79 @@
           ],
           "concentration_mol_L": [
             1e-05,
-            1.0
+            20.46
           ]
         },
         "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
+      },
+      "preparation_limit": {
+        "id": 3,
+        "formula": "NaOH",
+        "molar_mass_g_mol": 40.0058,
+        "maximum_mass_fraction": 0.53,
+        "density_kg_l": [
+          [
+            0,
+            0.9970474
+          ],
+          [
+            0.05,
+            1.052
+          ],
+          [
+            0.1,
+            1.106
+          ],
+          [
+            0.15,
+            1.16
+          ],
+          [
+            0.2,
+            1.216
+          ],
+          [
+            0.25,
+            1.27
+          ],
+          [
+            0.3,
+            1.325
+          ],
+          [
+            0.35,
+            1.375
+          ],
+          [
+            0.4,
+            1.426
+          ],
+          [
+            0.45,
+            1.476
+          ],
+          [
+            0.5,
+            1.521
+          ],
+          [
+            0.53,
+            1.545
+          ]
+        ],
+        "basis_zh": "25°C · 约 53% 质量分数；按液相线图向下取整的近饱和上限",
+        "sources": [
+          {
+            "url": "https://www.oxychem.com/siteassets/documents/chlor-alkali/caustic-soda-handbook.pdf",
+            "pages": [
+              33,
+              34
+            ],
+            "use": "Liquidus near 53-54 wt% at 25 C, rounded down to 53%; approximate density graph interpolation, including metastable density continuation between 50 and 55% curves."
+          }
+        ],
+        "stock_only_above_mol_l": 1.0,
+        "maximum_mol_l": 20.46
       }
     },
     {
@@ -582,16 +714,17 @@
           "database": "pitzer.dat",
           "sha256": "06ab2debc0cdb333598118df953165499c2f762a79de5f2df55dec6b78b02589",
           "minimum_exclusive_mol_L": 0.01,
-          "maximum_mol_L": 1.0
+          "maximum_quantitative_mol_L": 5.4045
         }
       },
-      "applicability": "稀溶液配制与稀释；接近饱和时需检查活度模型；0.01–1 mol/L 采用独立 Pitzer 求解，仅限 HCl/NaOH/KOH/NaCl/KCl/水混合。",
+      "applicability": "配液上限约 5.40 mol/L；25°C · Halite 固液平衡估计饱和上限。独立 Pitzer 求解，混合检查盐饱和度；未实现盐结晶时拒绝过饱和结果。",
       "sources": [
         "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz",
         "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
       ],
       "validation": {
-        "status": "已验证（限定水溶液）",
+        "status": "限定配液与转移；参见浓度模型边界",
         "operational": true,
         "science_tests": [
           "tests/iphreeqc_probe.cpp",
@@ -601,10 +734,11 @@
           "tests/batch_test.cpp",
           "godot/tests/batch_flow.gd",
           "tests/aqueous_expansion_test.cpp",
-          "tests/reaction_dynamics_test.cpp"
+          "tests/reaction_dynamics_test.cpp",
+          "tests/concentration_limits_test.cpp"
         ],
         "plan": "稀溶液配制与稀释；接近饱和时需检查活度模型；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
-        "verified_on": "2026-09-10",
+        "verified_on": "2026-09-12",
         "range": {
           "temperature_K": 298.15,
           "volume_ml": [
@@ -613,10 +747,26 @@
           ],
           "concentration_mol_L": [
             1e-05,
-            1.0
+            5.4045
           ]
         },
         "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
+      },
+      "preparation_limit": {
+        "id": 4,
+        "formula": "NaCl",
+        "molar_mass_g_mol": 58.4428,
+        "maximum_mol_l": 5.4045,
+        "maximum_mass_fraction": 0,
+        "density_kg_l": [],
+        "basis_zh": "25°C · Halite 固液平衡估计饱和上限",
+        "sources": [
+          {
+            "url": "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz",
+            "use": "Original pitzer.dat Halite SI=0: 6.129227565 mol/kg water, solution volume 1.134095903 L/kg water; rounded down in mol/L."
+          }
+        ],
+        "stock_only_above_mol_l": null
       }
     },
     {
@@ -679,16 +829,17 @@
           "database": "pitzer.dat",
           "sha256": "06ab2debc0cdb333598118df953165499c2f762a79de5f2df55dec6b78b02589",
           "minimum_exclusive_mol_L": 0.01,
-          "maximum_mol_L": 1.0
+          "maximum_quantitative_mol_L": 1.0
         }
       },
-      "applicability": "预配稀溶液；固体溶解和热效应未验证；0.01–1 mol/L 采用独立 Pitzer 求解，仅限 HCl/NaOH/KOH/NaCl/KCl/水混合。",
+      "applicability": "配液上限约 14.96 mol/L；25°C · 约 54% 质量分数；按液相线图向下取整的近饱和上限。超过 1 mol/L 支持浓储液配制、分装、自身混合与水稀释；pH/速率未校准，异种反应须先稀释。",
       "sources": [
         "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
-        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz",
+        "https://www.oxychem.com/siteassets/documents/chlor-alkali/caustic-potash-handbook.pdf"
       ],
       "validation": {
-        "status": "已验证（限定水溶液）",
+        "status": "限定配液与转移；参见浓度模型边界",
         "operational": true,
         "science_tests": [
           "tests/iphreeqc_probe.cpp",
@@ -698,10 +849,11 @@
           "tests/batch_test.cpp",
           "godot/tests/batch_flow.gd",
           "tests/aqueous_expansion_test.cpp",
-          "tests/reaction_dynamics_test.cpp"
+          "tests/reaction_dynamics_test.cpp",
+          "tests/concentration_limits_test.cpp"
         ],
         "plan": "预配稀溶液；固体溶解和热效应未验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
-        "verified_on": "2026-09-10",
+        "verified_on": "2026-09-12",
         "range": {
           "temperature_K": 298.15,
           "volume_ml": [
@@ -710,10 +862,84 @@
           ],
           "concentration_mol_L": [
             1e-05,
-            1.0
+            14.96
           ]
         },
         "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
+      },
+      "preparation_limit": {
+        "id": 5,
+        "formula": "KOH",
+        "molar_mass_g_mol": 56.118,
+        "maximum_mass_fraction": 0.54,
+        "density_kg_l": [
+          [
+            0,
+            0.9970474
+          ],
+          [
+            0.05,
+            1.04
+          ],
+          [
+            0.1,
+            1.087
+          ],
+          [
+            0.15,
+            1.135
+          ],
+          [
+            0.2,
+            1.185
+          ],
+          [
+            0.25,
+            1.235
+          ],
+          [
+            0.3,
+            1.287
+          ],
+          [
+            0.35,
+            1.34
+          ],
+          [
+            0.4,
+            1.395
+          ],
+          [
+            0.45,
+            1.451
+          ],
+          [
+            0.5,
+            1.509
+          ],
+          [
+            0.52,
+            1.532
+          ],
+          [
+            0.54,
+            1.555
+          ]
+        ],
+        "basis_zh": "25°C · 约 54% 质量分数；按液相线图向下取整的近饱和上限",
+        "sources": [
+          {
+            "url": "https://www.oxychem.com/siteassets/documents/chlor-alkali/caustic-potash-handbook.pdf",
+            "pages": [
+              28,
+              33,
+              35
+            ],
+            "use": "Liquidus near 54-55 wt% at 77 F, rounded down to 54%. Density table at 15.6 C corrected by graph temperature slopes; last 2 wt% extrapolated from 50-52% density slope. Approximate density, not precision reference data."
+          }
+        ],
+        "stock_only_above_mol_l": 1.0,
+        "maximum_mol_l": 14.96
       }
     },
     {
@@ -807,16 +1033,17 @@
           "database": "pitzer.dat",
           "sha256": "06ab2debc0cdb333598118df953165499c2f762a79de5f2df55dec6b78b02589",
           "minimum_exclusive_mol_L": 0.01,
-          "maximum_mol_L": 1.0
+          "maximum_quantitative_mol_L": 4.15235
         }
       },
-      "applicability": "稀溶液配制与稀释；饱和实验独立验证；0.01–1 mol/L 采用独立 Pitzer 求解，仅限 HCl/NaOH/KOH/NaCl/KCl/水混合。",
+      "applicability": "配液上限约 4.15 mol/L；25°C · Sylvite 固液平衡估计饱和上限。独立 Pitzer 求解，混合检查盐饱和度；未实现盐结晶时拒绝过饱和结果。",
       "sources": [
         "USGS IPhreeqc 3.8.6-17100 / database/phreeqc.dat",
+        "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz",
         "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz"
       ],
       "validation": {
-        "status": "已验证（限定水溶液）",
+        "status": "限定配液与转移；参见浓度模型边界",
         "operational": true,
         "science_tests": [
           "tests/iphreeqc_probe.cpp",
@@ -826,10 +1053,11 @@
           "tests/batch_test.cpp",
           "godot/tests/batch_flow.gd",
           "tests/aqueous_expansion_test.cpp",
-          "tests/reaction_dynamics_test.cpp"
+          "tests/reaction_dynamics_test.cpp",
+          "tests/concentration_limits_test.cpp"
         ],
         "plan": "稀溶液配制与稀释；饱和实验独立验证；另测 1/50/250 mL、稀释、过量和重复转移、元素收支",
-        "verified_on": "2026-09-10",
+        "verified_on": "2026-09-12",
         "range": {
           "temperature_K": 298.15,
           "volume_ml": [
@@ -838,10 +1066,26 @@
           ],
           "concentration_mol_L": [
             1e-05,
-            1.0
+            4.15235
           ]
         },
         "limitations": "IDs 2–6,11,14: tested dilute acid/base/salt mixtures and water. IDs 7–9,15,16,25: same reagent or water only. Batch samples: empty-vessel aliquots only."
+      },
+      "preparation_limit": {
+        "id": 6,
+        "formula": "KCl",
+        "molar_mass_g_mol": 74.555,
+        "maximum_mol_l": 4.15235,
+        "maximum_mass_fraction": 0,
+        "density_kg_l": [],
+        "basis_zh": "25°C · Sylvite 固液平衡估计饱和上限",
+        "sources": [
+          {
+            "url": "https://water.usgs.gov/water-resources/software/PHREEQC/iphreeqc-3.8.6-17100.tar.gz",
+            "use": "Original pitzer.dat Sylvite SI=0: 4.791296848 mol/kg water, solution volume 1.153875366 L/kg water; rounded down in mol/L."
+          }
+        ],
+        "stock_only_above_mol_l": null
       }
     },
     {

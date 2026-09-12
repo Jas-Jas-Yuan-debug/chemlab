@@ -1,0 +1,51 @@
+{
+  "created_utc": "2026-09-12T07:57:56Z",
+  "source_sha256": "35249df562b922a3b244cb972786a076c383df89b95d1ace2ad9d0249aab8cc4",
+  "scope": "Targeted concentration expansion only. No full suite or performance run. Earlier passes and separately checked final native delta are distinguished below.",
+  "checks": [
+    {
+      "name": "concentration_limits_native",
+      "status": "passed",
+      "scope": "All five maxima at 1/50/250 mL, invalid values, handbook-density spot checks, stock aliquot/same-solute mixing/water dilution conservation, salt SI and transactional reaction rejection. Science sources unchanged after this pass.",
+      "log_sha256": "80ac2620461f8060f11152b249971a78f6fbfed72a390bcad908aafe9d4ff1f6",
+      "output": "maximum 2 = 13.09 mol/L; 1/50/250 mL, aliquot, dilution and rejection PASS\nmaximum 3 = 20.46 mol/L; 1/50/250 mL, aliquot, dilution and rejection PASS\nmaximum 4 = 5.4045 mol/L; 1/50/250 mL, aliquot, dilution and rejection PASS\nmaximum 5 = 14.96 mol/L; 1/50/250 mL, aliquot, dilution and rejection PASS\nmaximum 6 = 4.15235 mol/L; 1/50/250 mL, aliquot, dilution and rejection PASS\nPASS: per-solute near-saturation preparation, density references, conservation, model boundary and transactional rejection",
+      "completed_utc": "2026-09-12T07:48:22Z"
+    },
+    {
+      "name": "concentration_limits_flow",
+      "status": "passed",
+      "scope": "Rendered UI/catalog limits and maximum buttons, stock pH/species/kinetics withheld, dilution restores chemistry, save/load and identical CSV, beginner max NaOH. Passed before final two native lifecycle fixes; UI/scripts unchanged afterward.",
+      "log_sha256": "ead35131f33f164ac4e6f5119ce2322cab65dc730a592c90fb5ae7a3799ed309",
+      "output": "Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org\nMetal 4.0 - Forward Mobile - Using Device #0: Apple - Apple M4 (Apple9)\n\nPASS: both UI limits/presets, max stock preparation, no fictitious pH/kinetics, dilution recovery, native session and identical CSV roundtrip",
+      "completed_utc": "2026-09-12T07:53:33Z"
+    },
+    {
+      "name": "concentration_boundary_native",
+      "status": "passed",
+      "scope": "Final native delta: water-into-stock dilution and a completely emptied stock source retain loadable kinetic state. Only this focused boundary check was run after the final lifecycle patch.",
+      "log_sha256": "5cee28e39b54713dfbeff8fe698134b506d51aeb05ea4f527cfdce8ff13510cc",
+      "output": "Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org\n\nPASS: water-into-stock dilution and fully depleted stock source both preserve loadable kinetic boundaries",
+      "completed_utc": "2026-09-12T07:55:13Z"
+    }
+  ],
+  "resolved_during_work": [
+    "Corrected an invalid initial test assumption that mixing saturated NaCl and KCl stocks must precipitate; actual computed mixture is undersaturated. Runtime saturation guard retained.",
+    "Fixed CSV extra-column order changing after JSON reload; sorted additional headings and kinetic vessel IDs.",
+    "Fixed kinetic initialization after reverse dilution and complete depletion of a physical stock."
+  ],
+  "scientific_limits": [
+    "Approximate 25 C single-solute near-saturation/ambient-pressure limits, not universal maxima.",
+    "HCl/NaOH/KOH above 1 M are empirical-density stocks; no calibrated pH, ionic activities or reaction kinetics. Only same-solute mixing, aliquoting and water dilution.",
+    "HCl evaporation, thermal coupling and general crystal inventory not implemented.",
+    "NaOH/KOH/HCl handbook density values are approximate graph/table-derived estimates, not experimental validation. Other solutes retain prior model limits."
+  ],
+  "full_suite_rerun": false,
+  "performance_rerun": false,
+  "build_created_utc": "2026-09-12T07:56:35Z",
+  "packaged_files_checked": 16,
+  "package_source_matches": true,
+  "screenshot": "artifacts/concentration-limits-ui.png",
+  "sources": "data/solution_limits.json; docs/CONCENTRATION_LIMITS.md",
+  "packaged_app_opened": true,
+  "packaged_app_window_visually_confirmed": true
+}
