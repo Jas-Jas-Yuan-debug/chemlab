@@ -323,19 +323,39 @@ func choose(id: String) -> void:
             return
         tell("已选 %s。选中容器后点击“用所选溶液重新配液”，重新配制 %.2f mL、%.5f mol/L 溶液。%s"%[d.name,dose.value,solution_concentration.value,"此条目尚未支持。" if not d.operational else ""])
         return
+    if lab.core.is_busy():tell("请等待当前计算完成后再添加器材。");return
+    if objects.size()>=60: tell("实验区最多放置 60 件器材；收回一些后再添加。");return
     if d.action=="vessel":
         if lab.core.is_busy(): tell("请等待当前计算完成。");return
         pending_definition=d
         lab.add_vessel(d.name,float(d.get("capacity_ml",250)))
         return
-    if objects.size()>=60: tell("实验区最多放置 60 件器材；收回一些后再添加。");return
     var key := "o%d"%next_id
     next_id+=1
     var state := {"definition":id,"position":[0,0,0],"rotation":0.0,"vessel_id":0,"mass_g":d.get("default_mass_g",0.0),"contents":{},"open":true,"attachments":[],"scale":1.0}
     add_object(key,state)
+    if not objects.has(key):return
     select_object(key)
     if d.action=="heater": activate_heater(d.get("source",0))
     else: tell("已添加 "+d.name+"。"+d.get("scope","选择接收对象后可操作。"),true)
+
+func initial_position(radius: float) -> Variant:
+    var candidates: Array[Vector3]=[]
+    for slot in 12:
+        candidates.append(Vector3((slot%4-1.5)*0.19,0.005,0.08-float(slot/4)*0.18))
+    for row in 20:
+        for column in 20:
+            candidates.append(Vector3(-0.855+column*0.09,0.005,0.855-row*0.09))
+    for point in candidates:
+        if absf(point.x)+radius>0.98 or absf(point.z)+radius>0.98:continue
+        var free := true
+        for object in objects.values():
+            var other: Vector3=object.model.position
+            if Vector2(point.x-other.x,point.z-other.z).length()<radius+maxf(object.model.nominal_radius,0.03)+0.01:
+                free=false
+                break
+        if free:return point
+    return null
 
 func add_object(key: String, state: Dictionary, keep_position: bool = false) -> void:
     var d: Dictionary=definitions[state.definition]
@@ -343,8 +363,12 @@ func add_object(key: String, state: Dictionary, keep_position: bool = false) -> 
     world.add_child(model)
     model.build(d)
     if not keep_position:
-        var slot := objects.size()%12
-        state.position=[(slot%4-1.5)*0.19,0.005,0.08-float(slot/4)*0.18]
+        var point = initial_position(maxf(model.nominal_radius,0.03))
+        if point==null:
+            model.queue_free()
+            tell("实验区没有足够的空位；移动或收回一些器材后再添加。")
+            return
+        state.position=[point.x,point.y,point.z]
     model.position=Vector3(state.position[0],state.position[1],state.position[2])
     model.rotation.y=state.rotation
     var collider := StaticBody3D.new()
@@ -365,6 +389,8 @@ func sync_vessels() -> void:
     for key in objects.keys():
         var id := int(objects[key].state.vessel_id)
         if id>0 and not lab.states.has(id):
+            for object in objects.values():
+                object.state.attachments=object.state.attachments.filter(func(child):return child!=key)
             objects[key].model.queue_free()
             objects.erase(key)
             links=links.filter(func(link):return key not in link)
@@ -377,6 +403,7 @@ func sync_vessels() -> void:
             var d: Dictionary=pending_definition if not pending_definition.is_empty() and lab.views[id].kind==pending_definition.name else find_definition(lab.views[id].kind,s.capacity_ml)
             var state := {"definition":d.id,"position":[0,0,0],"rotation":0.0,"vessel_id":int(id),"mass_g":0.0,"contents":{},"open":true,"attachments":[],"scale":1.0}
             add_object(key,state)
+            if not objects.has(key):continue
             if not pending_definition.is_empty() and d.id==pending_definition.id:
                 pending_definition={}
                 select_object(key)
@@ -466,7 +493,7 @@ func prepare_liquid() -> void:
     if obj.vessel_id<=0 or selected_reagent<=0:tell("先选择一个溶液卡片，再选择容器。");return
     if not obj.contents.is_empty():tell("容器含未求解固体，暂不能配液。");return
     var reagent: Dictionary=definitions["reagent%d"%selected_reagent]
-    if not reagent.operational or selected_reagent in [10,18,19]:tell(reagent.scope);return
+    if not reagent.operational or selected_reagent in [10,18,19]:tell("此原料尚未支持直接配液。"+reagent.scope);return
     if lab.core.is_busy():tell("请等待当前计算完成。");return
     var cap: float=lab.states[int(obj.vessel_id)].capacity_ml
     if dose.value<1 or dose.value>minf(250,cap):tell("配液体积需在 1 mL 与容器容量之间；每次最多 250 mL。");return
@@ -518,6 +545,7 @@ func use_selected() -> void:
             if receiver.contents[id]<=0:receiver.contents.erase(id)
             tell("药匙取出 %s %.2f g。"%[definitions[id].name,n],true)
         elif not obj.contents.is_empty():
+            if receiver.get("vessel_id",0)>0 and lab.states[int(receiver.vessel_id)].volume_ml>0:tell("此固液反应尚未求解。先取用到空容器；已验证的方解石 / 石膏请使用专用实验。");return
             for id in obj.contents:receiver.contents[id]=receiver.contents.get(id,0.0)+obj.contents[id]
             obj.contents={}
             tell("已将药匙中的样品全部转入接收对象。",true)
@@ -561,7 +589,8 @@ func measure(action: String, receiver: Dictionary) -> void:
     elif vessel_id>0 and lab.states.has(vessel_id):
         var s: Dictionary=lab.states[vessel_id]
         if not receiver.contents.is_empty():tell("此样品含未求解的固体，无法给出新的 pH。");return
-        tell("读数：25.0 °C" if action=="temperature" else "pH 未校准（浓储液）" if s.get("empirical_stock",false) else "pH —（空容器）" if s.ph==null else "pH %.2f"%s.ph,true)
+        var probe_ph = lab.kinetic_readings.get(vessel_id,{}).get("ph",s.ph)
+        tell("读数：25.0 °C" if action=="temperature" else "pH 未校准（浓储液）" if s.get("empirical_stock",false) else "pH —（空容器）" if probe_ph==null else "pH %.2f"%probe_ph,true)
     else:tell("先选择含液体的测量对象。")
 
 func connect_selected() -> void:
@@ -594,7 +623,18 @@ func attach_selected() -> void:
     elif destination_definition.category!="支撑":tell("请选择支架、夹具、三脚架或升降台作为支撑。");return
     var support: Dictionary=objects[support_id]
     var child: Dictionary=objects[child_id]
+    var pending: Array=[child_id]
+    var visited := {}
+    while not pending.is_empty():
+        var descendant: String=pending.pop_back()
+        if descendant==support_id:tell("此固定关系会形成循环；请先拆开已有支撑关系。");return
+        if visited.has(descendant):continue
+        visited[descendant]=true
+        pending.append_array(objects[descendant].state.attachments)
     var point: Vector3=support.model.position+Vector3(0.025,0.16,0.015)
+    if absf(point.x)>1 or absf(point.y)>1 or absf(point.z)>1:tell("固定位置超出实验区；请先移动支架。");return
+    for object in objects.values():
+        object.state.attachments=object.state.attachments.filter(func(id):return id!=child_id)
     child.model.position=point
     child.state.position=[point.x,point.y,point.z]
     if child_id not in support.state.attachments:support.state.attachments.append(child_id)
@@ -635,6 +675,8 @@ func remove_selected() -> void:
     if o.state.vessel_id>0:tell("科学容器保留在实验记录中；重新开始可清空实验台。其余器材可单独收回。");return
     if not o.state.contents.is_empty():tell("器材仍装有样品，先把样品转回容器。");return
     disconnect_selected()
+    for object in objects.values():
+        object.state.attachments=object.state.attachments.filter(func(id):return id!=selected)
     o.model.queue_free()
     objects.erase(selected)
     selected=""
@@ -791,6 +833,7 @@ func save_view() -> Dictionary:
 
 func validate_view(data: Variant) -> String:
     if not data is Dictionary or not data.get("objects") is Dictionary or data.objects.size()>60 or not data.get("links") is Array or data.links.size()>128:return "新手实验区记录无效。"
+    var parent_by_child := {}
     for id in data.objects:
         var s=data.objects[id]
         if not id is String or not s is Dictionary or not definitions.has(s.get("definition")) or not s.get("position") is Array or s.position.size()!=3 or not s.get("contents") is Dictionary or not s.get("attachments") is Array:return "新手器材记录不完整。"
@@ -800,9 +843,18 @@ func validate_view(data: Variant) -> String:
         if not s.get("open") is bool or s.attachments.size()>60:return "器材开关或固定记录无效。"
         for attachment in s.attachments:
             if not attachment is String or not data.objects.has(attachment) or attachment==id:return "固定对象无效。"
+            if parent_by_child.has(attachment):return "一个器材不能同时固定到多个支架。"
+            parent_by_child[attachment]=id
         if s.vessel_id>0 and id!="v%d"%int(s.vessel_id):return "容器绑定编号无效。"
         for key in s.contents:
             if not definitions.has(key) or not preload("res://scripts/session_io.gd").finite(s.contents[key]) or s.contents[key]<0 or s.contents[key]>10000:return "样品库存无效。"
+    for child in parent_by_child:
+        var current: String=child
+        var visited := {}
+        while parent_by_child.has(current):
+            if visited.has(current):return "固定关系不能形成循环。"
+            visited[current]=true
+            current=parent_by_child[current]
     var occupied := {}
     var seen_links := {}
     for link in data.links:

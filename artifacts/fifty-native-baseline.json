@@ -1,0 +1,29 @@
+{
+  "scope": "Focused existing native invariants for unchanged native library, executed once from isolated directory",
+  "results": [
+    {
+      "name": "physics_models_test",
+      "exit_code": 0,
+      "duration_s": 0.271,
+      "stdout": "PASS: spring/pendulum energy and periods, calorimetry, circuits, lens, controlled heating/cooling/stirring and energy budgets, control replay, pause/reset and frame-step independence\n",
+      "stderr": "",
+      "binary_sha256": "9144e8ceafcdbdb5e4a3dee72042aef9aa15894c8011a54357b1a1dd4d7d7ea8"
+    },
+    {
+      "name": "reaction_dynamics_test",
+      "exit_code": 0,
+      "duration_s": 0.057,
+      "stdout": "prepare 2 0.001 M pH=3.01361 I=0.00100266\nprepare 2 0.01 M pH=2.03922 I=0.0100034\nprepare 2 0.1 M pH=1.08211 I=0.100481\nprepare 2 1 M pH=-0.051348 I=1.02234\nprepare 3 0.001 M pH=10.9805 I=0.00100296\nprepare 3 0.01 M pH=11.9504 I=0.0100291\nprepare 3 0.1 M pH=12.8865 I=0.100248\nprepare 3 1 M pH=13.8418 I=1.00055\nprepare 4 0.001 M pH=6.99705 I=0.00100309\nprepare 4 0.01 M pH=6.99486 I=0.0100314\nprepare 4 0.1 M pH=6.98366 I=0.10047\nprepare 4 1 M pH=6.88411 I=1.02204\nprepare 5 0.001 M pH=10.9805 I=0.00100297\nprepare 5 0.01 M pH=11.9504 I=0.0100302\nprepare 5 0.1 M pH=12.9004 I=0.100352\nprepare 5 1 M pH=13.9433 I=1.01081\nprepare 6 0.001 M pH=6.99705 I=0.0010031\nprepare 6 0.01 M pH=6.99486 I=0.0100325\nprepare 6 0.1 M pH=6.99438 I=0.100574\nprepare 6 1 M pH=6.96384 I=1.03273\nPASS: physical neutralization timescale, finite mixing, conservation, high-concentration Pitzer prepare/mix/dilute and exact dynamic restore\n",
+      "stderr": "",
+      "binary_sha256": "579c8420d32d75f59332a5a1aa9fbdf70f40f7bedffc44bc88993dfd9a6c8ff1"
+    },
+    {
+      "name": "concentration_limits_test",
+      "exit_code": 0,
+      "duration_s": 0.057,
+      "stdout": "maximum 2 = 13.09 mol/L; 1/50/250 mL, aliquot, dilution and rejection PASS\nmaximum 3 = 20.46 mol/L; 1/50/250 mL, aliquot, dilution and rejection PASS\nmaximum 4 = 5.4045 mol/L; 1/50/250 mL, aliquot, dilution and rejection PASS\nmaximum 5 = 14.96 mol/L; 1/50/250 mL, aliquot, dilution and rejection PASS\nmaximum 6 = 4.15235 mol/L; 1/50/250 mL, aliquot, dilution and rejection PASS\nPASS: per-solute near-saturation preparation, density references, conservation, model boundary and transactional rejection\n",
+      "stderr": "",
+      "binary_sha256": "a2bde9e60558db327f76c6375906add3dbd7b839c2531995300682748850e3eb"
+    }
+  ]
+}

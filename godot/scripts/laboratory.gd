@@ -469,6 +469,10 @@ func add_vessel(kind: String,capacity_override: float = 0.0) -> void:
     if views.size()>=12:
         set_status("实验台最多放置 12 件容器。")
         return
+    if beginner:beginner.sync_vessels()
+    if beginner and beginner.objects.size()>=60:
+        set_status("实验区最多保留 60 件物品；请先收回一些器材。")
+        return
     var id := 1
     while views.has(id):
         id+=1
@@ -488,9 +492,25 @@ func ensure_view(state: Dictionary) -> void:
     v.build(id,kind,state.capacity_ml)
     var column: int = (id-1)%4
     var row: int = (id-1)/4
-    v.position = Vector3((column-1.5)*0.12,0.89,0.10-row*0.13)
+    v.position = available_vessel_position(Vector3((column-1.5)*0.12,0.89,0.10-row*0.13),v.radius)
     views[id] = v
     v.visible = not physics_mode
+
+func available_vessel_position(preferred: Vector3,radius: float) -> Vector3:
+    var candidates: Array[Vector3]=[preferred]
+    for row in 8:
+        for column in 16:
+            candidates.append(Vector3(-0.56+column*0.075,0.89,-0.23+row*0.07))
+    for point in candidates:
+        var free := true
+        for other in views.values():
+            if point.distance_to(other.position)<radius+other.radius+0.014:
+                free=false
+                break
+        if free:return point
+    # Twelve supported vessels fit the scan; retain the prior position if a
+    # future larger apparatus requires expanding the placement search.
+    return preferred
 
 func select_vessel(id: int) -> void:
     if id!=selected_id:
@@ -658,13 +678,13 @@ func apply_result(result: Dictionary) -> void:
         if result.transferred_ml>0:
             last_transfer_ms = Time.get_ticks_msec()
             var id: int = result.to
-            if curve_sources.get(id,0)!=int(result.from):
-                curves[id]=[];total_added[id]=0.0;curve_sources[id]=int(result.from)
-                if prior_states.has(id) and prior_states[id].ph!=null:curves[id].append(Vector2(0,prior_states[id].ph))
-            total_added[id] = total_added.get(id,0.0)+result.transferred_ml
-            if not curves.has(id):
-                curves[id] = []
             if states[id].ph!=null:
+                if curve_sources.get(id,0)!=int(result.from):
+                    curves[id]=[];total_added[id]=0.0;curve_sources[id]=int(result.from)
+                    if prior_states.has(id) and prior_states[id].ph!=null:curves[id].append(Vector2(0,prior_states[id].ph))
+                total_added[id] = total_added.get(id,0.0)+result.transferred_ml
+                if not curves.has(id):
+                    curves[id] = []
                 curves[id].append(Vector2(total_added[id],states[id].ph))
             records.append({"time_s":elapsed,"operation":"pour","from":result.from,"to":result.to,"volume_ml":result.transferred_ml,"ph":states[id].ph})
             set_status("已加入 %.2f mL → %s %d；%s"%[result.transferred_ml,views[id].kind,id,"浓储液，pH 未校准" if states[id].ph==null else "最终平衡参考 pH %.2f"%states[id].ph])

@@ -1,30 +1,30 @@
 {
-  "created_utc": "2026-09-12T07:56:35Z",
-  "source_sha256": "35249df562b922a3b244cb972786a076c383df89b95d1ace2ad9d0249aab8cc4",
+  "created_utc": "2026-10-04T00:25:21Z",
+  "source_sha256": "e55eccf486a3f41cb88ff5d0b6f92ddcdf0b871ee4be45055e5c06de53390a68",
   "architecture": "arm64",
   "runtime": "official Godot 4.7.2 release template, thinned from universal",
   "signing": "ad-hoc, codesign --verify --deep --strict passed",
   "notarized": false,
   "files": {
     "Contents/Frameworks/libchemlab_native.dylib": {
-      "bytes": 2669296,
-      "sha256": "32c72fa5e0e6835ec19cbbad75082253154be6793409608b7ac62b2d6c8a0ddf"
+      "bytes": 2651312,
+      "sha256": "6b48bb9eb7c1b7d2236e724fe3ca3b4aba630adf85f611843d6b65c6034af04f"
     },
     "Contents/Info.plist": {
       "bytes": 1873,
       "sha256": "656c3c4bc4b2dc39693b932a5a5e15bddb982baffccf8a8297b2f5bd5028de85"
     },
     "Contents/MacOS/ChemLab \u00b7 \u89c2\u7269\u5b9e\u9a8c\u5ba4": {
-      "bytes": 82439632,
-      "sha256": "69b78e8ed2ac9a89ca7a65c5239f7defcbb5521cf2de2cee47cd28ff4f26ac49"
+      "bytes": 82421632,
+      "sha256": "81f54a9d01b7b295cae66614d7cf8da99ccf626da615c6ce03168f75097a39d5"
     },
     "Contents/PkgInfo": {
       "bytes": 9,
       "sha256": "7e50a30efad50208a173203ced60818d693bb61266b75aa10927d1a2adce80cb"
     },
     "Contents/Resources/ChemLab \u00b7 \u89c2\u7269\u5b9e\u9a8c\u5ba4.pck": {
-      "bytes": 5437428,
-      "sha256": "cdbcabdf02b57355bcdc6c3c5d55b0d672bef4ab4e1e67914f29edae185deada"
+      "bytes": 5441332,
+      "sha256": "1ec0a0bcb201ffb32afdd58ae47df1fec0a6a6d745a7691fbcd8444997ca53d5"
     },
     "Contents/Resources/Licenses/Cantera-LICENSE.txt": {
       "bytes": 1796,
@@ -68,7 +68,7 @@
     },
     "Contents/_CodeSignature/CodeResources": {
       "bytes": 5298,
-      "sha256": "4daf4872b2be0563cddf2e752b0248026516f7ff1cafecc58c37a505a3fd6cb7"
+      "sha256": "b28af2c6230be66b75254b022b46e5b8d50b59ad4966cda1b7ab240cb55d2197"
     }
   }
 }

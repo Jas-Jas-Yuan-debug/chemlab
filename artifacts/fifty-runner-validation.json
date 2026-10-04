@@ -1,0 +1,5 @@
+{
+  "timeout_seconds": 0.2,
+  "task_process_terminated": true,
+  "scope": "Owned process group only; no ordinary application processes signalled"
+}

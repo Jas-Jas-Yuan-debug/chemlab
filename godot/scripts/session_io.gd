@@ -28,8 +28,16 @@ static func make_document(lab: Node3D) -> Dictionary:
             item.heater_control_count = sample.heater_control_count
         bench_history.append(item)
     var mode := "beginner" if lab.beginner.active else "bench" if lab.bench_mode else "fall" if lab.physics_mode else "barite" if lab.batch_mode and lab.batch_experiment.barite_mode else "batch" if lab.batch_mode else "chemistry"
+    # Reset solutions precede the journal. Retain their measured initial point
+    # without substituting a hardcoded pH or storing a second chemical state.
+    var titration_baselines := {}
+    for id in lab.curves:
+        var points: Array=lab.curves[id]
+        if not points.is_empty() and points[0].x==0 and lab.curve_sources.has(id):
+            titration_baselines[str(id)]={"source":lab.curve_sources[id],"ph":points[0].y}
     return {"format":FORMAT,"view_schema":1,"science":lab.core.save_session(),"view":{
         "beginner":lab.beginner.save_view(),"equipment":equipment,"selected_id":lab.selected_id,"target_id":lab.target_id,"mode":mode,
+        "titration_baselines":titration_baselines,
         "kinetic_history":lab.kinetic_history.duplicate(true),"mix_exchange_ml_s":lab.mix_exchange.value,"plot_mode":lab.plot_mode.selected,
         "elapsed_s":lab.elapsed,"operation_times":lab.operation_times.duplicate(),
         "focus":[lab.focus.x,lab.focus.y,lab.focus.z],"orbit":[lab.orbit.x,lab.orbit.y],"distance":lab.distance,
@@ -88,6 +96,12 @@ static func validate(document: Variant,lab: Node3D) -> Dictionary:
         return {"error":"实验模式或时间无效。"}
     if not v.get("operation_times") is Array or v.operation_times.size()!=science.commands.size():
         return {"error":"操作时间记录不完整。"}
+    if v.has("titration_baselines"):
+        if not v.titration_baselines is Dictionary or v.titration_baselines.size()>12:return {"error":"滴定初始读数无效。"}
+        for key in v.titration_baselines:
+            var point = v.titration_baselines[key]
+            if not str(key).is_valid_int() or not expected.has(int(key)) or not point is Dictionary:return {"error":"滴定初始容器无效。"}
+            if not finite(point.get("source")) or point.source!=floor(point.source) or not expected.has(int(point.source)) or int(point.source)==int(key) or not finite(point.get("ph")) or point.ph< -2 or point.ph>16:return {"error":"滴定初始读数或来源无效。"}
     if v.has("beginner"):
         for key in v.beginner.objects:
             var item: Dictionary=v.beginner.objects[key]
@@ -201,7 +215,7 @@ static func restore(lab: Node3D,validated: Dictionary,state: Dictionary) -> void
             last_ph.erase(int(event.to))
             if event.readings.has("ph"):last_ph[int(event.to)]=event.readings.ph
             lab.total_added[int(event.to)] = 0.0
-        elif event.operation=="pour":
+        elif event.operation=="pour" and event.transferred_ml>0 and not bool(event.readings.get("empirical_stock",0)):
             var id := int(event.to)
             if lab.curve_sources.get(id,0)!=int(event.from):
                 lab.curves[id]=[];lab.total_added[id]=0.0;lab.curve_sources[id]=int(event.from)
@@ -215,6 +229,18 @@ static func restore(lab: Node3D,validated: Dictionary,state: Dictionary) -> void
         elif event.operation=="batch":
             batch_parameters = parameters
             batch_history.append({"parameters":parameters,"reading":event.readings})
+    if v.has("titration_baselines"):
+        # Baseline presence is also an observation: an emptied source later
+        # refilled as a receiver has no pre-pour pH point. Older files omitted
+        # this field and retain journal-only reconstruction.
+        for id in lab.curves:
+            var point: Dictionary=v.titration_baselines.get(str(id),{})
+            var points: Array=lab.curves[id]
+            var has_baseline: bool=not point.is_empty() and lab.curve_sources.get(id,0)==int(point.source)
+            if points.is_empty():continue
+            if points[0].x==0:
+                if not has_baseline:points.pop_front()
+            elif has_baseline:points.push_front(Vector2(0,point.ph))
     lab.selected_id = int(v.selected_id)
     lab.target_id = int(v.target_id)
     lab.paused = true
